@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -11,7 +13,6 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.MessageApi.*;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
@@ -20,6 +21,8 @@ import java.util.Set;
 public class MainActivity extends Activity {
 
     private TextView mTextView;
+    private Button mSendButton;
+
     private GoogleApiClient mGoogleApiClient;
     private String transcriptionNodeId = null;
 
@@ -28,27 +31,41 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+        //Create Google API Client
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                            .addApi(Wearable.API)
-                            .build();
+                .addApi(Wearable.API)
+                .build();
         mGoogleApiClient.connect();
 
+        //Create user interface
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 mTextView = (TextView) stub.findViewById(R.id.text);
+                mSendButton = (Button) stub.findViewById(R.id.sendButton);
+
+                mSendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AsyncTask<Void, Void, Integer>() {
+                            protected Integer doInBackground(Void... params) {
+                                byte[] dataToSend = {1, 2, 3};
+                                requestTranscription(dataToSend);
+                                return 0;
+                            }
+                        }.execute();
+                    }
+                });
             }
         });
 
+        //Setup message transcription device
         new AsyncTask<Void, Void, Integer>() {
             protected Integer doInBackground(Void... params) {
                 setupTestMessageTranscription();
-                byte[] dataToSend = {1, 2, 3};
-                requestTranscription(dataToSend);
                 return 0;
             }
         }.execute();
