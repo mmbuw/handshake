@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -20,7 +19,6 @@ import java.util.Set;
 
 public class MainActivity extends Activity {
 
-    private TextView mTextView;
     private Button mSendButton;
 
     private GoogleApiClient mGoogleApiClient;
@@ -44,7 +42,6 @@ public class MainActivity extends Activity {
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                mTextView = (TextView) stub.findViewById(R.id.text);
                 mSendButton = (Button) stub.findViewById(R.id.sendButton);
 
                 mSendButton.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +69,7 @@ public class MainActivity extends Activity {
 
     }
 
+    /* Searches for connected handheld devices that have subscribed to a message type */
     private void setupTestMessageTranscription() {
         CapabilityApi.GetCapabilityResult result =
                 Wearable.CapabilityApi.getCapability(mGoogleApiClient,
@@ -94,11 +92,13 @@ public class MainActivity extends Activity {
 
     }
 
+    /* Called whenever the number of connected nodes changes */
     private void updateTranscriptionCapability(CapabilityInfo capabilityInfo) {
         Set<Node> connectedNodes = capabilityInfo.getNodes();
         transcriptionNodeId = pickBestNodeId(connectedNodes);
     }
 
+    /* Picks the closes device to send the message to */
     private String pickBestNodeId(Set<Node> nodes) {
         String bestNodeId = null;
 
@@ -112,6 +112,7 @@ public class MainActivity extends Activity {
         return bestNodeId;
     }
 
+    /* Sends the given message to the best node determined before */
     private void requestTranscription(byte[] data) {
         if (transcriptionNodeId != null) {
             Wearable.MessageApi.sendMessage(mGoogleApiClient,
