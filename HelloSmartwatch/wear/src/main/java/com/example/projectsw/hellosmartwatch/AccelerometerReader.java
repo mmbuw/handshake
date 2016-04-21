@@ -6,6 +6,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class AccelerometerReader implements SensorEventListener {
@@ -22,6 +25,21 @@ public class AccelerometerReader implements SensorEventListener {
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mDataTransmitter = dataTransmitter;
+    }
+
+    private void transmitCurrentSensorData() {
+        // Send sensor data via the data transmitter
+        ByteArrayOutputStream bas = new ByteArrayOutputStream();
+        DataOutputStream ds = new DataOutputStream(bas);
+
+        try {
+
+            for (float f : linear_acceleration)
+                ds.writeFloat(f);
+
+        } catch (IOException ioe) {}
+
+        mDataTransmitter.requestTranscription(bas.toByteArray());
     }
 
     public void onSensorChanged(SensorEvent event) {
@@ -41,11 +59,8 @@ public class AccelerometerReader implements SensorEventListener {
         linear_acceleration[1] = event.values[1] - gravity[1];
         linear_acceleration[2] = event.values[2] - gravity[2];
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(12);
-        byteBuffer.putFloat(linear_acceleration[0]);
-        byteBuffer.putFloat(linear_acceleration[1]);
-        byteBuffer.putFloat(linear_acceleration[2]);
-        mDataTransmitter.requestTranscription(byteBuffer.array());
+        // Transmit the retrieved sensor data
+        transmitCurrentSensorData();
     }
 
     @Override
