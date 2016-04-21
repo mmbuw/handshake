@@ -1,6 +1,7 @@
 package com.example.projectsw.hellosmartwatch;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
@@ -23,6 +24,7 @@ public class MainActivity extends Activity {
 
     private GoogleApiClient mGoogleApiClient;
     private String transcriptionNodeId = null;
+    private AccelerometerReader accelerometerReader;
 
     private static final String TEST_MESSAGE_CAPABILITY_NAME = "test_message";
     public static final String TEST_MESSAGE_TRANSCRIPTION_PATH = "/test_message";
@@ -49,7 +51,10 @@ public class MainActivity extends Activity {
                     public void onClick(View v) {
                         new AsyncTask<Void, Void, Integer>() {
                             protected Integer doInBackground(Void... params) {
-                                byte[] dataToSend = {1, 2, 3};
+                                byte randomNumber1 = (byte) (Math.random() * 100);
+                                byte randomNumber2 = (byte) (Math.random() * 100);
+                                byte randomNumber3 = (byte) (Math.random() * 100);
+                                byte[] dataToSend = {randomNumber1, randomNumber2, randomNumber3};
                                 requestTranscription(dataToSend);
                                 return 0;
                             }
@@ -66,6 +71,10 @@ public class MainActivity extends Activity {
                 return 0;
             }
         }.execute();
+
+        //Setup acceleration reader
+        accelerometerReader = new AccelerometerReader(this.getApplicationContext());
+
 
     }
 
