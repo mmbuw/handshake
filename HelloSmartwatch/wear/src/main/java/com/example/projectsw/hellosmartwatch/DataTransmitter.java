@@ -93,9 +93,9 @@ public class DataTransmitter {
                         @Override
                         public void onResult(MessageApi.SendMessageResult sendMessageResult) {
                             if (!sendMessageResult.getStatus().isSuccess()) {
-                                System.err.println("Error: Failed to send message.");
+                                //System.err.println("Error: Failed to send message.");
                             } else {
-                                System.out.println("Message was sucessfully sent.");
+                                //System.out.println("Message was sucessfully sent.");
                             }
                         }
                     }

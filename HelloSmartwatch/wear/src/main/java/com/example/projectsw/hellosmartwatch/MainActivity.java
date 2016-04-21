@@ -47,7 +47,8 @@ public class MainActivity extends Activity {
         dataTransmitter = new DataTransmitter(this.getApplicationContext());
 
         //Setup acceleration reader
-        accelerometerReader = new AccelerometerReader(this.getApplicationContext());
+        accelerometerReader = new AccelerometerReader(this.getApplicationContext(),
+                                                      dataTransmitter);
 
 
     }
