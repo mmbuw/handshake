@@ -1,0 +1,6 @@
+include ':app', ':wiigee-manual', ':wiigee-lib', ':wiigee-plugin-wiimote', ':wiigee-gui', ':wiigee-plugin-android'
+project(':wiigee-manual').projectDir = new File('libs/wiigee/wiigee-manual')
+project(':wiigee-lib').projectDir = new File('libs/wiigee/wiigee-lib')
+project(':wiigee-plugin-wiimote').projectDir = new File('libs/wiigee/wiigee-plugin-wiimote')
+project(':wiigee-gui').projectDir = new File('libs/wiigee/wiigee-gui')
+project(':wiigee-plugin-android').projectDir = new File('libs/wiigee/wiigee-plugin-android')

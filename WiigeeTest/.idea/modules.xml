@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/WiigeeTest.iml" filepath="$PROJECT_DIR$/WiigeeTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/wiigee/wiigee-gui/wiigee-gui.iml" filepath="$PROJECT_DIR$/libs/wiigee/wiigee-gui/wiigee-gui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/wiigee/wiigee-lib/wiigee-lib.iml" filepath="$PROJECT_DIR$/libs/wiigee/wiigee-lib/wiigee-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/wiigee/wiigee-manual/wiigee-manual.iml" filepath="$PROJECT_DIR$/libs/wiigee/wiigee-manual/wiigee-manual.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/wiigee/wiigee-plugin-android/wiigee-plugin-android.iml" filepath="$PROJECT_DIR$/libs/wiigee/wiigee-plugin-android/wiigee-plugin-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/wiigee/wiigee-plugin-wiimote/wiigee-plugin-wiimote.iml" filepath="$PROJECT_DIR$/libs/wiigee/wiigee-plugin-wiimote/wiigee-plugin-wiimote.iml" />
+    </modules>
+  </component>
+</project>
