@@ -11,7 +11,7 @@ public class MainActivity extends Activity {
 
     private Button mSendButton;
 
-    private AccelerometerReader accelerometerReader;
+    private AccelerometerHandler accelerometerHandler;
     private DataTransmitter dataTransmitter;
 
     @Override
@@ -30,11 +30,7 @@ public class MainActivity extends Activity {
                     public void onClick(View v) {
                         new AsyncTask<Void, Void, Integer>() {
                             protected Integer doInBackground(Void... params) {
-                                byte randomNumber1 = (byte) (Math.random() * 100);
-                                byte randomNumber2 = (byte) (Math.random() * 100);
-                                byte randomNumber3 = (byte) (Math.random() * 100);
-                                byte[] dataToSend = {randomNumber1, randomNumber2, randomNumber3};
-                                dataTransmitter.requestTranscription(dataToSend);
+                                accelerometerHandler.switchTransmissionMode();
                                 return 0;
                             }
                         }.execute();
@@ -47,8 +43,8 @@ public class MainActivity extends Activity {
         dataTransmitter = new DataTransmitter(this.getApplicationContext());
 
         //Setup acceleration reader
-        accelerometerReader = new AccelerometerReader(this.getApplicationContext(),
-                                                      dataTransmitter);
+        accelerometerHandler = new AccelerometerHandler(this.getApplicationContext(),
+                                                        dataTransmitter);
 
 
     }

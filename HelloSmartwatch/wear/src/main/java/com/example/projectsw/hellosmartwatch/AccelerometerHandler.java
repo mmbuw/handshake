@@ -11,20 +11,26 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class AccelerometerReader implements SensorEventListener {
+public class AccelerometerHandler implements SensorEventListener {
 
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private DataTransmitter mDataTransmitter;
+    private boolean mTransmissionActivated;
 
     private float[] gravity = new float[3];
     private float[] linear_acceleration = new float[3];
 
-    public AccelerometerReader(Context context, DataTransmitter dataTransmitter) {
+    public AccelerometerHandler(Context context, DataTransmitter dataTransmitter) {
         mSensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mDataTransmitter = dataTransmitter;
+        mTransmissionActivated = false;
+    }
+
+    public void switchTransmissionMode() {
+        mTransmissionActivated = !mTransmissionActivated;
     }
 
     private void transmitCurrentSensorData() {
@@ -59,8 +65,10 @@ public class AccelerometerReader implements SensorEventListener {
         linear_acceleration[1] = event.values[1] - gravity[1];
         linear_acceleration[2] = event.values[2] - gravity[2];
 
-        // Transmit the retrieved sensor data
-        transmitCurrentSensorData();
+        // Transmit the retrieved sensor data if activated
+        if (mTransmissionActivated) {
+            transmitCurrentSensorData();
+        }
     }
 
     @Override
