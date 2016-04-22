@@ -22,12 +22,21 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
     private Button mButCloseGesture;
     private Button mButStartRecognition;
     private Button mButStopRecognition;
+
     private TextView mTextRecognizedGesture;
+    private TextView mTextStatus;
+
+    private int mNumGesturesStored;
+    private int mNumTrainingSamples;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mNumGesturesStored = 0;
+        mNumTrainingSamples = 0;
+
         initWiigee();
         initButtons();
         initTextViews();
@@ -46,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
             @Override
             public void onClick(View view) {
                 mDevice.startTraining();
+                mTextStatus.setText("Training");
             }
         });
 
@@ -54,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
             @Override
             public void onClick(View view) {
                 mDevice.stopTraining();
+                mTextStatus.setText("Stored training example " + mNumTrainingSamples++);
             }
         });
 
@@ -62,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
             @Override
             public void onClick(View view) {
                 mDevice.closeGesture();
+                mTextStatus.setText("Save gesture with ID " + mNumGesturesStored++);
+                mNumTrainingSamples = 0;
             }
         });
 
@@ -70,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
             @Override
             public void onClick(View view) {
                 mDevice.startRecognition();
+                mTextStatus.setText("Recording");
             }
         });
 
@@ -78,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
             @Override
             public void onClick(View view) {
                 mDevice.stopRecognition();
+                mTextStatus.setText("Ready");
             }
         });
     }
@@ -85,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements GestureListener {
     public void initTextViews() {
         mTextRecognizedGesture = (TextView) findViewById(R.id.textRecognizedGesture);
         mTextRecognizedGesture.setText("Recognized Gesture: None");
+
+        mTextStatus = (TextView) findViewById(R.id.textStatus);
     }
 
 
