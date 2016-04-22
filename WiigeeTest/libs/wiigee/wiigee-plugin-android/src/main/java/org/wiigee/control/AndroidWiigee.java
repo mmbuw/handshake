@@ -55,6 +55,7 @@ public class AndroidWiigee extends Wiigee {
         super();
         Log.write("This is wiigee-plugin-android (Andgee) version "+pluginversion+" ("+pluginreleasedate+")");
         device = new AndroidDevice(context);
+        device.setAccelerationEnabled(true);
     }
 
     public void addGestureListener(GestureListener listener) {

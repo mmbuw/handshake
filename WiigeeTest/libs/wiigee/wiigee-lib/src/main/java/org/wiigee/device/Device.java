@@ -59,7 +59,7 @@ public class Device {
     protected Vector<ButtonListener> buttonlistener = new Vector<ButtonListener>();
 
     // Processing unit to analyze the data
-    protected ProcessingUnit processingunit = new TriggeredProcessingUnit();
+    protected TriggeredProcessingUnit processingunit = new TriggeredProcessingUnit();
 
     public Device(boolean autofiltering) {
         if (autofiltering) {
@@ -122,6 +122,26 @@ public class Device {
         this.processingunit.addGestureListener(listener);
     }
 
+    public void startTraining() {
+        this.processingunit.startTraining();
+    }
+
+    public void startRecognition() {
+        this.processingunit.startRecognition();
+    }
+
+    public void closeGesture() {
+        this.processingunit.closeGesture();
+    }
+
+    public void stopTraining() {
+        this.processingunit.stopTraining();
+    }
+
+    public void stopRecognition() {
+        this.processingunit.stopRecognition();
+    }
+
     public int getRecognitionButton() {
         return this.recognitionbutton;
     }
@@ -150,7 +170,7 @@ public class Device {
         return this.processingunit;
     }
 
-    public void setAccelerationEnabled(boolean enabled) throws IOException {
+    public void setAccelerationEnabled(boolean enabled) {
         this.accelerationEnabled = enabled;
     }
 

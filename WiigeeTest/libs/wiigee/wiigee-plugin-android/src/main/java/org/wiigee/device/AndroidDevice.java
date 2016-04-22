@@ -84,9 +84,9 @@ public class AndroidDevice extends Device implements SensorEventListener {
                  * the various www-sources.
                  *
                  */
-                xraw = values[SensorManager.DATA_X];
-                yraw = values[SensorManager.DATA_Y];
-                zraw = values[SensorManager.DATA_Z];
+                xraw = values[0];
+                yraw = values[1];
+                zraw = values[2];
 
                 x = (double) (xraw - x0) / (double) (x1 - x0);
                 y = (double) (yraw - y0) / (double) (y1 - y0);

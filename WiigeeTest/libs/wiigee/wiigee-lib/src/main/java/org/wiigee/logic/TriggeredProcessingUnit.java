@@ -89,37 +89,52 @@ public class TriggeredProcessingUnit extends ProcessingUnit {
 	public void motionStopReceived(MotionStopEvent event) {
 		// this.handleStopEvent(event);
 	}
-	
+
 	public void handleStartEvent(ActionStartEvent event) {
-		
+
 		// TrainButton = record a gesture for learning
-		if((!this.analyzing && !this.learning) && 
-			event.isTrainInitEvent()) {
-			Log.write("Training started!");
-			this.learning=true;
+		if(event.isTrainInitEvent()) {
+			startTraining();
 		}
-		
+
 		// RecognitionButton = record a gesture for recognition
-		if((!this.analyzing && !this.learning) && 
-			event.isRecognitionInitEvent()) {
-			Log.write("Recognition started!");
-			this.analyzing=true;
+		if(event.isRecognitionInitEvent()) {
+			startRecognition();
 		}
-			
+
 		// CloseGestureButton = starts the training of the model with multiple
 		// recognized gestures, contained in trainsequence
-		if((!this.analyzing && !this.learning) && 
-			event.isCloseGestureInitEvent()) {
-		
-			if(this.trainsequence.size()>0) {
+		if(event.isCloseGestureInitEvent()) {
+			closeGesture();
+		}
+	}
+
+	public void startTraining() {
+		if (!this.analyzing && !this.learning) {
+			Log.write("Training started!");
+			this.learning = true;
+		}
+	}
+
+	public void startRecognition() {
+		if (!this.analyzing && !this.learning) {
+			Log.write("Recognition started!");
+			this.analyzing = true;
+		}
+	}
+
+	public void closeGesture() {
+		if (!this.analyzing && !this.learning) {
+
+			if (this.trainsequence.size()>0) {
 				Log.write("Training the model with "+this.trainsequence.size()+" gestures...");
 				this.learning=true;
-				
+
 				GestureModel m = new GestureModel();
 				m.train(this.trainsequence);
 				m.print();
 				this.classifier.addGestureModel(m);
-				
+
 				this.trainsequence=new Vector<Gesture>();
 				this.learning=false;
 			} else {
@@ -127,8 +142,14 @@ public class TriggeredProcessingUnit extends ProcessingUnit {
 			}
 		}
 	}
-	
+
 	public void handleStopEvent(ActionStopEvent event) {
+		//independent of actual release event
+		stopTraining();
+		stopRecognition();
+	}
+
+	public void stopTraining() {
 		if(this.learning) { // button release and state=learning, stops learning
 			if(this.current.getCountOfData()>0) {
 				Log.write("Finished recording (training)...");
@@ -143,13 +164,16 @@ public class TriggeredProcessingUnit extends ProcessingUnit {
 				this.learning=false; // ?
 			}
 		}
-		
-		else if(this.analyzing) { // button release and state=analyzing, stops analyzing
+	}
+
+	public void stopRecognition() {
+
+		if(this.analyzing) { // button release and state=analyzing, stops analyzing
 			if(this.current.getCountOfData()>0) {
 				Log.write("Finished recording (recognition)...");
 				Log.write("Compare gesture with "+this.classifier.getCountOfGestures()+" other gestures.");
 				Gesture gesture = new Gesture(this.current);
-				
+
 				int recognized = this.classifier.classifyGesture(gesture);
 				if(recognized!=-1) {
 					double recogprob = this.classifier.getLastProbability();
@@ -163,7 +187,7 @@ public class TriggeredProcessingUnit extends ProcessingUnit {
 					Log.write("No gesture recognized.");
 					Log.write("######");
 				}
-				
+
 				this.current=new Gesture();
 				this.analyzing=false;
 			} else {
