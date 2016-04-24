@@ -163,13 +163,13 @@ public class MainActivity extends AppCompatActivity {
             BluetoothDevice btDevice = result.getDevice();
 
             //textView.append("Found device\n");
-            textView.append("Name:\t"+result.getDevice().getName()+"\n");
-            textView.append("Address:\t"+result.getDevice().getAddress()+"\n");
-            textView.append("Type:\t"+result.getDevice().getType()+"\n");
-            textView.append("BondState:\t"+result.getDevice().getBondState()+"\n");
-            textView.append("RSSI:\t"+result.getRssi()+"\n");
-            textView.append("NanoTimeStamp:\t"+result.getTimestampNanos()+"\n");
-            textView.append("Time:\t"+new Date(System.currentTimeMillis())+"\n\n");
+            textView.append("Name:\t"           +btDevice.getName()+"\n");
+            textView.append("Address:\t"        +btDevice.getAddress()+"\n");
+            textView.append("Type:\t"           +btDevice.getType()+"\n");
+            textView.append("BondState:\t"      +btDevice.getBondState()+"\n");
+            textView.append("RSSI:\t"           +result.getRssi()+"\n");
+            textView.append("NanoTimeStamp:\t"  +result.getTimestampNanos()+"\n");
+            textView.append("Time:\t"           +(new Date(System.currentTimeMillis()))+"\n\n");
             textView.append("=====================================\n\n");
 
             connectToDevice(btDevice);
@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             List<BluetoothGattService> services = gatt.getServices();
             Log.d(D_TAG+":onServicesDiscovered", services.toString());
+
             gatt.readCharacteristic(services
                     .get(0).getCharacteristics()
                     .get(0));
