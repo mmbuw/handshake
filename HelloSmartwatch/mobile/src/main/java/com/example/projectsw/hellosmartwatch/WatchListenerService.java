@@ -5,6 +5,9 @@ import android.content.Intent;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class WatchListenerService extends WearableListenerService {
@@ -20,11 +23,25 @@ public class WatchListenerService extends WearableListenerService {
             startIntent.putExtra("TEST_MESSAGE", messageEvent.getData());
             startActivity(startIntent);*/
 
-            ByteBuffer byteBuffer = ByteBuffer.wrap(messageEvent.getData());
-            System.out.println(byteBuffer.getFloat(0) + ", " +
-                               byteBuffer.getFloat(1) + ", " +
-                               byteBuffer.getFloat(2));
+            float[] receivedValues = decodeMessage(messageEvent.getData());
+
+            System.out.println(receivedValues[0] + ", " +
+                               receivedValues[1] + ", " +
+                               receivedValues[2]);
         }
+    }
+
+    private float[] decodeMessage(byte[] messageData) {
+        ByteArrayInputStream bas = new ByteArrayInputStream(messageData);
+        DataInputStream dis = new DataInputStream(bas);
+        float[] receivedValues = new float[messageData.length / 4];
+
+        try {
+            for (int i = 0; i < receivedValues.length; ++i)
+                receivedValues[i] = dis.readFloat();
+        } catch (IOException ioe) {}
+
+        return receivedValues;
     }
 
 }
