@@ -26,10 +26,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 // read this, bitch!
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothGatt mGatt;
 
     private TextView textView;
+    private Button scanButton;
     private Handler mHandler;
 
     @Override
@@ -75,7 +79,24 @@ public class MainActivity extends AppCompatActivity {
 
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
+        scanButton = (Button) findViewById(R.id.scanButton);
+
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (scanButton.isClickable()){
+                    scanButton.setClickable(false);
+                    scanLeDevice(true);
+                }
+                else{
+                    Toast.makeText(getApplicationContext(), R.string.scan_in_progress, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
+
+
 
     @Override
     protected void onResume() {
@@ -124,15 +145,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     mLEScanner.stopScan(mScanCallback);
+                    scanButton.setClickable(true);
                 }
             }, SCAN_PERIOD);
-
             mLEScanner.startScan(filters, settings, mScanCallback);
-
         } else {
-
             mLEScanner.stopScan(mScanCallback);
-
+            scanButton.setClickable(true);
         }
     }
 
@@ -143,13 +162,15 @@ public class MainActivity extends AppCompatActivity {
             Log.d(D_TAG+":result", result.toString());
             BluetoothDevice btDevice = result.getDevice();
 
-            textView.setText("Found device\n");
+            //textView.append("Found device\n");
             textView.append("Name:\t"+result.getDevice().getName()+"\n");
             textView.append("Address:\t"+result.getDevice().getAddress()+"\n");
             textView.append("Type:\t"+result.getDevice().getType()+"\n");
             textView.append("BondState:\t"+result.getDevice().getBondState()+"\n");
             textView.append("RSSI:\t"+result.getRssi()+"\n");
-            textView.append("TimeStamp:\t"+result.getTimestampNanos()+"\n");
+            textView.append("NanoTimeStamp:\t"+result.getTimestampNanos()+"\n");
+            textView.append("Time:\t"+new Date(System.currentTimeMillis())+"\n\n");
+            textView.append("=====================================\n\n");
 
             connectToDevice(btDevice);
         }
