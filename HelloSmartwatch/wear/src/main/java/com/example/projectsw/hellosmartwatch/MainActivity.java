@@ -6,13 +6,18 @@ import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+    private TextView mTextView;
     private Button mSendButton;
 
     private AccelerometerHandler accelerometerHandler;
     private DataTransmitter dataTransmitter;
+
+    private String[] statusData = {"Not transmitting", "Transmitting"};
+    private int currentStatus = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +39,12 @@ public class MainActivity extends Activity {
                                 return 0;
                             }
                         }.execute();
+                        currentStatus = (currentStatus + 1) % 2;
+                        mTextView.setText(statusData[currentStatus]);
                     }
                 });
+
+                mTextView = (TextView) stub.findViewById(R.id.textStatus);
             }
         });
 

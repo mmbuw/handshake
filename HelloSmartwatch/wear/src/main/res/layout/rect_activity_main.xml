@@ -8,10 +8,10 @@
     tools:deviceIds="wear_square">
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/textStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_square" />
+        android:text="Not transmitting" />
 
     <Button
         android:layout_width="match_parent"

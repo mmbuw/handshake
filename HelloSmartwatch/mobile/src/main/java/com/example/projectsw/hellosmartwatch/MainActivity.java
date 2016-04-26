@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.nio.ByteBuffer;
@@ -17,6 +19,9 @@ import java.nio.ByteBuffer;
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextView;
+    private Button mNewFileButton;
+    private TextView mStatusTextView;
+
     private AccelerationDataReceiver serviceReceiver;
     private FileOutputWriter fileOutputWriter;
     private FileOutputWriter fileOutputWriterWithTime;
@@ -49,17 +54,26 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        mStatusTextView = (TextView) findViewById(R.id.textStatus);
+        mNewFileButton = (Button) findViewById(R.id.butNewFile);
+        mNewFileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createNewFileWriters();
+            }
+        });
+
         /* Register broadcast receiver */
         serviceReceiver = new AccelerationDataReceiver();
         IntentFilter intentSFilter = new IntentFilter("AccelerationDataAction");
         registerReceiver(serviceReceiver, intentSFilter);
 
-        /* Init FileOutputWriter */
-        verifyStoragePermissions(this);
-        int unixTime = getCurrentUnixTimestamp();
-        fileOutputWriter = new FileOutputWriter(getApplicationContext(), "watch-" + unixTime + ".txt");
-        fileOutputWriterWithTime = new FileOutputWriter(getApplicationContext(), "watchWithTime-" + unixTime + ".txt");
+        /* Init file writers */
+        fileOutputWriter = null;
+        fileOutputWriterWithTime = null;
 
+        /* Get permissions */
+        verifyStoragePermissions(this);
     }
 
     /* Requests the necessary storage permissions from the operating system */
@@ -75,6 +89,19 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_EXTERNAL_STORAGE
             );
         }
+    }
+
+    public void createNewFileWriters() {
+        int unixTime = getCurrentUnixTimestamp();
+
+        if (fileOutputWriter != null) {
+            fileOutputWriter.closeStream();
+            fileOutputWriterWithTime.closeStream();
+        }
+
+        fileOutputWriter = new FileOutputWriter("watch-" + unixTime + ".txt");
+        fileOutputWriterWithTime = new FileOutputWriter("watchWithTime-" + unixTime + ".txt");
+        mStatusTextView.setText("Current file created at time " + unixTime);
     }
 
     private int getCurrentUnixTimestamp() {
@@ -93,15 +120,17 @@ public class MainActivity extends AppCompatActivity {
                                receivedValues[1] + ", " +
                                receivedValues[2]);*/
 
-            fileOutputWriter.writeToFile(receivedValues[0] + ", " +
-                                         receivedValues[1] + ", " +
-                                         receivedValues[2]);
+            if (fileOutputWriter != null) {
+                fileOutputWriter.writeToFile(receivedValues[0] + ", " +
+                        receivedValues[1] + ", " +
+                        receivedValues[2]);
 
-            int unixTime = getCurrentUnixTimestamp();
-            fileOutputWriterWithTime.writeToFile(unixTime + ", " +
-                                                 receivedValues[0] + ", " +
-                                                 receivedValues[1] + ", " +
-                                                 receivedValues[2]);
+                int unixTime = getCurrentUnixTimestamp();
+                fileOutputWriterWithTime.writeToFile(unixTime + ", " +
+                        receivedValues[0] + ", " +
+                        receivedValues[1] + ", " +
+                        receivedValues[2]);
+            }
         }
 
     }

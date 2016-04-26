@@ -11,7 +11,7 @@ public class FileOutputWriter {
 
     private FileOutputStream outputStream;
 
-    public FileOutputWriter(Context context, String fileName) {
+    public FileOutputWriter(String fileName) {
 
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -33,6 +33,14 @@ public class FileOutputWriter {
             outputStream.write(line.getBytes());
             outputStream.write("\n".getBytes());
             outputStream.flush();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
+    public void closeStream() {
+        try {
+            outputStream.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }

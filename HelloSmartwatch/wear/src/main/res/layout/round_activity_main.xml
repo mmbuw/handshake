@@ -7,7 +7,7 @@
     tools:deviceIds="wear_round">
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/textStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:text="Send data"
         android:id="@+id/sendButton"
-        android:layout_below="@+id/text"
-        android:layout_alignStart="@+id/text"
-        android:layout_alignEnd="@+id/text" />
+        android:layout_below="@+id/textStatus"
+        android:layout_alignStart="@+id/textStatus"
+        android:layout_alignEnd="@+id/textStatus" />
 </RelativeLayout>
