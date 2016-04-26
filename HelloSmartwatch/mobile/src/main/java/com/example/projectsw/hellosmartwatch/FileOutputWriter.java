@@ -15,11 +15,7 @@ public class FileOutputWriter {
 
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            System.out.println(path.isDirectory());
             File tmpFile = new File(path, fileName);
-            System.out.println("&&&&&&&&&&&&&&&&" + tmpFile);
-            System.out.println(tmpFile.canRead());
-            System.out.println(tmpFile.canWrite());
 
             try {
                 outputStream = new FileOutputStream(tmpFile);

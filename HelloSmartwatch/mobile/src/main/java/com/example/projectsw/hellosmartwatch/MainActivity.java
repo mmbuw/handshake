@@ -2,7 +2,10 @@ package com.example.projectsw.hellosmartwatch;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +17,7 @@ import java.nio.ByteBuffer;
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextView;
-
+    private AccelerationDataReceiver serviceReceiver;
     private FileOutputWriter fileOutputWriter;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -45,11 +48,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        /* Register broadcast receiver */
+        serviceReceiver = new AccelerationDataReceiver();
+        IntentFilter intentSFilter = new IntentFilter("AccelerationDataAction");
+        registerReceiver(serviceReceiver, intentSFilter);
+
         /* Init FileOutputWriter */
         verifyStoragePermissions(this);
         fileOutputWriter = new FileOutputWriter(getApplicationContext(), "debugfile.txt");
         fileOutputWriter.writeToFile("Testoutput");
-
 
     }
 
@@ -66,5 +73,20 @@ public class MainActivity extends AppCompatActivity {
             );
         }
     }
+
+    /* Internal receiver class to get data from background service */
+    public class AccelerationDataReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle notificationData = intent.getExtras();
+            float[] receivedValues  = notificationData.getFloatArray("AccelerationData");
+            System.out.println(receivedValues[0] + ", " +
+                               receivedValues[1] + ", " +
+                               receivedValues[2]);
+        }
+
+    }
+
 
 }
