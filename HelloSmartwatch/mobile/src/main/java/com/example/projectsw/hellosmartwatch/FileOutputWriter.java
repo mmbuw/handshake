@@ -1,6 +1,7 @@
 package com.example.projectsw.hellosmartwatch;
 
 import android.content.Context;
+import android.os.Environment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,7 +14,12 @@ public class FileOutputWriter {
     public FileOutputWriter(Context context, String fileName) {
 
         try {
-            File tmpFile = new File(context.getExternalCacheDir() + "/" + fileName);
+            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            System.out.println(path.isDirectory());
+            File tmpFile = new File(path, fileName);
+            System.out.println("&&&&&&&&&&&&&&&&" + tmpFile);
+            System.out.println(tmpFile.canRead());
+            System.out.println(tmpFile.canWrite());
 
             try {
                 outputStream = new FileOutputStream(tmpFile);
