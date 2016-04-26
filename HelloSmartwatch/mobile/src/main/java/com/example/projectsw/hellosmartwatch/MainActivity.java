@@ -55,11 +55,11 @@ public class MainActivity extends AppCompatActivity {
 
         /* Init FileOutputWriter */
         verifyStoragePermissions(this);
-        fileOutputWriter = new FileOutputWriter(getApplicationContext(), "debugfile.txt");
-        fileOutputWriter.writeToFile("Testoutput");
+        fileOutputWriter = new FileOutputWriter(getApplicationContext(), "recording.txt");
 
     }
 
+    /* Requests the necessary storage permissions from the operating system */
     public static void verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -81,9 +81,12 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Bundle notificationData = intent.getExtras();
             float[] receivedValues  = notificationData.getFloatArray("AccelerationData");
-            System.out.println(receivedValues[0] + ", " +
+            /*System.out.println(receivedValues[0] + ", " +
                                receivedValues[1] + ", " +
-                               receivedValues[2]);
+                               receivedValues[2]);*/
+            fileOutputWriter.writeToFile(receivedValues[0] + ", " +
+                                         receivedValues[1] + ", " +
+                                         receivedValues[2]);
         }
 
     }
