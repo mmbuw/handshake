@@ -11,6 +11,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextView;
 
+    private FileOutputWriter fileOutputWriter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
                                   byteBuffer.getFloat(2));
             }
         }
+
+        /* Init FileOutputWriter */
+        fileOutputWriter = new FileOutputWriter(getApplicationContext(), "debugfile.txt");
+        fileOutputWriter.writeToFile("Testoutput");
+
 
     }
 }
