@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTextView;
     private AccelerationDataReceiver serviceReceiver;
     private FileOutputWriter fileOutputWriter;
+    private FileOutputWriter fileOutputWriterWithTime;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -55,7 +56,9 @@ public class MainActivity extends AppCompatActivity {
 
         /* Init FileOutputWriter */
         verifyStoragePermissions(this);
-        fileOutputWriter = new FileOutputWriter(getApplicationContext(), "recording.txt");
+        int unixTime = getCurrentUnixTimestamp();
+        fileOutputWriter = new FileOutputWriter(getApplicationContext(), "watch-" + unixTime + ".txt");
+        fileOutputWriterWithTime = new FileOutputWriter(getApplicationContext(), "watchWithTime-" + unixTime + ".txt");
 
     }
 
@@ -74,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private int getCurrentUnixTimestamp() {
+        return (int) (System.currentTimeMillis() / 1000L);
+    }
+
     /* Internal receiver class to get data from background service */
     public class AccelerationDataReceiver extends BroadcastReceiver {
 
@@ -81,12 +88,20 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Bundle notificationData = intent.getExtras();
             float[] receivedValues  = notificationData.getFloatArray("AccelerationData");
+
             /*System.out.println(receivedValues[0] + ", " +
                                receivedValues[1] + ", " +
                                receivedValues[2]);*/
+
             fileOutputWriter.writeToFile(receivedValues[0] + ", " +
                                          receivedValues[1] + ", " +
                                          receivedValues[2]);
+
+            int unixTime = getCurrentUnixTimestamp();
+            fileOutputWriterWithTime.writeToFile(unixTime + ", " +
+                                                 receivedValues[0] + ", " +
+                                                 receivedValues[1] + ", " +
+                                                 receivedValues[2]);
         }
 
     }
