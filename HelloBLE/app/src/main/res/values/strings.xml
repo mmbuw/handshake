@@ -3,4 +3,6 @@
     <string name="ble_not_supported">No BLE support</string>
     <string name="ble_supported">BLE supported!</string>
     <string name="b_enabled">Bluetooth enabled.</string>
+    <string name="scan_in_progress">Device is already scanning</string>
+    <string name="patient">Be patient...\n\n</string>
 </resources>

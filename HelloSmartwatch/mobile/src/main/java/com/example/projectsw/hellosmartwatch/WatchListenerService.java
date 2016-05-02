@@ -24,10 +24,11 @@ public class WatchListenerService extends WearableListenerService {
             startActivity(startIntent);*/
 
             float[] receivedValues = decodeMessage(messageEvent.getData());
+            sendDataToActivity(receivedValues);
 
-            System.out.println(receivedValues[0] + ", " +
+            /*System.out.println(receivedValues[0] + ", " +
                                receivedValues[1] + ", " +
-                               receivedValues[2]);
+                               receivedValues[2]);*/
         }
     }
 
@@ -42,6 +43,13 @@ public class WatchListenerService extends WearableListenerService {
         } catch (IOException ioe) {}
 
         return receivedValues;
+    }
+
+    private void sendDataToActivity(float[] data) {
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("AccelerationDataAction");
+        broadcastIntent.putExtra("AccelerationData", data);
+        sendBroadcast(broadcastIntent);
     }
 
 }

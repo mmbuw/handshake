@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.PowerManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -18,6 +19,7 @@ public class AccelerometerHandler implements SensorEventListener {
     private DataTransmitter mDataTransmitter;
     private boolean mTransmissionActivated;
 
+
     private float[] gravity = new float[3];
     private float[] linear_acceleration = new float[3];
 
@@ -27,6 +29,10 @@ public class AccelerometerHandler implements SensorEventListener {
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mDataTransmitter = dataTransmitter;
         mTransmissionActivated = false;
+
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+        wl.acquire();
     }
 
     public void switchTransmissionMode() {
