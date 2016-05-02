@@ -12,10 +12,11 @@ public class FeatureExtractor {
 	public static int NUM_SAMPLES_FOR_PEAK_DETECTION;
 	public static float PEAK_AMPLITUDE_THRESHOLD = 5.0f;
 	public static int NUM_DATA_COLUMNS = 3;
-	public static boolean ACTIVATE_PREPROCESSING = false;
+	public static int MOVING_AVERAGE_WINDOW_WIDTH = 3;
 
 	// Data record processing helpers
-	public static float[] lastValues;
+	public static LinkedList<float[]> recordHistory;
+	public static float[] lastMovingAverageOutput;
 	public static int numRecordsProcessed = 0;
 	public static int[] numAscentingSince;
 	public static int[] numDescendingSince;
@@ -45,7 +46,8 @@ public class FeatureExtractor {
 	public static void main(String[] args) {
 
 		/* Initialize arrays */
-		lastValues = new float[NUM_DATA_COLUMNS];
+		recordHistory = new LinkedList<float[]>();
+		lastMovingAverageOutput = new float[NUM_DATA_COLUMNS];
 		numAscentingSince = new int[NUM_DATA_COLUMNS];
 		numDescendingSince = new int[NUM_DATA_COLUMNS];
 		maximumCandidateIndex = new int[NUM_DATA_COLUMNS];
@@ -109,17 +111,13 @@ public class FeatureExtractor {
 
 	public static void processDataRecord(float[] data) {
 
-		float[] preprocessedData = data;
-
-		if (ACTIVATE_PREPROCESSING) {
-			preprocessedData = performPreprocessing(data);
-		}
+		float[] preprocessedData = performPreprocessing(data);
 
 		for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
 			processDataColumn(i, preprocessedData[i]);
 		}
 
-		lastValues = preprocessedData;
+		lastMovingAverageOutput = preprocessedData;
 		++numRecordsProcessed;
 
 	}
@@ -127,7 +125,7 @@ public class FeatureExtractor {
 	public static void processDataColumn(int column, float value) {
 
 		float currentValue = value;
-		float lastValue = lastValues[column];
+		float lastValue = lastMovingAverageOutput[column];
 
 		// Detect ascension and descension
 		if (currentValue > lastValue) {
@@ -178,11 +176,18 @@ public class FeatureExtractor {
 
 	public static float[] performPreprocessing(float[] data) {
 
-		// averaging with previous values
-		float[] output = data;
+		addToRecordHistory(data);
+		float[] output = new float[data.length];
+
+		// moving average over record history
+		for (float[] dataRecord : recordHistory) {
+			for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
+				output[i] += dataRecord[i];
+			}
+		}
 
 		for (int i = 0; i < output.length; ++i) {
-			output[i] = (output[i] + lastValues[i]) / 2.0f;
+			output[i] = output[i] / (float) (recordHistory.size());
 		}
 
 		return output;
@@ -244,6 +249,16 @@ public class FeatureExtractor {
 			lastPeakDetectionIndex = sampleID;
 			lastPeakType = PEAK_TYPE_MIN;
 
+		}
+
+	}
+
+	public static void addToRecordHistory(float[] data) {
+		
+		recordHistory.addLast(data);
+
+		if (recordHistory.size() > 2*MOVING_AVERAGE_WINDOW_WIDTH+1) {
+			recordHistory.removeFirst();
 		}
 
 	}
