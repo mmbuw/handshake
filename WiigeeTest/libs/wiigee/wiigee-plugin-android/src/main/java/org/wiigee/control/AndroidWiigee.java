@@ -54,7 +54,7 @@ public class AndroidWiigee extends Wiigee {
     public AndroidWiigee(Context context) {
         super();
         Log.write("This is wiigee-plugin-android (Andgee) version "+pluginversion+" ("+pluginreleasedate+")");
-        device = new AndroidDevice(context);
+        device = new AndroidDevice(context, false);
         device.setAccelerationEnabled(true);
     }
 
