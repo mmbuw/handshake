@@ -12,7 +12,7 @@ public class FeatureExtractor {
 	public static int NUM_SAMPLES_FOR_PEAK_DETECTION;
 	public static float PEAK_AMPLITUDE_THRESHOLD = 5.0f;
 	public static int NUM_DATA_COLUMNS = 3;
-	public static boolean ACTIVATE_PREPROCESSING = true;
+	public static boolean ACTIVATE_PREPROCESSING = false;
 
 	// Data record processing helpers
 	public static float[] lastValues;
@@ -109,26 +109,24 @@ public class FeatureExtractor {
 
 	public static void processDataRecord(float[] data) {
 
-		for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
-			processDataColumn(i, data[i]);
+		float[] preprocessedData = data;
+
+		if (ACTIVATE_PREPROCESSING) {
+			preprocessedData = performPreprocessing(data);
 		}
 
-		lastValues = data;
+		for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
+			processDataColumn(i, preprocessedData[i]);
+		}
+
+		lastValues = preprocessedData;
 		++numRecordsProcessed;
 
 	}
 
 	public static void processDataColumn(int column, float value) {
 
-		// Perform preprocessing on current value if activated
-		float currentValue;
-
-		if (ACTIVATE_PREPROCESSING) {
-			currentValue = performPreprocessing(column, value);
-		} else {
-			currentValue = value;
-		}
-
+		float currentValue = value;
 		float lastValue = lastValues[column];
 
 		// Detect ascension and descension
@@ -178,12 +176,16 @@ public class FeatureExtractor {
 
 	}
 
-	public static float performPreprocessing(int column, float value) {
+	public static float[] performPreprocessing(float[] data) {
 
-		// averaging with previous value
-		//float lastValue = lastValues[column];
-		//return (value + lastValue) / 2.0f;
-		return value;
+		// averaging with previous values
+		float[] output = data;
+
+		for (int i = 0; i < output.length; ++i) {
+			output[i] = (output[i] + lastValues[i]) / 2.0f;
+		}
+
+		return output;
 
 	}
 
