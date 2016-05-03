@@ -277,7 +277,7 @@ public class FeatureExtractor {
 
 	public static void saveMaxima(int index) throws FileNotFoundException {
 
-		PrintWriter writer = new PrintWriter("maxima_" + index + ".txt");
+		PrintWriter writer = new PrintWriter("output_data/maxima_" + index + ".txt");
 
 		for (int i = 0; i < maximaIndices[index].size(); ++i) {
 			writer.println(maximaIndices[index].get(i) + " " + maximaValues[index].get(i));
@@ -289,7 +289,7 @@ public class FeatureExtractor {
 
 	public static void saveMinima(int index) throws FileNotFoundException {
 
-		PrintWriter writer = new PrintWriter("minima_" + index + ".txt");
+		PrintWriter writer = new PrintWriter("output_data/minima_" + index + ".txt");
 
 		for (int i = 0; i < minimaIndices[index].size(); ++i) {
 			writer.println(minimaIndices[index].get(i) + " " + minimaValues[index].get(i));
@@ -301,7 +301,7 @@ public class FeatureExtractor {
 
 	public static void saveHandshakes() throws FileNotFoundException {
 
-		PrintWriter writer = new PrintWriter("handshakes.txt");
+		PrintWriter writer = new PrintWriter("output_data/handshakes.txt");
 
 		for (int i = 0; i < handshakeIndices.size(); ++i) {
 			writer.println(handshakeIndices.get(i) + " 0");
