@@ -12,7 +12,7 @@ public class FeatureExtractor {
 	public static int MAJOR_AXIS_COLUMN;
 	public static final int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 	public static final float PEAK_AMPLITUDE_THRESHOLD = 5.0f;
-	public static final int NUM_DATA_COLUMNS = 3;
+	public static int NUM_DATA_COLUMNS;
 	public static final int MOVING_AVERAGE_WINDOW_WIDTH = 3;
 
 	// Data record processing helpers
@@ -46,6 +46,10 @@ public class FeatureExtractor {
 
 	public static void main(String[] args) {
 
+		/* Parse parameters */
+		NUM_DATA_COLUMNS = Integer.parseInt(args[1]);
+		MAJOR_AXIS_COLUMN = Integer.parseInt(args[2]);
+
 		/* Initialize arrays */
 		recordHistory = new LinkedList<float[]>();
 		lastMovingAverageOutput = new float[NUM_DATA_COLUMNS];
@@ -75,7 +79,6 @@ public class FeatureExtractor {
 
 		/* Start application logic */
 		try {			
-			MAJOR_AXIS_COLUMN = Integer.parseInt(args[1]);
 			parseInputFile(args[0]);
 			saveFeatures();
 
