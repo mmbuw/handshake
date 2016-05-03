@@ -5,14 +5,15 @@ import java.util.*;
 public class FeatureExtractor {
 
 	// Constants
-	public static short PEAK_TYPE_NONE = 0;
-	public static short PEAK_TYPE_MIN = 1;
-	public static short PEAK_TYPE_MAX = 2;
+	public static final short PEAK_TYPE_NONE = 0;
+	public static final short PEAK_TYPE_MIN = 1;
+	public static final short PEAK_TYPE_MAX = 2;
 
-	public static int NUM_SAMPLES_FOR_PEAK_DETECTION;
-	public static float PEAK_AMPLITUDE_THRESHOLD = 5.0f;
-	public static int NUM_DATA_COLUMNS = 3;
-	public static int MOVING_AVERAGE_WINDOW_WIDTH = 3;
+	public static int MAJOR_AXIS_COLUMN;
+	public static final int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
+	public static final float PEAK_AMPLITUDE_THRESHOLD = 5.0f;
+	public static final int NUM_DATA_COLUMNS = 3;
+	public static final int MOVING_AVERAGE_WINDOW_WIDTH = 3;
 
 	// Data record processing helpers
 	public static LinkedList<float[]> recordHistory;
@@ -74,7 +75,7 @@ public class FeatureExtractor {
 
 		/* Start application logic */
 		try {			
-			NUM_SAMPLES_FOR_PEAK_DETECTION = Integer.parseInt(args[1]);
+			MAJOR_AXIS_COLUMN = Integer.parseInt(args[1]);
 			parseInputFile(args[0]);
 			saveFeatures();
 
@@ -163,7 +164,7 @@ public class FeatureExtractor {
 		}
 
 		// Handshake timeout
-		if (column == 1) {
+		if (column == MAJOR_AXIS_COLUMN) {
 			if (numRecordsProcessed - lastPeakDetectionIndex > ALTERNATION_TIME_MAX_DIFF) {
 				if (alternationStreak >= ALTERNATION_COUNT_DETECTION_THRESHOLD) {
 					handshakeIndices.addLast(numRecordsProcessed - ALTERNATION_TIME_MAX_DIFF - 1);
@@ -201,7 +202,7 @@ public class FeatureExtractor {
 		maximumCandidateIndex[column] = -1;
 		maximumCandidateValue[column] = 0.0f;
 
-		if (column == 1) {
+		if (column == MAJOR_AXIS_COLUMN) {
 
 			if (sampleID - lastPeakDetectionIndex < ALTERNATION_TIME_MAX_DIFF && 
 				lastPeakType == PEAK_TYPE_MIN) {
@@ -231,7 +232,7 @@ public class FeatureExtractor {
 		minimumCandidateIndex[column] = -1;
 		minimumCandidateValue[column] = 0.0f;
 
-		if (column == 1) {
+		if (column == MAJOR_AXIS_COLUMN) {
 
 			if (sampleID - lastPeakDetectionIndex < ALTERNATION_TIME_MAX_DIFF && 
 				lastPeakType == PEAK_TYPE_MAX) {
