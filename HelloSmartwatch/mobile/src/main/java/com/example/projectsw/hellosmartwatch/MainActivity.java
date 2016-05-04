@@ -7,15 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import java.nio.ByteBuffer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createNewFileWriters() {
+
         int unixTime = getCurrentUnixTimestamp();
 
         if (fileOutputWriter != null) {
@@ -107,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
     /* Internal receiver class to get data from background service */
     public class AccelerationDataReceiver extends BroadcastReceiver {
 
+        long lastMessageTimestamp = System.currentTimeMillis();
+        int messageCount = 0;
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle notificationData = intent.getExtras();
@@ -127,6 +129,20 @@ public class MainActivity extends AppCompatActivity {
                         receivedValues[1] + ", " +
                         receivedValues[2]);
             }
+
+
+            if (messageCount == 10) {
+                long nowTime = System.currentTimeMillis();
+                long diffTime = nowTime - lastMessageTimestamp;
+                double diffSeconds = diffTime / 1000.0;
+                mTextView.setText(10.0/diffSeconds + "");
+                messageCount = 0;
+                lastMessageTimestamp = nowTime;
+            } else {
+                ++messageCount;
+            }
+
+
         }
 
     }
