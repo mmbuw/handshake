@@ -128,6 +128,10 @@ public class FeatureExtractor {
 
 	public static void processDataColumn(int column, float value) {
 
+		if (column != 1) {
+			return;
+		}
+
 		float currentValue = value;
 		float lastValue = lastMovingAverageOutput[column];
 
@@ -137,13 +141,13 @@ public class FeatureExtractor {
 			numDescendingSince[column] = 0;
 
 			// If enough ascending samples after a peek
-			if (numAscentingSince[column] > NUM_SAMPLES_FOR_PEAK_DETECTION && 
+			if (numAscentingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION && 
 				minimumCandidateIndex[column] > -1 &&
 				minimumCandidateValue[column] < -PEAK_AMPLITUDE_THRESHOLD) {
 				handleDetectedMinimum(column, minimumCandidateIndex[column], minimumCandidateValue[column]);
 			}
 			// Mark maximum candidate if enough samples
-			else if (numAscentingSince[column] > NUM_SAMPLES_FOR_PEAK_DETECTION) {
+			if (numAscentingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION) {
 				maximumCandidateIndex[column] = numRecordsProcessed;
 				maximumCandidateValue[column] = currentValue;
 			}
@@ -153,13 +157,13 @@ public class FeatureExtractor {
 			numAscentingSince[column] = 0;
 
 			// If enough descending samples after a peak
-			if (numDescendingSince[column] > NUM_SAMPLES_FOR_PEAK_DETECTION &&
+			if (numDescendingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION &&
 				maximumCandidateIndex[column] > -1 &&
 				maximumCandidateValue[column] > PEAK_AMPLITUDE_THRESHOLD) {
 				handleDetectedMaximum(column, maximumCandidateIndex[column], maximumCandidateValue[column]);
 			}
 			// Mark minimum candidate if enough samples
-			else if (numDescendingSince[column] > NUM_SAMPLES_FOR_PEAK_DETECTION) {
+			if (numDescendingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION) {
 				minimumCandidateIndex[column] = numRecordsProcessed;
 				minimumCandidateValue[column] = currentValue;
 			}
