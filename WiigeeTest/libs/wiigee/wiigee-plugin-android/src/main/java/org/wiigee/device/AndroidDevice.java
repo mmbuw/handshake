@@ -45,8 +45,8 @@ public class AndroidDevice extends Device implements SensorEventListener {
     private float x0, y0, z0, x1, y1, z1;
     private SensorManager sensorManager;
 
-    public AndroidDevice(Context context) {
-        super(true);
+    public AndroidDevice(Context context, boolean autofiltering) {
+        super(autofiltering);
         // 'Calibrate' values
         this.x0 = 0;
         this.y0 = -SensorManager.STANDARD_GRAVITY;
