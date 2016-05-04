@@ -18,6 +18,7 @@ public class AccelerometerHandler implements SensorEventListener {
     private Sensor mSensor;
     private DataTransmitter mDataTransmitter;
     private boolean mTransmissionActivated;
+    private PowerManager.WakeLock wl;
 
 
     private float[] gravity = new float[3];
@@ -31,12 +32,16 @@ public class AccelerometerHandler implements SensorEventListener {
         mTransmissionActivated = false;
 
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
-        wl.acquire();
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
     }
 
     public void switchTransmissionMode() {
         mTransmissionActivated = !mTransmissionActivated;
+        if (mTransmissionActivated==true) {
+            wl.acquire();
+        } else {
+            wl.release();
+        }
     }
 
     private void transmitCurrentSensorData() {

@@ -7,20 +7,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
-
-import java.nio.ByteBuffer;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextView;
     private Button mNewFileButton;
     private TextView mStatusTextView;
+    private EditText mFileNameEditText;
 
     private AccelerationDataReceiver serviceReceiver;
     private FileOutputWriter fileOutputWriter;
@@ -38,22 +38,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mTextView = (TextView) findViewById(R.id.mainTextView);
 
-        Intent intent = getIntent();
-        byte[] intentData = intent.getByteArrayExtra("TEST_MESSAGE");
-
-        if (intentData != null) {
-            if (intentData.length == 3) {
-                mTextView.setText(intentData[0] +  ", " + intentData[1] + ", " + intentData[2]);
-            }
-            else if (intentData.length == 12)
-            {
-                ByteBuffer byteBuffer = ByteBuffer.wrap(intentData);
-                mTextView.setText(byteBuffer.getFloat(0) + ", " +
-                                  byteBuffer.getFloat(1) + ", " +
-                                  byteBuffer.getFloat(2));
-            }
-        }
-
         mStatusTextView = (TextView) findViewById(R.id.textStatus);
         mNewFileButton = (Button) findViewById(R.id.butNewFile);
         mNewFileButton.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 createNewFileWriters();
             }
         });
+        mFileNameEditText = (EditText) findViewById(R.id.inputFileName);
 
         /* Register broadcast receiver */
         serviceReceiver = new AccelerationDataReceiver();
@@ -92,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createNewFileWriters() {
+
         int unixTime = getCurrentUnixTimestamp();
 
         if (fileOutputWriter != null) {
@@ -99,9 +85,18 @@ public class MainActivity extends AppCompatActivity {
             fileOutputWriterWithTime.closeStream();
         }
 
-        fileOutputWriter = new FileOutputWriter("watch-" + unixTime + ".txt");
-        fileOutputWriterWithTime = new FileOutputWriter("watchWithTime-" + unixTime + ".txt");
-        mStatusTextView.setText("Current file created at time " + unixTime);
+        String filename = mFileNameEditText.getText().toString();
+        if (filename.isEmpty()) {
+            filename = "watch-" + unixTime + ".txt";
+        }
+        else {
+            if (!filename.endsWith(".txt")) { filename += ".txt"; }
+            mFileNameEditText.setText("");
+        }
+
+        fileOutputWriter = new FileOutputWriter(filename);
+        fileOutputWriterWithTime = new FileOutputWriter("timestamps-" + filename);
+        mStatusTextView.setText("Current file created at time " + unixTime + " with name " + filename);
     }
 
     private int getCurrentUnixTimestamp() {
@@ -110,6 +105,9 @@ public class MainActivity extends AppCompatActivity {
 
     /* Internal receiver class to get data from background service */
     public class AccelerationDataReceiver extends BroadcastReceiver {
+
+        long lastMessageTimestamp = System.currentTimeMillis();
+        int messageCount = 0;
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -131,6 +129,20 @@ public class MainActivity extends AppCompatActivity {
                         receivedValues[1] + ", " +
                         receivedValues[2]);
             }
+
+
+            if (messageCount == 10) {
+                long nowTime = System.currentTimeMillis();
+                long diffTime = nowTime - lastMessageTimestamp;
+                double diffSeconds = diffTime / 1000.0;
+                mTextView.setText(10.0/diffSeconds + "");
+                messageCount = 0;
+                lastMessageTimestamp = nowTime;
+            } else {
+                ++messageCount;
+            }
+
+
         }
 
     }
