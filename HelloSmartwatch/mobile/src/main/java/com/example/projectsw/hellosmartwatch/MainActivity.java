@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.nio.ByteBuffer;
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTextView;
     private Button mNewFileButton;
     private TextView mStatusTextView;
+    private EditText mFileNameEditText;
 
     private AccelerationDataReceiver serviceReceiver;
     private FileOutputWriter fileOutputWriter;
@@ -38,22 +40,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mTextView = (TextView) findViewById(R.id.mainTextView);
 
-        Intent intent = getIntent();
-        byte[] intentData = intent.getByteArrayExtra("TEST_MESSAGE");
-
-        if (intentData != null) {
-            if (intentData.length == 3) {
-                mTextView.setText(intentData[0] +  ", " + intentData[1] + ", " + intentData[2]);
-            }
-            else if (intentData.length == 12)
-            {
-                ByteBuffer byteBuffer = ByteBuffer.wrap(intentData);
-                mTextView.setText(byteBuffer.getFloat(0) + ", " +
-                                  byteBuffer.getFloat(1) + ", " +
-                                  byteBuffer.getFloat(2));
-            }
-        }
-
         mStatusTextView = (TextView) findViewById(R.id.textStatus);
         mNewFileButton = (Button) findViewById(R.id.butNewFile);
         mNewFileButton.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 createNewFileWriters();
             }
         });
+        mFileNameEditText = (EditText) findViewById(R.id.inputFileName);
 
         /* Register broadcast receiver */
         serviceReceiver = new AccelerationDataReceiver();
@@ -99,9 +86,18 @@ public class MainActivity extends AppCompatActivity {
             fileOutputWriterWithTime.closeStream();
         }
 
-        fileOutputWriter = new FileOutputWriter("watch-" + unixTime + ".txt");
-        fileOutputWriterWithTime = new FileOutputWriter("watchWithTime-" + unixTime + ".txt");
-        mStatusTextView.setText("Current file created at time " + unixTime);
+        String filename = mFileNameEditText.getText().toString();
+        if (filename.isEmpty()) {
+            filename = "watch-" + unixTime + ".txt";
+        }
+        else {
+            if (!filename.endsWith(".txt")) { filename += ".txt"; }
+            mFileNameEditText.setText("");
+        }
+
+        fileOutputWriter = new FileOutputWriter(filename);
+        fileOutputWriterWithTime = new FileOutputWriter("timestamps-" + filename);
+        mStatusTextView.setText("Current file created at time " + unixTime + " with name " + filename);
     }
 
     private int getCurrentUnixTimestamp() {
