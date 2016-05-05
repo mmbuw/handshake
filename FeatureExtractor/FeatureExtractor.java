@@ -12,8 +12,9 @@ public class FeatureExtractor {
 	public static int MAJOR_AXIS_COLUMN;
 	public static final int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 	public static final float PEAK_AMPLITUDE_THRESHOLD = 5.0f;
+	public static final int PEAK_REPEAT_THRESHOLD = 10;
 	public static int NUM_DATA_COLUMNS;
-	public static final int MOVING_AVERAGE_WINDOW_WIDTH = 3;
+	public static final int MOVING_AVERAGE_WINDOW_WIDTH = 0;
 
 	// Data record processing helpers
 	public static LinkedList<float[]> recordHistory;
@@ -204,6 +205,11 @@ public class FeatureExtractor {
 
 	public static void handleDetectedMaximum(int column, int sampleID, float value) {
 
+		if (lastPeakType == PEAK_TYPE_MAX &&
+			sampleID - lastPeakDetectionIndex < PEAK_REPEAT_THRESHOLD) {
+			return;
+		}
+
 		maximaIndices[column].addLast(sampleID);
 		maximaValues[column].addLast(value);
 		maximumCandidateIndex[column] = -1;
@@ -233,6 +239,11 @@ public class FeatureExtractor {
 	}
 
 	public static void handleDetectedMinimum(int column, int sampleID, float value) {
+
+		if (lastPeakType == PEAK_TYPE_MIN &&
+			sampleID - lastPeakDetectionIndex < PEAK_REPEAT_THRESHOLD) {
+			return;
+		}
 
 		minimaIndices[column].addLast(sampleID);
 		minimaValues[column].addLast(value);
