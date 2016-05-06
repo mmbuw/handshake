@@ -1,4 +1,4 @@
-package com.example.projectsw.bletransfer;
+package util;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -9,11 +9,11 @@ import java.net.URL;
  */
 public class MessageData implements Serializable{
 
-    URL url;
-    String hash;
-    static String prefix = "http://bit.ly/";
+    public URL url;
+    public String hash;
+    public static String prefix = "http://bit.ly/";
 
-    MessageData(String str, boolean isUrl) throws Exception {
+    public MessageData(String str, boolean isUrl) throws Exception {
         if (isUrl){
             this.url = new URL(str);
             generateHash();

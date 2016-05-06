@@ -1,4 +1,4 @@
-package com.example.projectsw.bletransfer;
+package util;
 
 import android.util.Log;
 

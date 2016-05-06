@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import util.MessageData;
+
 public class SettingsActivity extends AppCompatActivity {
 
     Button submitSettingsButton;
@@ -21,7 +23,7 @@ public class SettingsActivity extends AppCompatActivity {
         submitSettingsButton = (Button) findViewById(R.id.submitSettingsButton);
         urlField = (EditText) findViewById(R.id.urlField);
 
-        urlField.setText(MainActivity.msg);
+        urlField.setText(MainActivity.msgData.url.toString());
 
         submitSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override

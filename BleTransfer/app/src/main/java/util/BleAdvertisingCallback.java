@@ -1,4 +1,4 @@
-package com.example.projectsw.bletransfer;
+package util;
 
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseSettings;

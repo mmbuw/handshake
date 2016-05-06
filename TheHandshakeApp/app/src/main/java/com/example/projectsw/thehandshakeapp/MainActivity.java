@@ -1,4 +1,4 @@
-package com.example.projectsw.bletransfer;
+package com.example.projectsw.thehandshakeapp;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -28,6 +28,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity
     private AdvertiseCallback bleAdvCallback;
     private ScanCallback bleScanCallback;
 
-    private boolean isScanActive = false;
+    boolean isScanActive = false;
     final Handler scanHandler = new Handler();
 
     final static int SCAN_PERIOD = 3000;
@@ -61,11 +63,23 @@ public class MainActivity extends AppCompatActivity
     private int placeholder;
 
     Button shakeButton;
+    Button settingsApplyButton;
+
+    Toolbar toolbar;
+    NavigationView navigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        MainFragment mainFragment = new MainFragment();
+        android.support.v4.app.FragmentTransaction fragmentTransaction
+                = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, mainFragment);
+        fragmentTransaction.commit();
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -74,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         try {
@@ -126,26 +140,37 @@ public class MainActivity extends AppCompatActivity
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
                 .addManufacturerData(BLE_TAG, msgData.hash.getBytes()).build();
+    }
 
-        shakeButton = (Button)findViewById(R.id.shakeButton);
+    public void onScanButtonClick(){
 
-        shakeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!isScanActive){
-                    startBle();
-                    scanHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            stopBle();
-                        }
-                    }, SCAN_PERIOD);
-                }  else {
+        shakeButton = (Button) findViewById(R.id.shakeButton);
+
+        if (!isScanActive){
+            startBle();
+            scanHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
                     stopBle();
                 }
+            }, SCAN_PERIOD);
+        }  else {
+            stopBle();
+        }
+    }
 
-            }
-        });
+    public void onSettingsApplyButtonClick() {
+
+        String newUrl = ((TextView) findViewById(R.id.setting_url_field)).getText().toString();
+
+        try {
+            MessageData newMsgData = new MessageData(newUrl, true);
+            msgData = newMsgData;
+        } catch (Exception e) {
+            Toast.makeText(this, "Couldn't convert URL.", Toast.LENGTH_SHORT);
+        }
+
+
     }
 
     private void startBle(){
@@ -210,22 +235,25 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_handshake) {
+            MainFragment mainFragment = new MainFragment();
+            android.support.v4.app.FragmentTransaction fragmentTransaction
+                    = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, mainFragment);
+            fragmentTransaction.commit();
+        } else if (id == R.id.nav_list) {
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_settings) {
+            SettingsFragment settingsFragment = new SettingsFragment();
+            android.support.v4.app.FragmentTransaction fragmentTransaction
+                    = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
+            fragmentTransaction.commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }

@@ -1,9 +1,11 @@
-package com.example.projectsw.bletransfer;
+package util;
 
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.util.Log;
 import android.util.SparseArray;
+
+import com.example.projectsw.thehandshakeapp.MainActivity;
 
 /**
  * Created by projectsw on 02.05.16.
