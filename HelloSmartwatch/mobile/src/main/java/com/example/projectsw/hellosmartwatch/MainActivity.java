@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         /* Register broadcast receiver */
         serviceReceiver = new AccelerationDataReceiver();
-        IntentFilter intentSFilter = new IntentFilter("AccelerationDataAction");
+        IntentFilter intentSFilter = new IntentFilter("accelerationAction");
         registerReceiver(serviceReceiver, intentSFilter);
 
         /* Init file writers */
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle notificationData = intent.getExtras();
-            float[] receivedValues  = notificationData.getFloatArray("AccelerationData");
+            float[] receivedValues  = notificationData.getFloatArray("acceleration");
 
             /* Write data to current file if present */
             if (fileOutputWriter != null) {

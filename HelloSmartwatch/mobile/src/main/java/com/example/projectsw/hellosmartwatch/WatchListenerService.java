@@ -40,8 +40,8 @@ public class WatchListenerService extends WearableListenerService {
 
     private void sendDataToActivity(float[] data) {
         Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction("AccelerationDataAction");
-        broadcastIntent.putExtra("AccelerationData", data);
+        broadcastIntent.setAction("accelerationAction");
+        broadcastIntent.putExtra("acceleration", data);
         sendBroadcast(broadcastIntent);
     }
 
