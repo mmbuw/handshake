@@ -16,8 +16,8 @@ import java.util.Set;
 
 public class DataTransmitter {
 
-    public static final String TEST_MESSAGE_CAPABILITY_NAME = "test_message";
-    public static final String TEST_MESSAGE_TRANSCRIPTION_PATH = "/test_message";
+    public static final String ACCELEROMETER_DATA_CAPABILITY_NAME = "acceleration";
+    public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/acceleration";
 
     private GoogleApiClient mGoogleApiClient;
     private String transcriptionNodeId = null;
@@ -42,7 +42,7 @@ public class DataTransmitter {
     private void setupTestMessageTranscription() {
         CapabilityApi.GetCapabilityResult result =
                 Wearable.CapabilityApi.getCapability(mGoogleApiClient,
-                        TEST_MESSAGE_CAPABILITY_NAME,
+                        ACCELEROMETER_DATA_CAPABILITY_NAME,
                         CapabilityApi.FILTER_REACHABLE).await();
         updateTranscriptionCapability(result.getCapability());
 
@@ -57,7 +57,7 @@ public class DataTransmitter {
         Wearable.CapabilityApi.addCapabilityListener(
                 mGoogleApiClient,
                 capabilityListener,
-                TEST_MESSAGE_CAPABILITY_NAME);
+                ACCELEROMETER_DATA_CAPABILITY_NAME);
 
     }
 
@@ -86,7 +86,7 @@ public class DataTransmitter {
         if (transcriptionNodeId != null) {
             Wearable.MessageApi.sendMessage(mGoogleApiClient,
                     transcriptionNodeId,
-                    TEST_MESSAGE_TRANSCRIPTION_PATH,
+                    ACCELEROMETER_DATA_TRANSCRIPTION_PATH,
                     data).setResultCallback(
 
                     new ResultCallback<MessageApi.SendMessageResult>() {
