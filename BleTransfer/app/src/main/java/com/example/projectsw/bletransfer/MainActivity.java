@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +37,10 @@ public class MainActivity extends AppCompatActivity {
 
     final static int SCAN_PERIOD = 3000;
     final static public int BLE_TAG = 0x4343;
-    final static String msg = "1SRhxGT";
+
+    static MessageData msgData;
+
+    public static HashMap<String, HandshakeData> receivedHandshakes = new HashMap<>();
 
     private String uid;
     private int placeholder;
@@ -46,7 +50,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_advertise);
+        setContentView(R.layout.activity_main);
+
+        try {
+            msgData = new MessageData("1SRhxGT", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
         if (ContextCompat.checkSelfPermission(this,
@@ -90,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         bleAdvData1 = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
-                .addManufacturerData(BLE_TAG, msg.getBytes()).build();
+                .addManufacturerData(BLE_TAG, msgData.hash.getBytes()).build();
 
         shakeButton = (Button)findViewById(R.id.shakeButton);
 
