@@ -21,11 +21,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -162,8 +164,26 @@ public class MainActivity extends AppCompatActivity {
             Log.d(D_TAG+":result", result.toString());
             BluetoothDevice btDevice = result.getDevice();
 
-            //textView.append("Found device\n");
+            byte[] bytes = result.getScanRecord().getBytes();
+
+            SparseArray<byte[]> manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData();
+
+            String msg = "null";
+
+            try {
+                Log.d("MAN_DATA", manufacturerSpecificData.toString());
+                msg = new String(manufacturerSpecificData.get(17219));
+            }
+            catch (Exception e){
+                Log.e("MAN_DATA",e.toString());
+            }
+
+            textView.setText("");
+
             textView.append("Name:\t"           +btDevice.getName()+"\n");
+            textView.append("Bytes:\t"          +bytes+"\n");
+            textView.append("ManData:\t"        +manufacturerSpecificData+"\n");
+            textView.append("Msg:\t"            +msg+"\n");
             textView.append("Address:\t"        +btDevice.getAddress()+"\n");
             textView.append("Type:\t"           +btDevice.getType()+"\n");
             textView.append("BondState:\t"      +btDevice.getBondState()+"\n");
@@ -171,6 +191,9 @@ public class MainActivity extends AppCompatActivity {
             textView.append("NanoTimeStamp:\t"  +result.getTimestampNanos()+"\n");
             textView.append("Time:\t"           +(new Date(System.currentTimeMillis()))+"\n\n");
             textView.append("=====================================\n\n");
+
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://bit.ly/"+msg));
+            startActivity(browserIntent);
 
             connectToDevice(btDevice);
         }

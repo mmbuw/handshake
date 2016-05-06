@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">BleTransfer</string>
+    <string name="interrupt_scan_button_text">stop shaking</string>
+    <string name="start_scan_button_text">shake your booty</string>
+</resources>
