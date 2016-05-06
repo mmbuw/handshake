@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private AccelerationDataReceiver serviceReceiver;
     private FileOutputWriter fileOutputWriter;
     private FileOutputWriter fileOutputWriterWithTime;
+    private FeatureExtractor featureExtractor;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -56,6 +57,17 @@ public class MainActivity extends AppCompatActivity {
         /* Init file writers */
         fileOutputWriter = null;
         fileOutputWriterWithTime = null;
+
+        /* Init feature extractor */
+        featureExtractor = new FeatureExtractor(3,    // number of data columns
+                                                1,    // index of major axis column
+                                                1,    // samples for peak detection
+                                                5.0f, // peak amplitude threshold
+                                                15,   // peak repeat threshold
+                                                0,    // moving average window width
+                                                30,   // alternation time max diff
+                                                5,    // alternation count detection threshold
+                                                new HandshakeDetectedToastAction(getApplicationContext()));
 
         /* Get permissions */
         verifyStoragePermissions(this);
@@ -103,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         return (int) (System.currentTimeMillis() / 1000L);
     }
 
+
     /* Internal receiver class to get data from background service */
     public class AccelerationDataReceiver extends BroadcastReceiver {
 
@@ -114,10 +127,7 @@ public class MainActivity extends AppCompatActivity {
             Bundle notificationData = intent.getExtras();
             float[] receivedValues  = notificationData.getFloatArray("AccelerationData");
 
-            /*System.out.println(receivedValues[0] + ", " +
-                               receivedValues[1] + ", " +
-                               receivedValues[2]);*/
-
+            /* Write data to current file if present */
             if (fileOutputWriter != null) {
                 fileOutputWriter.writeToFile(receivedValues[0] + ", " +
                         receivedValues[1] + ", " +
@@ -130,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                         receivedValues[2]);
             }
 
-
+            /* Update FPS display */
             if (messageCount == 10) {
                 long nowTime = System.currentTimeMillis();
                 long diffTime = nowTime - lastMessageTimestamp;
@@ -141,6 +151,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 ++messageCount;
             }
+
+            /* Hand data over to feature extractor */
+            featureExtractor.processDataRecord(receivedValues);
 
 
         }
