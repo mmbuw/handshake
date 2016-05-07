@@ -1,6 +1,5 @@
 package mobile_core;
 
-import android.content.Context;
 import android.os.Environment;
 
 import java.io.File;

@@ -71,6 +71,10 @@ public class MainActivity extends AppCompatActivity {
 
         /* Get permissions */
         verifyStoragePermissions(this);
+
+        /* Internal accelerometer data input for debugging */
+        //Intent intent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
+        //startService(intent);
     }
 
     /* Requests the necessary storage permissions from the operating system */
