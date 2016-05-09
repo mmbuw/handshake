@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 
 public class WatchListenerService extends WearableListenerService {
 
-    public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/accelerometer";
+    public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/accelerometer_data";
 
     /* When a message is received via the data API, perform theses actions */
     @Override

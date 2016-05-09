@@ -16,8 +16,8 @@ import java.util.Set;
 
 public class DataTransmitter {
 
-    public static final String ACCELEROMETER_DATA_CAPABILITY_NAME = "acceleration";
-    public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/acceleration";
+    public static final String ACCELEROMETER_DATA_CAPABILITY_NAME = "accelerometer_data";
+    public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/accelerometer_data";
 
     private GoogleApiClient mGoogleApiClient;
     private String transcriptionNodeId = null;
@@ -32,14 +32,14 @@ public class DataTransmitter {
         //Setup message transcription device
         new AsyncTask<Void, Void, Integer>() {
             protected Integer doInBackground(Void... params) {
-                setupTestMessageTranscription();
+                setupAccelerometerTranscription();
                 return 0;
             }
         }.execute();
     }
 
     /* Searches for connected handheld devices that have subscribed to a message type */
-    private void setupTestMessageTranscription() {
+    private void setupAccelerometerTranscription() {
         CapabilityApi.GetCapabilityResult result =
                 Wearable.CapabilityApi.getCapability(mGoogleApiClient,
                         ACCELEROMETER_DATA_CAPABILITY_NAME,
