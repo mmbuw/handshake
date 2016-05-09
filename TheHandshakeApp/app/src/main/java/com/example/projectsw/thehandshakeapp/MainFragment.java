@@ -7,14 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class MainFragment extends Fragment {
 
-    Button shakeButton;
+    private TextView mTextView;
+    private Button mNewFileButton;
+    private TextView mStatusTextView;
+    private EditText mFileNameEditText;
+    private Button mShakeButton;
 
     public MainFragment() {
         // Required empty public constructor
@@ -26,9 +29,23 @@ public class MainFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-        shakeButton = (Button) view.findViewById(R.id.shakeButton);
+        mTextView = (TextView) view.findViewById(R.id.textView);
+        mNewFileButton = (Button) view.findViewById(R.id.butNewFile);
+        mStatusTextView = (TextView) view.findViewById(R.id.textStatus);
+        mFileNameEditText = (EditText) view.findViewById(R.id.inputFileName);
+        mShakeButton = (Button) view.findViewById(R.id.shakeButton);
 
-        shakeButton.setOnClickListener(new View.OnClickListener() {
+        mNewFileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String filename = mFileNameEditText.getText().toString();
+                ((MainActivity) getActivity()).createNewFileWriters(filename);
+                mFileNameEditText.setText("");
+                mStatusTextView.setText("Current file has name " + filename);
+            }
+        });
+
+        mShakeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ((MainActivity)getActivity()).onScanButtonClick();
@@ -36,6 +53,10 @@ public class MainFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public void updateTextView(String text) {
+        mTextView.setText(text);
     }
 
 }

@@ -1,20 +1,27 @@
 package com.example.projectsw.thehandshakeapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -31,8 +38,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.util.HashMap;
 
+import detection.FeatureExtractor;
+import detection.FileOutputWriter;
+import detection.HandshakeDetectedToastAction;
 import util.BleAdvertisingCallback;
 import util.BleScanCallback;
 import util.HandshakeData;
@@ -68,13 +82,30 @@ public class MainActivity extends AppCompatActivity
     Toolbar toolbar;
     NavigationView navigationView;
 
+    private TextView helloWorldTextView;
+    private AccelerationDataReceiver serviceReceiver;
+    private FileOutputWriter fileOutputWriter;
+    private FileOutputWriter fileOutputWriterWithTime;
+    private FeatureExtractor featureExtractor;
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         MainFragment mainFragment = new MainFragment();
-        android.support.v4.app.FragmentTransaction fragmentTransaction
+        FragmentTransaction fragmentTransaction
                 = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, mainFragment);
         fragmentTransaction.commit();
@@ -97,6 +128,7 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
+        //TODO: CREATE PERMISSION FUNCTIONS
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE)
@@ -119,9 +151,11 @@ public class MainActivity extends AppCompatActivity
                     placeholder);
         }
 
-        uid = ((TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+        verifyStoragePermissions(this);
 
-        bluetoothAdapter = ((android.bluetooth.BluetoothManager)getSystemService(BLUETOOTH_SERVICE))
+        uid = ((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+
+        bluetoothAdapter = ((BluetoothManager) getSystemService(BLUETOOTH_SERVICE))
                 .getAdapter();
         bleScanner = bluetoothAdapter.getBluetoothLeScanner();
         bleAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
@@ -140,13 +174,51 @@ public class MainActivity extends AppCompatActivity
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
                 .addManufacturerData(BLE_TAG, msgData.hash.getBytes()).build();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        /* Register broadcast receiver */
+        serviceReceiver = new AccelerationDataReceiver();
+        IntentFilter intentSFilter = new IntentFilter("accelerationAction");
+        registerReceiver(serviceReceiver, intentSFilter);
+
+        /* Init file writers */
+        fileOutputWriter = null;
+        fileOutputWriterWithTime = null;
+
+        /* Init feature extractor */
+        featureExtractor = new FeatureExtractor(3,    // number of data columns
+                                                1,    // index of major axis column
+                                                1,    // samples for peak detection
+                                                5.0f, // peak amplitude threshold
+                                                15,   // peak repeat threshold
+                                                0,    // moving average window width
+                                                30,   // alternation time max diff
+                                                5,    // alternation count detection threshold
+                                                new HandshakeDetectedToastAction(getApplicationContext()));
     }
 
-    public void onScanButtonClick(){
+    /* Requests the necessary storage permissions from the operating system */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+    public void onScanButtonClick() {
 
         shakeButton = (Button) findViewById(R.id.shakeButton);
 
-        if (!isScanActive){
+        if (!isScanActive) {
             startBle();
             scanHandler.postDelayed(new Runnable() {
                 @Override
@@ -154,7 +226,7 @@ public class MainActivity extends AppCompatActivity
                     stopBle();
                 }
             }, SCAN_PERIOD);
-        }  else {
+        } else {
             stopBle();
         }
     }
@@ -173,28 +245,32 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void startBle(){
-        if (!isScanActive){
+    private void startBle() {
+        if (!isScanActive) {
             bleAdvertiser.startAdvertising(bleAdvSettings, bleAdvData1, bleAdvCallback);
             bleScanner.startScan(bleScanCallback);
             isScanActive = true;
             shakeButton.setText(R.string.interrupt_scan_button_text);
-        }
-        else{
-            Log.d("BLE","Scan is already active!");
+        } else {
+            Log.d("BLE", "Scan is already active!");
         }
     }
 
-    private void stopBle(){
-        if (isScanActive){
+    private void stopBle() {
+        if (isScanActive) {
             bleAdvertiser.stopAdvertising(bleAdvCallback);
             bleScanner.stopScan(bleScanCallback);
             isScanActive = false;
             shakeButton.setText(R.string.start_scan_button_text);
+        } else {
+            Log.d("BLE", "Scan is already inactive!");
         }
-        else{
-            Log.d("BLE","Scan is already inactive!");
-        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(serviceReceiver);
     }
 
     @Override
@@ -237,7 +313,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_handshake) {
             MainFragment mainFragment = new MainFragment();
-            android.support.v4.app.FragmentTransaction fragmentTransaction
+            FragmentTransaction fragmentTransaction
                     = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, mainFragment);
             fragmentTransaction.commit();
@@ -245,7 +321,7 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_settings) {
             SettingsFragment settingsFragment = new SettingsFragment();
-            android.support.v4.app.FragmentTransaction fragmentTransaction
+            FragmentTransaction fragmentTransaction
                     = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
             fragmentTransaction.commit();
@@ -254,6 +330,74 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void createNewFileWriters(String filename) {
+
+        int unixTime = getCurrentUnixTimestamp();
+
+        if (fileOutputWriter != null) {
+            fileOutputWriter.closeStream();
+            fileOutputWriterWithTime.closeStream();
+        }
+
+        if (filename.isEmpty()) {
+            filename = "watch-" + unixTime + ".txt";
+        }
+        else {
+            if (!filename.endsWith(".txt")) { filename += ".txt"; }
+        }
+
+        fileOutputWriter = new FileOutputWriter(filename);
+        fileOutputWriterWithTime = new FileOutputWriter("timestamps-" + filename);
+    }
+
+    private int getCurrentUnixTimestamp() {
+        return (int) (System.currentTimeMillis() / 1000L);
+    }
+
+    /* Internal receiver class to get data from background service */
+    public class AccelerationDataReceiver extends BroadcastReceiver {
+
+        long lastMessageTimestamp = System.currentTimeMillis();
+        int messageCount = 0;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle notificationData = intent.getExtras();
+            float[] receivedValues = notificationData.getFloatArray("acceleration");
+
+            /* Write data to current file if present */
+            if (fileOutputWriter != null) {
+                fileOutputWriter.writeToFile(receivedValues[0] + ", " +
+                        receivedValues[1] + ", " +
+                        receivedValues[2]);
+
+                int unixTime = getCurrentUnixTimestamp();
+                fileOutputWriterWithTime.writeToFile(unixTime + ", " +
+                        receivedValues[0] + ", " +
+                        receivedValues[1] + ", " +
+                        receivedValues[2]);
+            }
+
+            /* Update FPS display */
+            if (messageCount == 10) {
+                long nowTime = System.currentTimeMillis();
+                long diffTime = nowTime - lastMessageTimestamp;
+                double diffSeconds = diffTime / 1000.0;
+                System.out.println(10.0 / diffSeconds + "");
+                messageCount = 0;
+                lastMessageTimestamp = nowTime;
+            } else {
+                ++messageCount;
+            }
+
+            /* Hand data over to feature extractor */
+            featureExtractor.processDataRecord(receivedValues);
+
+
+        }
+
     }
 
 }
