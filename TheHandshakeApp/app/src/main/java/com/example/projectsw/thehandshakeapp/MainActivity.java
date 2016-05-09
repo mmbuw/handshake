@@ -334,7 +334,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void createNewFileWriters(String filename) {
+    public String createNewFileWriters(String filename) {
 
         int unixTime = getCurrentUnixTimestamp();
 
@@ -352,6 +352,7 @@ public class MainActivity extends AppCompatActivity
 
         fileOutputWriter = new FileOutputWriter(filename);
         fileOutputWriterWithTime = new FileOutputWriter("timestamps-" + filename);
+        return filename;
     }
 
     private int getCurrentUnixTimestamp() {

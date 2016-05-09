@@ -39,7 +39,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String filename = mFileNameEditText.getText().toString();
-                ((MainActivity) getActivity()).createNewFileWriters(filename);
+                filename = ((MainActivity) getActivity()).createNewFileWriters(filename);
                 mFileNameEditText.setText("");
                 mStatusTextView.setText("Current file has name " + filename);
             }
