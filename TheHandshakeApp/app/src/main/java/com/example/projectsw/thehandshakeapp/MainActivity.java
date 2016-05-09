@@ -46,6 +46,7 @@ import java.util.HashMap;
 
 import detection.FeatureExtractor;
 import detection.FileOutputWriter;
+import detection.HandshakeDetectedBluetoothAction;
 import detection.HandshakeDetectedToastAction;
 import util.BleAdvertisingCallback;
 import util.BleScanCallback;
@@ -196,7 +197,8 @@ public class MainActivity extends AppCompatActivity
                                                 0,    // moving average window width
                                                 30,   // alternation time max diff
                                                 5,    // alternation count detection threshold
-                                                new HandshakeDetectedToastAction(getApplicationContext()));
+                                                new HandshakeDetectedBluetoothAction(this));
+                //new HandshakeDetectedToastAction(getApplicationContext()));
     }
 
     /* Requests the necessary storage permissions from the operating system */
@@ -385,7 +387,7 @@ public class MainActivity extends AppCompatActivity
                 long nowTime = System.currentTimeMillis();
                 long diffTime = nowTime - lastMessageTimestamp;
                 double diffSeconds = diffTime / 1000.0;
-                System.out.println(10.0 / diffSeconds + "");
+                //System.out.println(10.0 / diffSeconds + "");
                 messageCount = 0;
                 lastMessageTimestamp = nowTime;
             } else {
