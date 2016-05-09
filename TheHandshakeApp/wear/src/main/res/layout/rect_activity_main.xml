@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.projectsw.hellosmartwatch.MainActivity"
+    tools:context="de.mobilemedia.thehandshakeapp.wear_core.MainActivity"
     tools:deviceIds="wear_square">
 
     <TextView
