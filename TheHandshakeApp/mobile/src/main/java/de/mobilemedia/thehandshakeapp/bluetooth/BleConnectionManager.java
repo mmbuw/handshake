@@ -1,4 +1,4 @@
-package de.mobilemedia.thehandshakeapp.util;
+package de.mobilemedia.thehandshakeapp.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -11,10 +11,6 @@ import android.bluetooth.le.ScanCallback;
 import android.content.Context;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
-import java.util.HashMap;
-
-import de.mobilemedia.thehandshakeapp.R;
 
 public class BleConnectionManager {
 

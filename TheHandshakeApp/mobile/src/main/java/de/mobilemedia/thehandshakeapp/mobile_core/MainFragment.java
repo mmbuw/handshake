@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
-import de.mobilemedia.thehandshakeapp.util.BleConnectionManager;
+import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 
 
 public class MainFragment extends Fragment {
@@ -141,10 +141,6 @@ public class MainFragment extends Fragment {
 
     private int getCurrentUnixTimestamp() {
         return (int) (System.currentTimeMillis() / 1000L);
-    }
-
-    public void updateTextView(String text) {
-        mTextView.setText(text);
     }
 
 }

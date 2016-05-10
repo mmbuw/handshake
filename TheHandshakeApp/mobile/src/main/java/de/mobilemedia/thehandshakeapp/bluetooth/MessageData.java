@@ -1,4 +1,4 @@
-package de.mobilemedia.thehandshakeapp.util;
+package de.mobilemedia.thehandshakeapp.bluetooth;
 
 import java.io.Serializable;
 import java.net.URL;

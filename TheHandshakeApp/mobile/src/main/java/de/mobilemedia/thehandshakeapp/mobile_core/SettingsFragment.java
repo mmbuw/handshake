@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.util.MessageData;
+import de.mobilemedia.thehandshakeapp.bluetooth.MessageData;
 
 public class SettingsFragment extends Fragment {
 

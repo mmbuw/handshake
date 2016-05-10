@@ -1,4 +1,4 @@
-package de.mobilemedia.thehandshakeapp.util;
+package de.mobilemedia.thehandshakeapp.bluetooth;
 
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseSettings;

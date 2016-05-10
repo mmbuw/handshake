@@ -1,4 +1,4 @@
-package de.mobilemedia.thehandshakeapp.util;
+package de.mobilemedia.thehandshakeapp.bluetooth;
 
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;

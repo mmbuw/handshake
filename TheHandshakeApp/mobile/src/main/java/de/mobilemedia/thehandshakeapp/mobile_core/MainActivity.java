@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -19,9 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,11 +26,9 @@ import java.util.HashMap;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.detection.FeatureExtractor;
-import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
-import de.mobilemedia.thehandshakeapp.util.BleConnectionManager;
-import de.mobilemedia.thehandshakeapp.util.HandshakeData;
-import de.mobilemedia.thehandshakeapp.util.MessageData;
+import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
+import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
