@@ -2,9 +2,6 @@ package de.mobilemedia.thehandshakeapp.util;
 
 import java.io.Serializable;
 
-/**
- * Created by projectsw on 06.05.16.
- */
 public class HandshakeData implements Serializable {
     String msg;
     Long timestamp;

@@ -3,9 +3,6 @@ package de.mobilemedia.thehandshakeapp.util;
 import java.io.Serializable;
 import java.net.URL;
 
-/**
- * Created by projectsw on 06.05.16.
- */
 public class MessageData implements Serializable{
 
     public URL url;

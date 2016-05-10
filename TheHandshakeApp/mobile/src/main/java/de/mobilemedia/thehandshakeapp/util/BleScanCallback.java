@@ -7,9 +7,6 @@ import android.util.SparseArray;
 
 import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 
-/**
- * Created by projectsw on 02.05.16.
- */
 public class BleScanCallback extends ScanCallback {
     private byte[] data;
     @Override public void onScanResult(int callbackType, ScanResult result) {
@@ -18,7 +15,7 @@ public class BleScanCallback extends ScanCallback {
         String msg = "";
         try {
             Log.d("MAN_DATA", manufacturerSpecificData.toString());
-            msg = new String(manufacturerSpecificData.get(MainActivity.BLE_TAG));
+            msg = new String(manufacturerSpecificData.get(BleConnectionManager.BLE_TAG));
             Log.d("MSG", msg);
             if(!MainActivity.receivedHandshakes.containsKey(msg)){
                 MainActivity.receivedHandshakes.put(msg, new HandshakeData(msg, timestampNanos));

@@ -7,9 +7,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/**
- * Created by projectsw on 06.05.16.
- */
 public class Util {
         public static String doApiRequest(URL url) {
             try {
