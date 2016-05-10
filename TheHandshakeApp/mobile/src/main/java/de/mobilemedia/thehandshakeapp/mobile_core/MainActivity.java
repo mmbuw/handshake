@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity
                                                 30,   // alternation time max diff
                                                 5,    // alternation count detection threshold
                                                 new HandshakeDetectedBluetoothAction(mainFragment));
-                                                //new HandshakeDetectedToastAction(getApplicationContext()));
     }
 
     /* Requests the necessary storage permissions from the operating system */
@@ -195,7 +194,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_handshake) {
-            MainFragment mainFragment = new MainFragment();
             FragmentTransaction fragmentTransaction
                     = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, mainFragment);
@@ -219,7 +217,6 @@ public class MainActivity extends AppCompatActivity
 
     /* Internal receiver class to get data from background service */
     public class AccelerationDataReceiver extends BroadcastReceiver {
-
 
         @Override
         public void onReceive(Context context, Intent intent) {
