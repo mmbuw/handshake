@@ -40,10 +40,12 @@ public class MainActivity extends AppCompatActivity
     private AccelerationDataReceiver serviceReceiver;
     private FeatureExtractor featureExtractor;
 
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_PHONE_STATE
     };
 
     private BleConnectionManager bleConnectionManager;
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Request permissions */
+        verifyPermissions();
 
         /* Create initial fragment display */
         mainFragment = new MainFragment();
@@ -76,13 +81,6 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        /* Request permissions */
-        verifyStoragePermissions();
-        verifyLocationPermissions();
-        verifyPhoneStatePermissions();
-
-        /* Create Bluetooth LE connection manager */
-        bleConnectionManager = new BleConnectionManager(getApplicationContext());
 
         /* Create Google API client */
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -104,46 +102,45 @@ public class MainActivity extends AppCompatActivity
                                                 new HandshakeDetectedBluetoothAction(mainFragment));
     }
 
-    /* Requests the necessary storage permissions from the operating system */
-    public void verifyStoragePermissions() {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    /* Requests the necessary permissions from the operating system */
+    public void verifyPermissions() {
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    this,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
+        boolean permissionRequestNeeded = false;
+
+        for (String permission : PERMISSIONS_STORAGE) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionRequestNeeded = true;
+                break;
+            }
         }
+
+        if (permissionRequestNeeded) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 1);
+        }
+        else {
+            createBleConnectionManager();
+        }
+
     }
 
-    /* Requests the necessary location permissions from the operating system */
-    public void verifyLocationPermissions() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                    0);
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    0);
+        for (int i = 0; i < permissions.length; ++i) {
+
+            if (permissions[i].equals("android.permission.READ_PHONE_STATE") &&
+                    grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+
+                /* Create Bluetooth LE connection manager */
+                createBleConnectionManager();
+            }
         }
+
     }
 
-    /* Requests the necessary phone state permissions from the operating system */
-    public void verifyPhoneStatePermissions() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_PHONE_STATE},
-                    0);
-        }
+    public void createBleConnectionManager() {
+        bleConnectionManager = new BleConnectionManager(getApplicationContext());
     }
 
     public BleConnectionManager getBleConnectionManager() {
