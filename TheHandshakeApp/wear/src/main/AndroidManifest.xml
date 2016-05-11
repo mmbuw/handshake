@@ -11,6 +11,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
+
+        <service
+            android:name="de.mobilemedia.thehandshakeapp.wear_core.AccelerometerService"
+            android:exported="false"/>
+
         <activity
             android:name="de.mobilemedia.thehandshakeapp.wear_core.MainActivity"
             android:label="@string/app_name"

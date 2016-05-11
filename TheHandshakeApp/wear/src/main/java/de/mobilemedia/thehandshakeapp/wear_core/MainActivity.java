@@ -1,6 +1,7 @@
 package de.mobilemedia.thehandshakeapp.wear_core;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
@@ -15,11 +16,8 @@ public class MainActivity extends Activity {
     private TextView mTextView;
     private Button mSendButton;
 
-    private AccelerometerHandler accelerometerHandler;
-    private DataTransmitter dataTransmitter;
-
-    private String[] statusData = {"Not transmitting", "Transmitting"};
-    private int currentStatus = 0;
+    private String[] mStatusData = {"Not transmitting", "Transmitting"};
+    private int mTransmissionStatus = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,28 +33,25 @@ public class MainActivity extends Activity {
                 mSendButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        new AsyncTask<Void, Void, Integer>() {
-                            protected Integer doInBackground(Void... params) {
-                                accelerometerHandler.switchTransmissionMode();
-                                return 0;
-                            }
-                        }.execute();
-                        currentStatus = (currentStatus + 1) % 2;
-                        mTextView.setText(statusData[currentStatus]);
+
+                        if (mTransmissionStatus == 0) {
+                            Intent intent = new Intent(getApplicationContext(), AccelerometerService.class);
+                            startService(intent);
+                        }
+                        else {
+                            Intent intent = new Intent(getApplicationContext(), AccelerometerService.class);
+                            stopService(intent);
+                        }
+
+                        mTransmissionStatus = (mTransmissionStatus + 1) % 2;
+                        mTextView.setText(mStatusData[mTransmissionStatus]);
                     }
+
                 });
 
                 mTextView = (TextView) stub.findViewById(R.id.textStatus);
             }
         });
-
-        //Setup data transmitter
-        dataTransmitter = new DataTransmitter(this.getApplicationContext());
-
-        //Setup acceleration reader
-        accelerometerHandler = new AccelerometerHandler(this.getApplicationContext(),
-                                                        dataTransmitter);
-
 
     }
 
