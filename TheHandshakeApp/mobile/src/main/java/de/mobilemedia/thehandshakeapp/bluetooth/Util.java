@@ -34,7 +34,7 @@ public class Util {
         }
 
     public static String nanoTimeToDateString(long nanotime){
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("h:mm:ss\t\t\td.M.yy");
         return sdf.format(new Date(nanotime));
     }
 

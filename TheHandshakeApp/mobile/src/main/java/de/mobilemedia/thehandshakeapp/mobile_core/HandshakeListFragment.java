@@ -1,10 +1,14 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 
@@ -36,4 +40,11 @@ public class HandshakeListFragment extends ListFragment {
         setListAdapter(adapter);
     }
 
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        HandshakeData hd = (HandshakeData) (getListAdapter()).getItem(position);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(hd.getUrl()));
+        startActivity(intent);
+    }
 }

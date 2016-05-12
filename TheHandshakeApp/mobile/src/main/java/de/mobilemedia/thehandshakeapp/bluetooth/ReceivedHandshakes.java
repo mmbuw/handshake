@@ -29,7 +29,7 @@ public class ReceivedHandshakes {
 
         for (int i = 0; i < 100; i++) {
             String key = ""+i;
-            HandshakeData data = new HandshakeData(key);
+            HandshakeData data = new HandshakeData("1rM17oR");
             receivedHandshakesMap.put(key, data);
         }
 
