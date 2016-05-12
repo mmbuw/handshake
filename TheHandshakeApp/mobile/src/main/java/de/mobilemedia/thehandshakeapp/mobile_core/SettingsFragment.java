@@ -2,6 +2,7 @@ package de.mobilemedia.thehandshakeapp.mobile_core;
 
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,10 +24,16 @@ public class SettingsFragment extends Fragment {
     public SettingsFragment() {}
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        parentActivity = (MainActivity) getActivity();
+        parentActivity.setTitle(parentActivity.getString(R.string.fragment_setting_title));
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        parentActivity = (MainActivity) getActivity();
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         settingsApplyButton = (Button) view.findViewById(R.id.settings_apply_button);

@@ -24,7 +24,7 @@ public class HandshakeListFragment extends ListFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         parentActivity = (MainActivity) getActivity();
-        getActivity().setTitle(parentActivity.getString(R.string.list_title));
+        parentActivity.setTitle(parentActivity.getString(R.string.list_title));
 
         handshakes = ReceivedHandshakes.getInstance(getContext()).getHandshakes();
 

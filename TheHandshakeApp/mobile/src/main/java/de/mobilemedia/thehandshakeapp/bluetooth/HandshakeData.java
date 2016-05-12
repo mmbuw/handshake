@@ -23,6 +23,6 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
 
     @Override
     public int compareTo(HandshakeData hd) {
-        return this.timestamp >= hd.timestamp ? -1 : 1;
+        return (int) (this.timestamp - hd.timestamp);
     }
 }
