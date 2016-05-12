@@ -29,4 +29,8 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
     public String getUrl(){
         return "http://bit.ly/"+this.msg;
     }
+
+    public String getDateString() {
+        return Util.nanoTimeToDateString(timestamp);
+    }
 }

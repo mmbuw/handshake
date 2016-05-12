@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -33,12 +35,35 @@ public class HandshakeListFragment extends ListFragment {
 
         handshakes = ReceivedHandshakes.getInstance(getContext()).getHandshakes();
 
-        ArrayAdapter<HandshakeData> adapter =
-            new ArrayAdapter<HandshakeData>(parentActivity,
-                               R.layout.simple_list_item,
-                               handshakes );
+        setListAdapter(new HandshakeListAdapter(handshakes));
+    }
 
-        setListAdapter(adapter);
+    private class HandshakeListAdapter extends ArrayAdapter<HandshakeData> {
+        public HandshakeListAdapter(ArrayList<HandshakeData> handshakes) {
+            super(getActivity(), 0, handshakes);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            if (convertView == null){
+                convertView = getActivity().getLayoutInflater()
+                                .inflate(R.layout.list_item, null);
+            }
+
+            HandshakeData hd = getItem(position);
+
+            TextView title =
+                    (TextView) convertView.findViewById(R.id.list_item_msg);
+            title.setText(hd.getUrl());
+
+            TextView date =
+                    (TextView) convertView.findViewById(R.id.list_item_date);
+            date.setText(hd.getDateString());
+
+            return convertView;
+        }
+
 
     }
 
@@ -48,7 +73,7 @@ public class HandshakeListFragment extends ListFragment {
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-                HandshakeData hd = (HandshakeData) (getListAdapter()).getItem(position);
+                HandshakeData hd = ((HandshakeListAdapter)getListAdapter()).getItem(position);
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setType("text/plain");
                 i.putExtra(Intent.EXTRA_SUBJECT, "Sharing Handshake");
@@ -61,7 +86,7 @@ public class HandshakeListFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        HandshakeData hd = (HandshakeData) (getListAdapter()).getItem(position);
+        HandshakeData hd = ((HandshakeListAdapter)getListAdapter()).getItem(position);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(hd.getUrl()));
         startActivity(intent);

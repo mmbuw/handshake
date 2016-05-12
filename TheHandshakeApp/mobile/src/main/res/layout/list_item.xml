@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <TextView
+        android:id="@+id/list_item_msg"
+        android:paddingTop="5dip"
+        android:paddingBottom="1dip"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:textSize="24dip"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="URL">
+    </TextView>
+
+    <TextView
+        android:id="@+id/list_item_date"
+        android:paddingTop="1dip"
+        android:paddingBottom="2dip"
+        android:paddingLeft="4dip"
+        android:paddingRight="4dip"
+        android:textSize="24dip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/list_item_msg"
+        android:text="xx-xx-xxx">
+    </TextView>
+
+</RelativeLayout>
