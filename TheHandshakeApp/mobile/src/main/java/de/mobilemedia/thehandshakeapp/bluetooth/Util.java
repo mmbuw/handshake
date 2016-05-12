@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Util {
         public static String doApiRequest(URL url) {
@@ -30,5 +32,10 @@ public class Util {
                 return null;
             }
         }
+
+    public static String nanoTimeToDateString(long nanotime){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
+        return sdf.format(new Date(nanotime));
+    }
 
 }

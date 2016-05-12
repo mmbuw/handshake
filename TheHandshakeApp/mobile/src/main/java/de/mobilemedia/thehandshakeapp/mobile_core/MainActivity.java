@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -22,13 +21,11 @@ import android.view.MenuItem;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.util.HashMap;
-
 import de.mobilemedia.thehandshakeapp.R;
+import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
+import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
 import de.mobilemedia.thehandshakeapp.detection.FeatureExtractor;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
-import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
-import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -49,7 +46,8 @@ public class MainActivity extends AppCompatActivity
     };
 
     private BleConnectionManager bleConnectionManager;
-    public static HashMap<String, HandshakeData> receivedHandshakes = new HashMap<>();
+    public static ReceivedHandshakes receivedHandshakes;
+
 
     private GoogleApiClient client;
 
@@ -71,6 +69,9 @@ public class MainActivity extends AppCompatActivity
         /* Create toolbar and navigation view */
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        receivedHandshakes
+                = ReceivedHandshakes.getInstance(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -190,20 +191,20 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_handshake) {
-            FragmentTransaction fragmentTransaction
-                    = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, mainFragment);
-            fragmentTransaction.commit();
-        } else if (id == R.id.nav_list) {
+        FragmentTransaction fragmentTransaction
+                = getSupportFragmentManager().beginTransaction();
 
+        if (id == R.id.nav_handshake) {
+            fragmentTransaction.replace(R.id.fragment_container, mainFragment);
+        } else if (id == R.id.nav_list) {
+            HandshakeListFragment listFragment = new HandshakeListFragment();
+            fragmentTransaction.replace(R.id.fragment_container, listFragment);
         } else if (id == R.id.nav_settings) {
             SettingsFragment settingsFragment = new SettingsFragment();
-            FragmentTransaction fragmentTransaction
-                    = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
-            fragmentTransaction.commit();
         }
+
+        fragmentTransaction.commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

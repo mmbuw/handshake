@@ -2,17 +2,27 @@ package de.mobilemedia.thehandshakeapp.bluetooth;
 
 import java.io.Serializable;
 
-public class HandshakeData implements Serializable {
+public class HandshakeData implements Serializable, Comparable<HandshakeData> {
     String msg;
     Long timestamp;
     //HandshakeSignature signature;
 
-    HandshakeData(String msg, Long ts){
+    HandshakeData(String msg){
         this.msg = msg;
-        this.timestamp = ts;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public void updateTimestamp(long ts){
         this.timestamp = ts;
+    }
+
+    @Override
+    public String toString() {
+        return msg+"\t\t"+Util.nanoTimeToDateString(timestamp);
+    }
+
+    @Override
+    public int compareTo(HandshakeData hd) {
+        return this.timestamp >= hd.timestamp ? -1 : 1;
     }
 }
