@@ -4,6 +4,7 @@ package de.mobilemedia.thehandshakeapp.mobile_core;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.MessageData;
+import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 
 public class SettingsFragment extends Fragment {
 
@@ -52,10 +54,13 @@ public class SettingsFragment extends Fragment {
     public void onSettingsApplyButtonClick() {
 
         String newUrl = urlTextView.getText().toString();
+        Log.i("NEWURL", newUrl);
 
         try {
-            MessageData newMsgData = new MessageData(newUrl, true);
+            String shortUrl = new Util.BitlyShortenRequest().execute(newUrl).get();
+            MessageData newMsgData = new MessageData(shortUrl, true);
             parentActivity.getBleConnectionManager().setMessageData(newMsgData);
+            Log.i("NEWHASH", shortUrl);
         } catch (Exception e) {
             Toast.makeText(parentActivity, "Couldn't convert URL.", Toast.LENGTH_SHORT);
         }

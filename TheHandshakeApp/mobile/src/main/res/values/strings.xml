@@ -8,8 +8,7 @@
     <string name="start_scan_button_text">shake your booty</string>
     <string name="interrupt_scan_button_text">stop shaking</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="token">d9bf1e2bdc0a4d6f585829ec9bf0d128b6be586c</string>
     <string name="list_title">Received Handshakes</string>
     <string name="fragment_setting_title">Settings</string>
 </resources>
