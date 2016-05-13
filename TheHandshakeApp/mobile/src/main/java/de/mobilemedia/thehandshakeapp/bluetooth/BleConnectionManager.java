@@ -93,4 +93,8 @@ public class BleConnectionManager {
         msgData = newMsgData;
     }
 
+    public String getCurrentUrl() {
+        return msgData.url.toString();
+    }
+
 }

@@ -21,6 +21,7 @@ public class SettingsFragment extends Fragment {
     MainActivity parentActivity;
 
     Button settingsApplyButton;
+    Button clearButton;
     TextView urlTextView;
 
     public SettingsFragment() {}
@@ -39,12 +40,24 @@ public class SettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         settingsApplyButton = (Button) view.findViewById(R.id.settings_apply_button);
+        clearButton = (Button) view.findViewById(R.id.button_clear);
         urlTextView = (TextView) view.findViewById(R.id.setting_url_field);
+
+        String currentUrl = parentActivity.getBleConnectionManager().getCurrentUrl();
+
+        urlTextView.setText( currentUrl );
 
         settingsApplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onSettingsApplyButtonClick();
+            }
+        });
+
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                urlTextView.setText("");
             }
         });
 
@@ -60,9 +73,11 @@ public class SettingsFragment extends Fragment {
             String shortUrl = new Util.BitlyShortenRequest().execute(newUrl).get();
             MessageData newMsgData = new MessageData(shortUrl, true);
             parentActivity.getBleConnectionManager().setMessageData(newMsgData);
+            /*TODO: do it better or add wait screen*/
+            Toast.makeText(parentActivity, "Applied new Handshake URL:\n" + shortUrl, Toast.LENGTH_SHORT).show();
             Log.i("NEWHASH", shortUrl);
         } catch (Exception e) {
-            Toast.makeText(parentActivity, "Couldn't convert URL.", Toast.LENGTH_SHORT);
+            Toast.makeText(parentActivity, "Couldn't convert URL.", Toast.LENGTH_SHORT).show();
         }
 
     }

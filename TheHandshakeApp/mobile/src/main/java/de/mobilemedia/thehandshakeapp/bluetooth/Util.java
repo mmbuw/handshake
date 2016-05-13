@@ -76,7 +76,7 @@ public class Util {
                 String shortUrl = "&longUrl="+encodedUrlToShorten;
                 String format = "&format=txt";
 
-                String urlString = address + method + token + shortUrl +format;
+                String urlString = address + method + token + shortUrl + format;
 
                 shortenedLink = apiRequest(urlString);
 
