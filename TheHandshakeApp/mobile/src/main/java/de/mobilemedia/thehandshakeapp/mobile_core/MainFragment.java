@@ -2,6 +2,7 @@ package de.mobilemedia.thehandshakeapp.mobile_core;
 
 
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -37,10 +38,16 @@ public class MainFragment extends Fragment {
     public MainFragment() {}
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        parentActivity = (MainActivity) getActivity();
+        parentActivity.setTitle(R.string.app_name);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        parentActivity = (MainActivity) getActivity();
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         mTextView = (TextView) view.findViewById(R.id.mainTextView);

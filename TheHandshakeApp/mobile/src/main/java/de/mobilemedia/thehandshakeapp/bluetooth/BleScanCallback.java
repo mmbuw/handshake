@@ -17,16 +17,7 @@ public class BleScanCallback extends ScanCallback {
             Log.d("MAN_DATA", manufacturerSpecificData.toString());
             msg = new String(manufacturerSpecificData.get(BleConnectionManager.BLE_TAG));
             Log.d("MSG", msg);
-            if(!MainActivity.receivedHandshakes.containsKey(msg)){
-                MainActivity.receivedHandshakes.put(msg, new HandshakeData(msg, timestampNanos));
-                Log.d("MSG", "Added new message.");
-            }
-            else{
-                //TODO: Maybe we can do this better.
-                MainActivity.receivedHandshakes.get(msg).updateTimestamp(timestampNanos);
-                Log.d("MSG", "Message already exists, updated timestamp.");
-            }
-
+            MainActivity.receivedHandshakes.addHandshake(new HandshakeData(msg));
         }
         catch (Exception e){
             Log.e("MAN_DATA",e.toString());
