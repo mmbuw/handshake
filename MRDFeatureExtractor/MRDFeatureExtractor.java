@@ -7,6 +7,7 @@ public class MRDFeatureExtractor {
 	public static final int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 	public static final int NUM_DATA_COLUMNS = 3;
 	public static final int FEATURE_WINDOW_WIDTH = 150;
+	public static final int PEAKMAP_TOP_K = 5;
 	public static int LABELLED_HANDSHAKE_START;
 	public static int LABELLED_HANDSHAKE_END;
 	public static String FEATURE_OUTPUT_PATH;
@@ -126,7 +127,7 @@ public class MRDFeatureExtractor {
 		cleanPeaksOutsideWindow();
 		extractAndWriteCurrentWindowFeatureVector();
 
-		//Peak map debug
+		//Peak map
 		if (numRecordsProcessed == LABELLED_HANDSHAKE_END) {
 			short[] peakMap = createPeakMapForCurrentWindow(1);
 		}
@@ -195,20 +196,45 @@ public class MRDFeatureExtractor {
 
 		short[] peakMap = new short[FEATURE_WINDOW_WIDTH];
 
-		for (int i = 0; i < maximaIndices[column].size(); ++i) {
-			int maxId = maximaIndices[column].get(i);
-			float maxVal = maximaValues[column].get(i);
-			int index = maxId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
-			peakMap[index] = 1;
-			System.out.println(maxId + " 1");
+		// Sort the maxima to retrieve the top ones
+		TreeMap<Float, Integer> maximaTree = new TreeMap<Float, Integer>();
+		for (int maxId = 0; maxId < maximaIndices[column].size(); ++maxId) { 
+			maximaTree.put(new Float(maximaValues[column].get(maxId)), new Integer(maximaIndices[column].get(maxId))); 
 		}
 
-		for (int i = 0; i < minimaIndices[column].size(); ++i) {
-			int minId = minimaIndices[column].get(i);
-			float minVal = minimaValues[column].get(i);
-			int index = minId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
-			peakMap[index] = -1;
-			System.out.println(minId + " -1");
+		// Sort the minima to retrieve the top ones
+		TreeMap<Float, Integer> minimaTree = new TreeMap<Float, Integer>();
+		for (int minId = 0; minId < minimaIndices[column].size(); ++minId) { 
+			minimaTree.put(new Float(minimaValues[column].get(minId)), new Integer(minimaIndices[column].get(minId))); 
+		}
+
+		// Retrieve the top K maxima
+		int maximaOutputted = 0;
+		for (Map.Entry<Float, Integer> entry : maximaTree.descendingMap().entrySet()) {
+			int maxId = entry.getValue();
+			int peakMapIndex = maxId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
+			peakMap[peakMapIndex] = 1;
+
+			if (++maximaOutputted == PEAKMAP_TOP_K) {
+				break;
+			}
+		}
+
+		// Retrieve the top K minima
+		int minimaOutputted = 0;
+		for (Map.Entry<Float, Integer> entry : minimaTree.entrySet()) {
+			int minId = entry.getValue();
+			int peakMapIndex = minId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
+			peakMap[peakMapIndex] = -1;
+			
+			if (++minimaOutputted == PEAKMAP_TOP_K) {
+				break;
+			}
+
+		}
+
+		for (int i = 0; i < peakMap.length; ++i) {
+			System.out.println( (LABELLED_HANDSHAKE_START + i) + " " + peakMap[i]);
 		}
 
 		return peakMap;
