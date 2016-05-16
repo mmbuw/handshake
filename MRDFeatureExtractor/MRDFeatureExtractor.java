@@ -7,10 +7,11 @@ public class MRDFeatureExtractor {
 	public static final int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 	public static final int NUM_DATA_COLUMNS = 3;
 	public static final int FEATURE_WINDOW_WIDTH = 150;
-	public static final int PEAKMAP_TOP_K = 5;
+	public static final int PEAKMAP_TOP_K = 10;
 	public static int LABELLED_HANDSHAKE_START;
 	public static int LABELLED_HANDSHAKE_END;
 	public static String FEATURE_OUTPUT_PATH;
+	public static String FILENAME;
 
 	// Data record processing helpers
 	public static LinkedList<float[]> windowContent;
@@ -19,7 +20,6 @@ public class MRDFeatureExtractor {
 	public static int[] numDescendingSince;
 	public static float[] lastData;
 	public static PrintWriter featureWriter;
-	public static PrintWriter peakMapWriter;
 
 	// Maximum detection on all axes
 	public static int[] maximumCandidateIndex;
@@ -81,7 +81,7 @@ public class MRDFeatureExtractor {
 		try {
 			featureWriter = new PrintWriter(FEATURE_OUTPUT_PATH);
 			String[] splittedFileName = args[0].split("/");
-			peakMapWriter = new PrintWriter("peakmaps/peakmap-" + splittedFileName[splittedFileName.length - 1]);
+			FILENAME = splittedFileName[splittedFileName.length-1];
 			parseInputFile(args[0]);
 
 		} catch (Exception e) {
@@ -113,14 +113,22 @@ public class MRDFeatureExtractor {
 
 		scanner.close();
 		featureWriter.close();
-		peakMapWriter.close();
 
 	}
 
-	public static void exportPeakMap(short[] peakmap) {
+	public static void exportPeakMap(short[] peakmap, String nameSuffix) {
 
-		for (short s : peakmap) {
-			peakMapWriter.println(s);
+		try {
+			String fileNameStem = FILENAME.replace(".txt", "");
+			PrintWriter peakMapWriter = new PrintWriter("peakmaps/peakmap-" + fileNameStem + "-" + nameSuffix + ".txt");
+
+			for (short s : peakmap) {
+				peakMapWriter.println(s);
+			}
+
+			peakMapWriter.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -141,8 +149,12 @@ public class MRDFeatureExtractor {
 		//Peak map
 		if (LABELLED_HANDSHAKE_START > -1 &&
 			numRecordsProcessed == LABELLED_HANDSHAKE_END) {
-			short[] peakMap = createPeakMapForCurrentWindow(1);
-			exportPeakMap(peakMap);
+			short[] peakMapX = createPeakMapForCurrentWindow(0, true);
+			short[] peakMapY = createPeakMapForCurrentWindow(1, false);
+			short[] peakMapZ = createPeakMapForCurrentWindow(2, true);
+			exportPeakMap(peakMapX, "x");
+			exportPeakMap(peakMapY, "y");
+			exportPeakMap(peakMapZ, "z");
 		}
 
 		lastData = data;
@@ -203,11 +215,13 @@ public class MRDFeatureExtractor {
 
 	}
 
-	public static short[] createPeakMapForCurrentWindow(int column) {
+	public static short[] createPeakMapForCurrentWindow(int column, boolean flipAxis) {
 
 		// Remark: numRecordsProcessed is the last sample ID in the window
 
 		short[] peakMap = new short[FEATURE_WINDOW_WIDTH];
+		short maximumValueInMap = flipAxis ? (short) -1 : (short) 1;
+		short minimumValueInMap = flipAxis ? (short) 1 : (short) -1;
 
 		// Sort the maxima to retrieve the top ones
 		TreeMap<Float, Integer> maximaTree = new TreeMap<Float, Integer>();
@@ -226,7 +240,7 @@ public class MRDFeatureExtractor {
 		for (Map.Entry<Float, Integer> entry : maximaTree.descendingMap().entrySet()) {
 			int maxId = entry.getValue();
 			int peakMapIndex = maxId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
-			peakMap[peakMapIndex] = 1;
+			peakMap[peakMapIndex] = maximumValueInMap;
 
 			if (++maximaOutputted == PEAKMAP_TOP_K) {
 				break;
@@ -238,7 +252,7 @@ public class MRDFeatureExtractor {
 		for (Map.Entry<Float, Integer> entry : minimaTree.entrySet()) {
 			int minId = entry.getValue();
 			int peakMapIndex = minId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
-			peakMap[peakMapIndex] = -1;
+			peakMap[peakMapIndex] = minimumValueInMap;
 			
 			if (++minimaOutputted == PEAKMAP_TOP_K) {
 				break;
