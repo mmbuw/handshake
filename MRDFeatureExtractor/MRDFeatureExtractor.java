@@ -19,6 +19,7 @@ public class MRDFeatureExtractor {
 	public static int[] numDescendingSince;
 	public static float[] lastData;
 	public static PrintWriter featureWriter;
+	public static PrintWriter peakMapWriter;
 
 	// Maximum detection on all axes
 	public static int[] maximumCandidateIndex;
@@ -78,7 +79,9 @@ public class MRDFeatureExtractor {
 
 		/* Start application logic */
 		try {
-			featureWriter = new PrintWriter(FEATURE_OUTPUT_PATH);		
+			featureWriter = new PrintWriter(FEATURE_OUTPUT_PATH);
+			String[] splittedFileName = args[0].split("/");
+			peakMapWriter = new PrintWriter("peakmaps/peakmap-" + splittedFileName[splittedFileName.length - 1]);
 			parseInputFile(args[0]);
 
 		} catch (Exception e) {
@@ -110,7 +113,15 @@ public class MRDFeatureExtractor {
 
 		scanner.close();
 		featureWriter.close();
+		peakMapWriter.close();
 
+	}
+
+	public static void exportPeakMap(short[] peakmap) {
+
+		for (short s : peakmap) {
+			peakMapWriter.println(s);
+		}
 	}
 
 	/* MAIN FUNCTION FOR NEW INCOMING MEASUREMENTS                           */
@@ -128,8 +139,10 @@ public class MRDFeatureExtractor {
 		extractAndWriteCurrentWindowFeatureVector();
 
 		//Peak map
-		if (numRecordsProcessed == LABELLED_HANDSHAKE_END) {
+		if (LABELLED_HANDSHAKE_START > -1 &&
+			numRecordsProcessed == LABELLED_HANDSHAKE_END) {
 			short[] peakMap = createPeakMapForCurrentWindow(1);
+			exportPeakMap(peakMap);
 		}
 
 		lastData = data;
@@ -233,9 +246,9 @@ public class MRDFeatureExtractor {
 
 		}
 
-		for (int i = 0; i < peakMap.length; ++i) {
-			System.out.println( (LABELLED_HANDSHAKE_START + i) + " " + peakMap[i]);
-		}
+		//for (int i = 0; i < peakMap.length; ++i) {
+		//	System.out.println( (LABELLED_HANDSHAKE_START + i) + " " + peakMap[i]);
+		//}
 
 		return peakMap;
 
