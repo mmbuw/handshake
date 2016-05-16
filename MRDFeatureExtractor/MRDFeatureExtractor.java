@@ -38,7 +38,7 @@ public class MRDFeatureExtractor {
 		/* Parse parameters */
 		try {
 			LABELLED_HANDSHAKE_START = Integer.parseInt(args[1]);
-			LABELLED_HANDSHAKE_END = LABELLED_HANDSHAKE_START + FEATURE_WINDOW_WIDTH;
+			LABELLED_HANDSHAKE_END = LABELLED_HANDSHAKE_START + FEATURE_WINDOW_WIDTH - 1;
 			FEATURE_OUTPUT_PATH = args[2];
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -126,6 +126,11 @@ public class MRDFeatureExtractor {
 		cleanPeaksOutsideWindow();
 		extractAndWriteCurrentWindowFeatureVector();
 
+		//Peak map debug
+		if (numRecordsProcessed == LABELLED_HANDSHAKE_END) {
+			short[] peakMap = createPeakMapForCurrentWindow(1);
+		}
+
 		lastData = data;
 		++numRecordsProcessed;
 	}
@@ -181,6 +186,32 @@ public class MRDFeatureExtractor {
 		} else {
 			return "no-handshake";
 		}
+
+	}
+
+	public static short[] createPeakMapForCurrentWindow(int column) {
+
+		// Remark: numRecordsProcessed is the last sample ID in the window
+
+		short[] peakMap = new short[FEATURE_WINDOW_WIDTH];
+
+		for (int i = 0; i < maximaIndices[column].size(); ++i) {
+			int maxId = maximaIndices[column].get(i);
+			float maxVal = maximaValues[column].get(i);
+			int index = maxId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
+			peakMap[index] = 1;
+			System.out.println(maxId + " 1");
+		}
+
+		for (int i = 0; i < minimaIndices[column].size(); ++i) {
+			int minId = minimaIndices[column].get(i);
+			float minVal = minimaValues[column].get(i);
+			int index = minId - (numRecordsProcessed - FEATURE_WINDOW_WIDTH + 1);
+			peakMap[index] = -1;
+			System.out.println(minId + " -1");
+		}
+
+		return peakMap;
 
 	}
 
