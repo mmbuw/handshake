@@ -69,4 +69,8 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
     public long getTimeStamp() {
         return this.timestamp;
     }
+
+    public void setLongUrl(String longUrl) {
+        this.longUrl = longUrl;
+    }
 }

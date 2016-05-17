@@ -11,4 +11,5 @@
     <string name="token">d9bf1e2bdc0a4d6f585829ec9bf0d128b6be586c</string>
     <string name="list_title">Received Handshakes</string>
     <string name="fragment_setting_title">Settings</string>
+    <string name="long_url_not_available">Long URL not available yet</string>
 </resources>

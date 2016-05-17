@@ -70,7 +70,10 @@ public class SettingsFragment extends Fragment {
         Log.i("NEWURL", longUrl);
 
         try {
-            String shortUrl = new Util.BitlyShortenRequest().execute(longUrl).get();
+            String shortUrl = new Util.BitlyRequest()
+                    .setMethod("v3/shorten")
+                    .setContentType("&longUrl=")
+                    .execute(longUrl).get();
             HandshakeData newHandshakeData = new HandshakeData(shortUrl, longUrl);
             parentActivity.getBleConnectionManager().setMyHandshake(newHandshakeData);
             /*TODO: do it better or add wait screen*/
