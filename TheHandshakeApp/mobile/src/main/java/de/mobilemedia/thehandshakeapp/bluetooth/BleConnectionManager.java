@@ -27,7 +27,7 @@ public class BleConnectionManager {
 
     boolean isScanActive = false;
 
-    static MessageData msgData;
+    static HandshakeData myHandshakeData;
 
     private String uid;
 
@@ -36,7 +36,7 @@ public class BleConnectionManager {
         uid = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
 
         try {
-            setMessageData(new MessageData("1SRhxGT", false));
+            setMyHandshake(new HandshakeData("1SRhxGT"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -59,7 +59,7 @@ public class BleConnectionManager {
         bleAdvData1 = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
-                .addManufacturerData(BLE_TAG, msgData.hash.getBytes()).build();
+                .addManufacturerData(BLE_TAG, myHandshakeData.msg.getBytes()).build();
 
     }
 
@@ -89,12 +89,12 @@ public class BleConnectionManager {
         return isScanActive;
     }
 
-    public void setMessageData(MessageData newMsgData) {
-        msgData = newMsgData;
+    public void setMyHandshake(HandshakeData handshakeData) {
+        myHandshakeData = handshakeData;
     }
 
     public String getCurrentUrl() {
-        return msgData.url.toString();
+        return myHandshakeData.getShortUrl();
     }
 
 }

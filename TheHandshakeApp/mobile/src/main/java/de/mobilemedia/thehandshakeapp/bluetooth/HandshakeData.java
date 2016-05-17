@@ -4,10 +4,12 @@ import java.io.Serializable;
 
 public class HandshakeData implements Serializable, Comparable<HandshakeData> {
     String msg;
+    String longUrl;
+    static String shortUrlPrefix = "http://bit.ly/";
     Long timestamp;
     //HandshakeSignature signature;
 
-    HandshakeData(String msg){
+    public HandshakeData(String msg){
         this.msg = msg;
         this.timestamp = System.currentTimeMillis();
     }
@@ -23,11 +25,11 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
 
     @Override
     public int compareTo(HandshakeData hd) {
-        return (int) (this.timestamp - hd.timestamp);
+        return (int) (hd.timestamp - this.timestamp);
     }
 
-    public String getUrl(){
-        return "http://bit.ly/"+this.msg;
+    public String getShortUrl(){
+        return shortUrlPrefix + this.msg;
     }
 
     public String getDateString() {
