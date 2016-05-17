@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.bluetooth.MessageData;
+import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 
 public class SettingsFragment extends Fragment {
@@ -71,8 +71,8 @@ public class SettingsFragment extends Fragment {
 
         try {
             String shortUrl = new Util.BitlyShortenRequest().execute(newUrl).get();
-            MessageData newMsgData = new MessageData(shortUrl, true);
-            parentActivity.getBleConnectionManager().setMessageData(newMsgData);
+            HandshakeData newhandshakeData = new HandshakeData(shortUrl);
+            parentActivity.getBleConnectionManager().setMyHandshake(newhandshakeData);
             /*TODO: do it better or add wait screen*/
             Toast.makeText(parentActivity, "Applied new Handshake URL:\n" + shortUrl, Toast.LENGTH_SHORT).show();
             Log.i("NEWHASH", shortUrl);

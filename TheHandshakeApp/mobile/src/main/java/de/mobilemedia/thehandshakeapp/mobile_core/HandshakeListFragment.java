@@ -55,7 +55,7 @@ public class HandshakeListFragment extends ListFragment {
 
             TextView title =
                     (TextView) convertView.findViewById(R.id.list_item_msg);
-            title.setText(hd.getUrl());
+            title.setText(hd.getShortUrl());
 
             TextView date =
                     (TextView) convertView.findViewById(R.id.list_item_date);
@@ -77,7 +77,7 @@ public class HandshakeListFragment extends ListFragment {
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setType("text/plain");
                 i.putExtra(Intent.EXTRA_SUBJECT, "Sharing Handshake");
-                i.putExtra(Intent.EXTRA_TEXT, hd.getUrl());
+                i.putExtra(Intent.EXTRA_TEXT, hd.getShortUrl());
                 startActivity(Intent.createChooser(i, "Share Handshake"));
                 return true;
             }
@@ -88,7 +88,7 @@ public class HandshakeListFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         HandshakeData hd = ((HandshakeListAdapter)getListAdapter()).getItem(position);
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(hd.getUrl()));
+        intent.setData(Uri.parse(hd.getShortUrl()));
         startActivity(intent);
     }
 }

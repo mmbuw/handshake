@@ -27,7 +27,7 @@ public class ReceivedHandshakes {
         this.appContext = c;
         this.receivedHandshakesMap = new HashMap<>();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             String key = ""+i;
             HandshakeData data = new HandshakeData("1rM17oR");
             receivedHandshakesMap.put(key, data);
@@ -58,7 +58,5 @@ public class ReceivedHandshakes {
             receivedHandshakesMap.get(msg).updateTimestamp(hd.timestamp);
             Log.d("MSG", "Message already exists, updated timestamp.");
         }
-
-
     }
 }
