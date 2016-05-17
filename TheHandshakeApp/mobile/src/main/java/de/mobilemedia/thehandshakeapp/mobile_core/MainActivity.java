@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity
     private BleConnectionManager bleConnectionManager;
     public static ReceivedHandshakes receivedHandshakes;
 
-
     private GoogleApiClient client;
 
     @Override

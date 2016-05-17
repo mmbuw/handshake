@@ -43,7 +43,7 @@ public class SettingsFragment extends Fragment {
         clearButton = (Button) view.findViewById(R.id.button_clear);
         urlTextView = (TextView) view.findViewById(R.id.setting_url_field);
 
-        String currentUrl = parentActivity.getBleConnectionManager().getCurrentUrl();
+        String currentUrl = parentActivity.getBleConnectionManager().getLongUrl();
 
         urlTextView.setText( currentUrl );
 
@@ -66,16 +66,16 @@ public class SettingsFragment extends Fragment {
 
     public void onSettingsApplyButtonClick() {
 
-        String newUrl = urlTextView.getText().toString();
-        Log.i("NEWURL", newUrl);
+        String longUrl = urlTextView.getText().toString();
+        Log.i("NEWURL", longUrl);
 
         try {
-            String shortUrl = new Util.BitlyShortenRequest().execute(newUrl).get();
-            HandshakeData newhandshakeData = new HandshakeData(shortUrl);
-            parentActivity.getBleConnectionManager().setMyHandshake(newhandshakeData);
+            String shortUrl = new Util.BitlyShortenRequest().execute(longUrl).get();
+            HandshakeData newHandshakeData = new HandshakeData(shortUrl, longUrl);
+            parentActivity.getBleConnectionManager().setMyHandshake(newHandshakeData);
             /*TODO: do it better or add wait screen*/
             Toast.makeText(parentActivity, "Applied new Handshake URL:\n" + shortUrl, Toast.LENGTH_SHORT).show();
-            Log.i("NEWHASH", shortUrl);
+            Log.i("NEWSHORTURL", shortUrl);
         } catch (Exception e) {
             Toast.makeText(parentActivity, "Couldn't convert URL.", Toast.LENGTH_SHORT).show();
         }
