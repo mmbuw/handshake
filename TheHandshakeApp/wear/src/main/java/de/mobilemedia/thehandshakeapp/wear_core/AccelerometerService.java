@@ -23,9 +23,6 @@ public class AccelerometerService extends Service implements SensorEventListener
     private boolean mActiveStatus;
     private PowerManager.WakeLock mWakeLock;
 
-    private float[] gravity;
-    private float[] linear_acceleration;
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -34,11 +31,9 @@ public class AccelerometerService extends Service implements SensorEventListener
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mDataTransmitter = new DataTransmitter(this);
         mActiveStatus = true;
-        gravity = new float[3];
-        linear_acceleration = new float[3];
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Stay awake");
+        mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "Stay awake");
         mWakeLock.acquire();
 
         return START_STICKY;
@@ -80,22 +75,7 @@ public class AccelerometerService extends Service implements SensorEventListener
 
         if (mActiveStatus) {
 
-            // In this example, alpha is calculated as t / (t + dT),
-            // where t is the low-pass filter's time-constant and
-            // dT is the event delivery rate.
-            final float alpha = 0.8f;
-
-            // Isolate the force of gravity with the low-pass filter.
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
-
-            // Remove the gravity contribution with the high-pass filter.
-            linear_acceleration[0] = event.values[0] - gravity[0];
-            linear_acceleration[1] = event.values[1] - gravity[1];
-            linear_acceleration[2] = event.values[2] - gravity[2];
-
-            transmitSensorData(linear_acceleration);
+            transmitSensorData(event.values);
         }
     }
 
