@@ -119,8 +119,10 @@ public class MRDFeatureExtractor {
             handshakeClassificationTree = (J48) SerializationHelper.read(J48TrainedDataFile);
             Log.i("MRDFeatureExtractor", "Trained J48 tree successfully loaded: " + J48TrainedDataFile);
         } catch (Exception e) {
+            handshakeClassificationTree = null;
             Log.e("MRDFeatureExtractor", "Error loading trained J48 tree: " + J48TrainedDataFile);
         }
+
 
     }
 
@@ -246,7 +248,8 @@ public class MRDFeatureExtractor {
 
     public void analyzeWindowFeatures() {
 
-        if (windowContent.size() == FEATURE_WINDOW_WIDTH) {
+        if (windowContent.size() == FEATURE_WINDOW_WIDTH &&
+                handshakeClassificationTree != null) {
 
             float[] currentWindowFeatureVector = createFeatureVector();
 
