@@ -2,11 +2,14 @@ package de.mobilemedia.thehandshakeapp.mobile_core;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -21,11 +24,15 @@ import android.view.MenuItem;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.File;
+
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
 import de.mobilemedia.thehandshakeapp.detection.FeatureExtractor;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
+import de.mobilemedia.thehandshakeapp.detection.InternalAccelerationListenerService;
+import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -35,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private MainFragment mainFragment;
 
     private AccelerationDataReceiver serviceReceiver;
-    private FeatureExtractor featureExtractor;
+    private MRDFeatureExtractor featureExtractor;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -90,16 +97,16 @@ public class MainActivity extends AppCompatActivity
         IntentFilter intentSFilter = new IntentFilter("accelerationAction");
         registerReceiver(serviceReceiver, intentSFilter);
 
+
         /* Init feature extractor */
-        featureExtractor = new FeatureExtractor(3,    // number of data columns
-                                                1,    // index of major axis column
-                                                1,    // samples for peak detection
-                                                5.0f, // peak amplitude threshold
-                                                15,   // peak repeat threshold
-                                                0,    // moving average window width
-                                                30,   // alternation time max diff
-                                                5,    // alternation count detection threshold
-                                                new HandshakeDetectedBluetoothAction(mainFragment));
+        File trainingModelPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        File trainingModelFile = new File(trainingModelPath, "trained-j48.model");
+
+        featureExtractor = new MRDFeatureExtractor(3,   // number of data columns
+                                                   1,   // samples for peak detection
+                                                   150, // feature window width
+                                                   trainingModelFile.toString(),
+                                                   new HandshakeDetectedBluetoothAction(mainFragment));
     }
 
     /* Requests the necessary permissions from the operating system */

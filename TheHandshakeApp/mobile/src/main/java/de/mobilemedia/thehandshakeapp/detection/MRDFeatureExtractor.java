@@ -3,8 +3,16 @@ package de.mobilemedia.thehandshakeapp.detection;
 /* FeatureExtractor version May 18, 2016
  * Commit 84e4f86 */
 
-import java.io.*;
+import android.util.Log;
+
 import java.util.*;
+
+import weka.classifiers.trees.J48;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SerializationHelper;
 
 public class MRDFeatureExtractor {
 
@@ -32,16 +40,28 @@ public class MRDFeatureExtractor {
     public LinkedList<Integer>[] minimaIndices;
     public LinkedList<Float>[] minimaValues;
 
+    // WEKA data structures
+    J48 handshakeClassificationTree;
+    Instances testDataSet;
+    ArrayList<Attribute> attributeLabels;
+    ArrayList<String> classLabels;
+
+    // Action when a handshake was detected
+    HandshakeDetectedAction handshakeDetectedAction;
+
     //-------------------------------------------------------------------------
 
     public MRDFeatureExtractor(int numDataColumns,
                                int numSamplesForPeakDetection,
-                               int featureWindowWidth) {
+                               int featureWindowWidth,
+                               String J48TrainedDataFile,
+                               HandshakeDetectedAction hda) {
 
         /* Parse parameters */
         NUM_DATA_COLUMNS = numDataColumns;
         NUM_SAMPLES_FOR_PEAK_DETECTION = numSamplesForPeakDetection;
         FEATURE_WINDOW_WIDTH = featureWindowWidth;
+        handshakeDetectedAction = hda;
 
         /* Initialize arrays */
         windowContent = new LinkedList<float[]>();
@@ -71,21 +91,37 @@ public class MRDFeatureExtractor {
             minimaValues[i] = new LinkedList<Float>();
         }
 
-    }
+        /* Create WEKA data structures */
+        // class labels
+        classLabels = new ArrayList<String>();
+        classLabels.add("no-handshake");
+        classLabels.add("handshake");
 
-    public void exportPeakMap(short[] peakmap, String filename) {
+        // attribute labels
+        attributeLabels = new ArrayList<Attribute>();
+        attributeLabels.add(new Attribute("avg_x"));
+        attributeLabels.add(new Attribute("avg_y"));
+        attributeLabels.add(new Attribute("avg_z"));
+        attributeLabels.add(new Attribute("range_x"));
+        attributeLabels.add(new Attribute("range_y"));
+        attributeLabels.add(new Attribute("range_z"));
+        attributeLabels.add(new Attribute("ipd_x"));
+        attributeLabels.add(new Attribute("ipd_y"));
+        attributeLabels.add(new Attribute("ipd_z"));
+        attributeLabels.add(new Attribute("class", classLabels));
 
+        // test data set
+        testDataSet = new Instances("handshake-candidates", attributeLabels, 0);
+        testDataSet.setClassIndex(testDataSet.numAttributes()-1);
+
+        // load trained decision tree
         try {
-            PrintWriter peakMapWriter = new PrintWriter(filename);
-
-            for (short s : peakmap) {
-                peakMapWriter.println(s);
-            }
-
-            peakMapWriter.close();
+            handshakeClassificationTree = (J48) SerializationHelper.read(J48TrainedDataFile);
+            Log.i("MRDFeatureExtractor", "Trained J48 tree successfully loaded: " + J48TrainedDataFile);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("MRDFeatureExtractor", "Error loading trained J48 tree: " + J48TrainedDataFile);
         }
+
     }
 
 	/* MAIN FUNCTION FOR NEW INCOMING MEASUREMENTS                           */
@@ -214,7 +250,32 @@ public class MRDFeatureExtractor {
 
             float[] currentWindowFeatureVector = createFeatureVector();
 
-            // TODO: process feature vector
+            Instance candidate = new DenseInstance(9);
+            candidate.setValue(testDataSet.attribute(0), currentWindowFeatureVector[0]);
+            candidate.setValue(testDataSet.attribute(1), currentWindowFeatureVector[1]);
+            candidate.setValue(testDataSet.attribute(2), currentWindowFeatureVector[2]);
+            candidate.setValue(testDataSet.attribute(3), currentWindowFeatureVector[3]);
+            candidate.setValue(testDataSet.attribute(4), currentWindowFeatureVector[4]);
+            candidate.setValue(testDataSet.attribute(5), currentWindowFeatureVector[5]);
+            candidate.setValue(testDataSet.attribute(6), currentWindowFeatureVector[6]);
+            candidate.setValue(testDataSet.attribute(7), currentWindowFeatureVector[7]);
+            candidate.setValue(testDataSet.attribute(8), currentWindowFeatureVector[8]);
+
+            // add instance to dataset for testing
+            testDataSet.add(candidate);
+            candidate.setDataset(testDataSet);
+
+            // perform classification
+            try {
+                double result = handshakeClassificationTree.classifyInstance(candidate);
+                Log.i("MRDFeatureExtractor", "Classification result " + result);
+            } catch (Exception e) {
+                Log.e("MRDFeatureExtractor", "Classification of an instance has failed.");
+            }
+
+            // remove instance again after testing
+            testDataSet.delete();
+            candidate.setDataset(null);
 
         }
 
