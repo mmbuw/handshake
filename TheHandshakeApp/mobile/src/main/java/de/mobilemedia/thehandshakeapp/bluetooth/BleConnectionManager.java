@@ -35,11 +35,10 @@ public class BleConnectionManager {
     public BleConnectionManager(Context context) {
         uid = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
 
-        try {
-            setMyHandshake(new HandshakeData("1SRhxGT"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        myHandshakeData = new HandshakeData("http://bit.ly/1mmNNln",
+                "http://www.binaryhexconverter.com/hex-to-decimal-converter");
+
+        Log.d("NEWBLE", "New BleConnectionManager");
 
         bluetoothAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE))
                             .getAdapter();
@@ -59,7 +58,7 @@ public class BleConnectionManager {
         bleAdvData1 = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
-                .addManufacturerData(BLE_TAG, myHandshakeData.msg.getBytes()).build();
+                .addManufacturerData(BLE_TAG, myHandshakeData.getMsg().getBytes()).build();
 
     }
 
@@ -91,10 +90,14 @@ public class BleConnectionManager {
 
     public void setMyHandshake(HandshakeData handshakeData) {
         myHandshakeData = handshakeData;
+        bleAdvData1 = new AdvertiseData.Builder()
+                .setIncludeDeviceName(true)
+                .setIncludeTxPowerLevel(false)
+                .addManufacturerData(BLE_TAG, myHandshakeData.getMsg().getBytes()).build();
     }
 
-    public String getCurrentUrl() {
-        return myHandshakeData.getShortUrl();
+    public String getLongUrl() {
+        return myHandshakeData.getLongUrl();
     }
 
 }

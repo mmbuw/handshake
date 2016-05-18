@@ -53,9 +53,18 @@ public class HandshakeListFragment extends ListFragment {
 
             HandshakeData hd = getItem(position);
 
-            TextView title =
-                    (TextView) convertView.findViewById(R.id.list_item_msg);
-            title.setText(hd.getShortUrl());
+
+            String longUrlStr = hd.getLongUrl();
+
+            if(longUrlStr != null){
+                TextView longUrl =
+                        (TextView) convertView.findViewById(R.id.list_item_longurl);
+                longUrl.setText(longUrlStr);
+            }
+
+            TextView shortUrl =
+                    (TextView) convertView.findViewById(R.id.list_item_shorturl);
+            shortUrl.setText(hd.getShortUrl());
 
             TextView date =
                     (TextView) convertView.findViewById(R.id.list_item_date);
@@ -88,7 +97,11 @@ public class HandshakeListFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         HandshakeData hd = ((HandshakeListAdapter)getListAdapter()).getItem(position);
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(hd.getShortUrl()));
+
+        String url = hd.getLongUrl();
+        if (url == null ) url = hd.getShortUrl();
+
+        intent.setData(Uri.parse(url));
         startActivity(intent);
     }
 }

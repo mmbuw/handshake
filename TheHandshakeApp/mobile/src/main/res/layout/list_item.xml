@@ -5,7 +5,7 @@
     >
 
     <TextView
-        android:id="@+id/list_item_msg"
+        android:id="@+id/list_item_longurl"
         android:paddingTop="5dip"
         android:paddingBottom="1dip"
         android:paddingLeft="3dp"
@@ -14,7 +14,20 @@
         android:textStyle="bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="URL">
+        android:text="@string/long_url_not_available">
+    </TextView>
+
+    <TextView
+        android:id="@+id/list_item_shorturl"
+        android:paddingTop="3dip"
+        android:paddingBottom="1dip"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:textSize="18dip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/list_item_longurl"
+        android:text="Short URL">
     </TextView>
 
     <TextView
@@ -23,10 +36,10 @@
         android:paddingBottom="2dip"
         android:paddingLeft="4dip"
         android:paddingRight="4dip"
-        android:textSize="24dip"
+        android:textSize="16dip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/list_item_msg"
+        android:layout_below="@id/list_item_shorturl"
         android:text="xx-xx-xxx">
     </TextView>
 

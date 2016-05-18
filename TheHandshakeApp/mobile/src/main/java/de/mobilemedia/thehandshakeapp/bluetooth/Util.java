@@ -38,7 +38,7 @@ public class Util {
         }
 
     public static String nanoTimeToDateString(long nanotime){
-        SimpleDateFormat sdf = new SimpleDateFormat("h:mm:ss\t\t\td.M.yy");
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss\t-\td.MM.yy");
         return sdf.format(new Date(nanotime));
     }
 
@@ -57,6 +57,54 @@ public class Util {
         content = readAsText(urlConnection.getInputStream());
 
         return content;
+    }
+
+    public static class BitlyRequest extends AsyncTask<String, Void, String> {
+
+        String method;
+        String contentType;
+        String format = "&format=txt";
+
+        public BitlyRequest setMethod(String method) {
+            this.method = method;
+            return this;
+        }
+
+        public BitlyRequest setContentType(String content) {
+            this.contentType = content;
+            return this;
+        }
+
+        public BitlyRequest setFormat(String format) {
+            this.format = format;
+            return this;
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String response = "";
+
+            try{
+                String encodedUrl = URLEncoder.encode(urls[0], "UTF-8");
+                String address =  "https://api-ssl.bitly.com/";
+                //TODO: Maybe we should put this somewhere else :)
+                String token = "?access_token=d9bf1e2bdc0a4d6f585829ec9bf0d128b6be586c";
+                String content = contentType + encodedUrl;
+                String urlString = address + method + token + content + format;
+
+                response = apiRequest(urlString);
+
+            }
+            catch (Exception e){
+                Log.e("APIREQUEST", urls[0] + " " + method + " request failed.");
+                Log.d("APIREQUEST", e.toString());
+                e.printStackTrace();
+            }
+
+            return response;
+        }
+
     }
 
     public static class BitlyShortenRequest extends AsyncTask<String, Void, String> {
