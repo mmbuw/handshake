@@ -7,7 +7,7 @@ public class MRDFeatureExtractor {
 	public static final int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 	public static final int NUM_DATA_COLUMNS = 3;
 	public static final int FEATURE_WINDOW_WIDTH = 150;
-	public static final int PEAKMAP_TOP_K = 10;
+	public static final int PEAKMAP_TOP_K = 2;
 	public static int LABELLED_HANDSHAKE_START;
 	public static int LABELLED_HANDSHAKE_END;
 	public static String FEATURE_OUTPUT_PATH;
@@ -40,8 +40,9 @@ public class MRDFeatureExtractor {
 		/* Parse parameters */
 		try {
 			LABELLED_HANDSHAKE_START = Integer.parseInt(args[1]);
-			LABELLED_HANDSHAKE_END = LABELLED_HANDSHAKE_START + FEATURE_WINDOW_WIDTH - 1;
-			FEATURE_OUTPUT_PATH = args[2];
+			LABELLED_HANDSHAKE_END = Integer.parseInt(args[2]);
+			//LABELLED_HANDSHAKE_END = LABELLED_HANDSHAKE_START + FEATURE_WINDOW_WIDTH - 1;
+			FEATURE_OUTPUT_PATH = args[3];
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
