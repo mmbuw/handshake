@@ -115,6 +115,13 @@ public class MRDFeatureExtractor {
         testDataSet.setClassIndex(testDataSet.numAttributes()-1);
 
         // load trained decision tree
+        loadTrainingFile(J48TrainedDataFile);
+
+
+    }
+
+    public void loadTrainingFile(String J48TrainedDataFile) {
+
         try {
             handshakeClassificationTree = (J48) SerializationHelper.read(J48TrainedDataFile);
             Log.i("MRDFeatureExtractor", "Trained J48 tree successfully loaded: " + J48TrainedDataFile);
@@ -122,7 +129,6 @@ public class MRDFeatureExtractor {
             handshakeClassificationTree = null;
             Log.e("MRDFeatureExtractor", "Error loading trained J48 tree: " + J48TrainedDataFile);
         }
-
 
     }
 

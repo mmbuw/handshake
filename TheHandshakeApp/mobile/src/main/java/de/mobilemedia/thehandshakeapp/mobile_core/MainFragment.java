@@ -1,6 +1,7 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
 
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,9 +9,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.io.File;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
@@ -26,6 +34,7 @@ public class MainFragment extends Fragment {
     private TextView mStatusTextView;
     private EditText mFileNameEditText;
     private Button mShakeButton;
+    private Spinner mSpinner;
 
     private FileOutputWriter fileOutputWriter;
     private FileOutputWriter fileOutputWriterWithTime;
@@ -55,6 +64,21 @@ public class MainFragment extends Fragment {
         mStatusTextView = (TextView) view.findViewById(R.id.textStatus);
         mFileNameEditText = (EditText) view.findViewById(R.id.inputFileName);
         mShakeButton = (Button) view.findViewById(R.id.shakeButton);
+        mSpinner = (Spinner) view.findViewById(R.id.spinner);
+
+        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        ArrayList<File> files = getFileList(directory);
+        ArrayList<String> spinnerList = new ArrayList<String>();
+
+        for (File f : files) {
+            spinnerList.add(f.getName());
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(parentActivity,
+                                                               android.R.layout.simple_spinner_item,
+                                                               spinnerList);
+        mSpinner.setAdapter(adapter);
+
 
         fileOutputWriter = null;
         fileOutputWriterWithTime = null;
@@ -66,6 +90,20 @@ public class MainFragment extends Fragment {
                 filename = createNewFileWriters(filename);
                 mFileNameEditText.setText("");
                 mStatusTextView.setText("Current file has name " + filename);
+            }
+        });
+
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString();
+                String filename = adapterView.getItemAtPosition(pos).toString();
+                parentActivity.loadNewTrainingFile(path + "/" + filename);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
         });
 
@@ -143,6 +181,25 @@ public class MainFragment extends Fragment {
         } else {
             ++messageCount;
         }
+
+    }
+
+    private ArrayList<File> getFileList(File parentDirectory) {
+
+        ArrayList<File> inFiles = new ArrayList<File>();
+        File[] files = parentDirectory.listFiles();
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                inFiles.addAll(getFileList(file));
+            } else {
+                if (file.getName().endsWith(".model")) {
+                    inFiles.add(file);
+                }
+            }
+        }
+
+        return inFiles;
 
     }
 

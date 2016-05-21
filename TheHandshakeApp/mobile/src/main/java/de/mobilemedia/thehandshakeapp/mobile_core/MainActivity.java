@@ -100,12 +100,12 @@ public class MainActivity extends AppCompatActivity
 
         /* Init feature extractor */
         File trainingModelPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        File trainingModelFile = new File(trainingModelPath, "trained-j48.model");
+        File initialTrainingFile = trainingModelPath.listFiles()[0];
 
         featureExtractor = new MRDFeatureExtractor(3,   // number of data columns
                                                    1,   // samples for peak detection
                                                    150, // feature window width
-                                                   trainingModelFile.toString(),
+                                                   initialTrainingFile.toString(),
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
     }
 
@@ -127,6 +127,12 @@ public class MainActivity extends AppCompatActivity
         else {
             createBleConnectionManager();
         }
+
+    }
+
+    public void loadNewTrainingFile(String filename) {
+
+        featureExtractor.loadTrainingFile(filename);
 
     }
 
