@@ -2,14 +2,11 @@ package de.mobilemedia.thehandshakeapp.mobile_core;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -24,14 +21,10 @@ import android.view.MenuItem;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.File;
-
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
-import de.mobilemedia.thehandshakeapp.detection.FeatureExtractor;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
-import de.mobilemedia.thehandshakeapp.detection.InternalAccelerationListenerService;
 import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 
 public class MainActivity extends AppCompatActivity
@@ -97,15 +90,12 @@ public class MainActivity extends AppCompatActivity
         IntentFilter intentSFilter = new IntentFilter("accelerationAction");
         registerReceiver(serviceReceiver, intentSFilter);
 
-
         /* Init feature extractor */
-        File trainingModelPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        File initialTrainingFile = trainingModelPath.listFiles()[0];
-
-        featureExtractor = new MRDFeatureExtractor(3,   // number of data columns
-                                                   1,   // samples for peak detection
-                                                   100, // minimum handshake window size
-                                                   initialTrainingFile.toString(),
+        featureExtractor = new MRDFeatureExtractor(3,    // number of data columns
+                                                   1,    // samples for peak detection
+                                                   100,  // minimum handshake window size
+                                                   1000, // maximum handshake window size
+                                                   10,   // analysis feature window width
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
     }
 
@@ -127,12 +117,6 @@ public class MainActivity extends AppCompatActivity
         else {
             createBleConnectionManager();
         }
-
-    }
-
-    public void loadNewTrainingFile(String filename) {
-
-        featureExtractor.loadTrainingFile(filename);
 
     }
 

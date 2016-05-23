@@ -17,7 +17,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import de.mobilemedia.thehandshakeapp.R;
@@ -96,7 +95,7 @@ public class MainFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
                 String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString();
                 String filename = adapterView.getItemAtPosition(pos).toString();
-                parentActivity.loadNewTrainingFile(path + "/" + filename);
+                //parentActivity.loadNewTrainingFile(path + "/" + filename);
             }
 
             @Override
@@ -176,7 +175,7 @@ public class MainFragment extends Fragment {
 
     private ArrayList<File> getFileList(File parentDirectory) {
 
-        ArrayList<File> inFiles = new ArrayList<File>();
+        /*ArrayList<File> inFiles = new ArrayList<File>();
         File[] files = parentDirectory.listFiles();
 
         for (File file : files) {
@@ -189,7 +188,8 @@ public class MainFragment extends Fragment {
             }
         }
 
-        return inFiles;
+        return inFiles;*/
+        return new ArrayList<File>();
 
     }
 

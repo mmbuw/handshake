@@ -1,18 +1,8 @@
 package de.mobilemedia.thehandshakeapp.detection;
 
-/* FeatureExtractor version May 18, 2016
- * Commit 84e4f86 */
-
 import android.util.Log;
 
 import java.util.*;
-
-import weka.classifiers.trees.J48;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SerializationHelper;
 
 public class MRDFeatureExtractor {
 
@@ -20,10 +10,14 @@ public class MRDFeatureExtractor {
     public final int NUM_DATA_COLUMNS;
     public final int NUM_SAMPLES_FOR_PEAK_DETECTION;
     public final int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS;
-    public final int FEATURE_WINDOW_WIDTH = 20;
+    public final int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS;
+    public final int ANALYSIS_FEATURE_WINDOW_WIDTH;
+
+    public final float HANDSHAKE_Y_AXIS_RANGE_THRESHOLD = 20.0f;
+    public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.1f;
 
     // Data record processing helpers
-    public LinkedList<float[]> windowContent;
+    public LinkedList<float[]> dataRecords;
     public int numRecordsProcessed = 0;
     public int[] numAscentingSince;
     public int[] numDescendingSince;
@@ -41,12 +35,6 @@ public class MRDFeatureExtractor {
     public LinkedList<Integer>[] minimaIndices;
     public LinkedList<Float>[] minimaValues;
 
-    // WEKA data structures
-    J48 handshakeClassificationTree;
-    Instances testDataSet;
-    ArrayList<Attribute> attributeLabels;
-    ArrayList<String> classLabels;
-
     // Action when a handshake was detected
     HandshakeDetectedAction handshakeDetectedAction;
 
@@ -54,18 +42,21 @@ public class MRDFeatureExtractor {
 
     public MRDFeatureExtractor(int numDataColumns,
                                int numSamplesForPeakDetection,
-                               int numSamplesForHandshakeAnalysis,
-                               String J48TrainedDataFile,
+                               int minNumSamplesForHandshakeAnalysis,
+                               int maxNumSamplesForHandshakeAnalysis,
+                               int analysisFeatureWindowWidth,
                                HandshakeDetectedAction hda) {
 
         /* Parse parameters */
         NUM_DATA_COLUMNS = numDataColumns;
         NUM_SAMPLES_FOR_PEAK_DETECTION = numSamplesForPeakDetection;
-        MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = numSamplesForHandshakeAnalysis;
+        MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = minNumSamplesForHandshakeAnalysis;
+        MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = maxNumSamplesForHandshakeAnalysis;
+        ANALYSIS_FEATURE_WINDOW_WIDTH = analysisFeatureWindowWidth;
         handshakeDetectedAction = hda;
 
         /* Initialize arrays */
-        windowContent = new LinkedList<float[]>();
+        dataRecords = new LinkedList<float[]>();
         numAscentingSince = new int[NUM_DATA_COLUMNS];
         numDescendingSince = new int[NUM_DATA_COLUMNS];
         lastData = new float[NUM_DATA_COLUMNS];
@@ -92,36 +83,10 @@ public class MRDFeatureExtractor {
             minimaValues[i] = new LinkedList<Float>();
         }
 
-        /* Create WEKA data structures */
-        // class labels
-        classLabels = new ArrayList<String>();
-        classLabels.add("no-handshake");
-        classLabels.add("handshake");
-
-        // attribute labels
-        attributeLabels = new ArrayList<Attribute>();
-        attributeLabels.add(new Attribute("avg_x"));
-        attributeLabels.add(new Attribute("avg_y"));
-        attributeLabels.add(new Attribute("avg_z"));
-        attributeLabels.add(new Attribute("range_x"));
-        attributeLabels.add(new Attribute("range_y"));
-        attributeLabels.add(new Attribute("range_z"));
-        attributeLabels.add(new Attribute("ipd_x"));
-        attributeLabels.add(new Attribute("ipd_y"));
-        attributeLabels.add(new Attribute("ipd_z"));
-        attributeLabels.add(new Attribute("class", classLabels));
-
-        // test data set
-        testDataSet = new Instances("handshake-candidates", attributeLabels, 0);
-        testDataSet.setClassIndex(testDataSet.numAttributes()-1);
-
-        // load trained decision tree
-        loadTrainingFile(J48TrainedDataFile);
-
     }
 
     public void clearData() {
-        windowContent.clear();
+        dataRecords.clear();
 
         for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
             numAscentingSince[col] = 0;
@@ -138,30 +103,21 @@ public class MRDFeatureExtractor {
         }
     }
 
-    public void loadTrainingFile(String J48TrainedDataFile) {
-
-        try {
-            handshakeClassificationTree = (J48) SerializationHelper.read(J48TrainedDataFile);
-            Log.i("MRDFeatureExtractor", "Trained J48 tree successfully loaded: " + J48TrainedDataFile);
-        } catch (Exception e) {
-            handshakeClassificationTree = null;
-            Log.e("MRDFeatureExtractor", "Error loading trained J48 tree: " + J48TrainedDataFile);
-        }
-
-    }
-
     public void startDataEvent() {
         clearData();
     }
 
     public void endDataEvent() {
 
-        if (windowContent.size() > MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS) {
-            System.out.println("Analyzing data package of " + windowContent.size() + " samples.");
-            analyzeWindowFeatures();
+        if (    dataRecords.size() > MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS &&
+                dataRecords.size() < MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS) {
+
+            System.out.println("Analyzing data package of " + dataRecords.size() + " samples.");
+            analyzeDataRecordsFeatures();
+
         }
         else {
-            System.out.println("Omitting data package of " + windowContent.size() + " samples.");
+            System.out.println("Omitting data package of " + dataRecords.size() + " samples.");
         }
     }
 
@@ -170,7 +126,7 @@ public class MRDFeatureExtractor {
 
     public void processDataRecord(float[] data) {
 
-        updateWindowContent(data);
+        updateDataRecordStore(data);
 
         for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
             checkNewValueForPeaks(i, data[i]);
@@ -181,12 +137,12 @@ public class MRDFeatureExtractor {
     }
 
 
-	/* MOVING WINDOW FUNCTIONS                                               */
+	/* DATA RECORD STORE FUNCTIONS                                           */
 	/* --------------------------------------------------------------------- */
 
-    public void updateWindowContent(float[] newData) {
+    public void updateDataRecordStore(float[] newData) {
 
-        windowContent.addLast(newData);
+        dataRecords.addLast(newData);
 
     }
 
@@ -255,25 +211,40 @@ public class MRDFeatureExtractor {
 	/* FEATURE EXTRACTION                                                    */
 	/* --------------------------------------------------------------------- */
 
-    public void analyzeWindowFeatures() {
+    public void analyzeDataRecordsFeatures() {
 
+        // move a window through the data records to check for handshake features
         int movingWindowStart = 0;
-        int movingWindowEnd = FEATURE_WINDOW_WIDTH-1;
+        int movingWindowEnd = ANALYSIS_FEATURE_WINDOW_WIDTH-1;
         boolean handshakeDetected = false;
 
-        while (movingWindowEnd < windowContent.size()) {
+        int positiveWindows = 0;
 
-            float[] ranges = computeWindowRanges(movingWindowStart, movingWindowEnd);
+        while (movingWindowEnd < dataRecords.size()) {
+
+            float[] ranges = computeDataRecordRanges(movingWindowStart, movingWindowEnd);
+
             if (rangesRepresentHandshake(ranges)) {
-                handshakeDetected = true;
-                break;
+                positiveWindows++;
             }
 
             movingWindowStart += 1;
             movingWindowEnd += 1;
         }
 
+        int numOfAllWindows = dataRecords.size() - ANALYSIS_FEATURE_WINDOW_WIDTH + 1;
+        float positiveWindowFraction = (float) positiveWindows/numOfAllWindows;
+        Log.i("MRDFeatureExtractor", "Positive window fraction: " + positiveWindowFraction);
+
+        // handshake detection criteria
+        if (positiveWindowFraction > HANDSHAKE_POSITIVE_WINDOW_FRACTION) {
+            handshakeDetected = true;
+        }
+
+
+        // actions performed when handshake was (not) detected
         if (handshakeDetected) {
+            handshakeDetectedAction.onHandshakeDetected();
             Log.i("MRDFeatureExtractor", "Classification result: handshake");
         } else {
             Log.i("MRDFeatureExtractor", "Classification Result: nothing");
@@ -283,92 +254,19 @@ public class MRDFeatureExtractor {
 
     public boolean rangesRepresentHandshake(float[] ranges) {
 
-        if (ranges[1] > 20.0f) {
+        if (    ranges[0] < HANDSHAKE_Y_AXIS_RANGE_THRESHOLD &&
+                ranges[1] > HANDSHAKE_Y_AXIS_RANGE_THRESHOLD &&
+                ranges[2] < HANDSHAKE_Y_AXIS_RANGE_THRESHOLD) {
+
             return true;
+
         }
 
         return false;
 
     }
 
-    public void analyzeWindowFeatures_old() {
-
-        if (handshakeClassificationTree != null) {
-
-            float[] currentWindowFeatureVector = createFeatureVector();
-
-            Instance candidate = new DenseInstance(9);
-            candidate.setValue(testDataSet.attribute(0), currentWindowFeatureVector[0]);
-            candidate.setValue(testDataSet.attribute(1), currentWindowFeatureVector[1]);
-            candidate.setValue(testDataSet.attribute(2), currentWindowFeatureVector[2]);
-            candidate.setValue(testDataSet.attribute(3), currentWindowFeatureVector[3]);
-            candidate.setValue(testDataSet.attribute(4), currentWindowFeatureVector[4]);
-            candidate.setValue(testDataSet.attribute(5), currentWindowFeatureVector[5]);
-            candidate.setValue(testDataSet.attribute(6), currentWindowFeatureVector[6]);
-            candidate.setValue(testDataSet.attribute(7), currentWindowFeatureVector[7]);
-            candidate.setValue(testDataSet.attribute(8), currentWindowFeatureVector[8]);
-
-            // add instance to dataset for testing
-            testDataSet.add(candidate);
-            candidate.setDataset(testDataSet);
-
-            // perform classification
-            try {
-                double result = handshakeClassificationTree.classifyInstance(candidate);
-                Log.i("MRDFeatureExtractor", "Classification result " + result);
-            } catch (Exception e) {
-                Log.e("MRDFeatureExtractor", "Classification of an instance has failed.");
-            }
-
-            // remove instance again after testing
-            testDataSet.delete();
-            candidate.setDataset(null);
-
-        }
-
-    }
-
-
-    public float[] createFeatureVector() {
-
-        float[] outputVector = new float[9];
-
-        float[] averages = computeWindowAverages();
-        float[] ranges = computeWindowRanges(0, windowContent.size()-1);
-        float[] interPeakDistances = computeWindowInterPeakDistances();
-
-        outputVector[0] = averages[0];
-        outputVector[1] = averages[1];
-        outputVector[2] = averages[2];
-        outputVector[3] = ranges[0];
-        outputVector[4] = ranges[1];
-        outputVector[5] = ranges[2];
-        outputVector[6] = interPeakDistances[0];
-        outputVector[7] = interPeakDistances[1];
-        outputVector[8] = interPeakDistances[2];
-
-        return outputVector;
-    }
-
-    public float[] computeWindowAverages() {
-
-        float[] outputVector = new float[NUM_DATA_COLUMNS];
-
-        for (float[] record : windowContent) {
-
-            for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
-                outputVector[col] += record[col];
-            }
-        }
-
-        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
-            outputVector[col] = outputVector[col] / windowContent.size();
-        }
-
-        return outputVector;
-    }
-
-    public float[] computeWindowRanges(int startSample, int endSample) {
+    public float[] computeDataRecordRanges(int startSample, int endSample) {
 
         float[] highestValues = new float[NUM_DATA_COLUMNS];
         float[] lowestValues = new float[NUM_DATA_COLUMNS];
@@ -380,7 +278,7 @@ public class MRDFeatureExtractor {
 
         for (int sample = startSample; sample <= endSample; ++sample) {
 
-            float[] record = windowContent.get(sample);
+            float[] record = dataRecords.get(sample);
 
             for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
                 if (record[col] > highestValues[col]) { highestValues[col] = record[col]; }
@@ -394,59 +292,6 @@ public class MRDFeatureExtractor {
             ranges[col] = highestValues[col] - lowestValues[col];
         }
         return ranges;
-
-    }
-
-    public float[] computeWindowInterPeakDistances() {
-
-        float[] sampleCounters = new float[NUM_DATA_COLUMNS];
-        int[] divisors = new int[NUM_DATA_COLUMNS];
-
-        int windowStartId = 0;
-        int windowEndId = windowContent.size()-1;
-
-        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
-
-            LinkedList<Integer> mergedIndexList = new LinkedList<Integer>();
-
-            for (Integer id : maximaIndices[col]) { mergedIndexList.addLast(new Integer(id)); }
-            for (Integer id : minimaIndices[col]) { mergedIndexList.addLast(new Integer(id)); }
-            Collections.sort(mergedIndexList);
-
-            if (mergedIndexList.size() == 0 ||
-                    mergedIndexList.getFirst() != windowStartId) {
-                mergedIndexList.addFirst(windowStartId);
-            }
-            if (mergedIndexList.getLast() != windowEndId) {
-                mergedIndexList.addLast(windowEndId);
-            }
-
-
-            if (mergedIndexList.size() > 0) {
-
-                for (int listId = 0; listId < mergedIndexList.size(); ++listId) {
-
-                    if (listId != mergedIndexList.size() - 1) {
-                        sampleCounters[col] = sampleCounters[col] + (mergedIndexList.get(listId+1)-mergedIndexList.get(listId));
-                    }
-
-                }
-
-                divisors[col] = mergedIndexList.size() - 1;
-
-            } else {
-                sampleCounters[col] = windowContent.size();
-                divisors[col] = 1;
-            }
-
-
-        }
-
-        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
-            sampleCounters[col] = sampleCounters[col] / divisors[col];
-        }
-
-        return sampleCounters;
 
     }
 }
