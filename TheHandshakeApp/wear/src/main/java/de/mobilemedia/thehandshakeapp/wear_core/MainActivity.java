@@ -2,7 +2,6 @@ package de.mobilemedia.thehandshakeapp.wear_core;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;

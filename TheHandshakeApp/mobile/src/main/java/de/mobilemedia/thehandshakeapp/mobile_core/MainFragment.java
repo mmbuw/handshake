@@ -37,7 +37,6 @@ public class MainFragment extends Fragment {
     private Spinner mSpinner;
 
     private FileOutputWriter fileOutputWriter;
-    private FileOutputWriter fileOutputWriterWithTime;
 
     private final Handler scanHandler = new Handler();
     private long lastMessageTimestamp = System.currentTimeMillis();
@@ -81,7 +80,6 @@ public class MainFragment extends Fragment {
 
 
         fileOutputWriter = null;
-        fileOutputWriterWithTime = null;
 
         mNewFileButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,7 +138,6 @@ public class MainFragment extends Fragment {
 
         if (fileOutputWriter != null) {
             fileOutputWriter.closeStream();
-            fileOutputWriterWithTime.closeStream();
         }
 
         if (filename.isEmpty()) {
@@ -151,7 +148,6 @@ public class MainFragment extends Fragment {
         }
 
         fileOutputWriter = new FileOutputWriter(filename);
-        fileOutputWriterWithTime = new FileOutputWriter("timestamps-" + filename);
         return filename;
     }
 
@@ -160,12 +156,6 @@ public class MainFragment extends Fragment {
         /* Write data to current file if present */
         if (fileOutputWriter != null) {
             fileOutputWriter.writeToFile(receivedValues[0] + ", " +
-                    receivedValues[1] + ", " +
-                    receivedValues[2]);
-
-            int unixTime = getCurrentUnixTimestamp();
-            fileOutputWriterWithTime.writeToFile(unixTime + ", " +
-                    receivedValues[0] + ", " +
                     receivedValues[1] + ", " +
                     receivedValues[2]);
         }

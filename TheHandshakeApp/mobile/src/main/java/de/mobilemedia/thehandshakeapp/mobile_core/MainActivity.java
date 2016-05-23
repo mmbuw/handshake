@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity
 
         featureExtractor = new MRDFeatureExtractor(3,   // number of data columns
                                                    1,   // samples for peak detection
-                                                   150, // feature window width
+                                                   100, // minimum handshake window size
                                                    initialTrainingFile.toString(),
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
     }
@@ -228,12 +228,34 @@ public class MainActivity extends AppCompatActivity
     /* Internal receiver class to get data from background service */
     public class AccelerationDataReceiver extends BroadcastReceiver {
 
+        public float[] GRAVITY_START_EVENT_VALUES = {20.0f, 0.0f, 0.0f};
+        public float[] GRAVITY_END_EVENT_VALUES = {-20.0f, 0.0f, 0.0f};
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle notificationData = intent.getExtras();
             float[] receivedValues = notificationData.getFloatArray("acceleration");
-            mainFragment.processReceivedValues(receivedValues);
-            featureExtractor.processDataRecord(receivedValues);
+
+            if (receivedValues[0] == GRAVITY_START_EVENT_VALUES[0] &&
+                receivedValues[1] == GRAVITY_START_EVENT_VALUES[1] &&
+                receivedValues[2] == GRAVITY_START_EVENT_VALUES[2]) {
+
+                featureExtractor.startDataEvent();
+                System.out.println("Mobile has detected start event");
+
+            }
+            else if (receivedValues[0] == GRAVITY_END_EVENT_VALUES[0] &&
+                     receivedValues[1] == GRAVITY_END_EVENT_VALUES[1] &&
+                     receivedValues[2] == GRAVITY_END_EVENT_VALUES[2]) {
+
+                featureExtractor.endDataEvent();
+
+            }
+            else {
+                mainFragment.processReceivedValues(receivedValues);
+                featureExtractor.processDataRecord(receivedValues);
+            }
+
         }
 
     }

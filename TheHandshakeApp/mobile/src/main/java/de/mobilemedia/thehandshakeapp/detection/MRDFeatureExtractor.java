@@ -19,7 +19,8 @@ public class MRDFeatureExtractor {
     // Constants
     public final int NUM_DATA_COLUMNS;
     public final int NUM_SAMPLES_FOR_PEAK_DETECTION;
-    public final int FEATURE_WINDOW_WIDTH;
+    public final int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS;
+    public final int FEATURE_WINDOW_WIDTH = 20;
 
     // Data record processing helpers
     public LinkedList<float[]> windowContent;
@@ -53,14 +54,14 @@ public class MRDFeatureExtractor {
 
     public MRDFeatureExtractor(int numDataColumns,
                                int numSamplesForPeakDetection,
-                               int featureWindowWidth,
+                               int numSamplesForHandshakeAnalysis,
                                String J48TrainedDataFile,
                                HandshakeDetectedAction hda) {
 
         /* Parse parameters */
         NUM_DATA_COLUMNS = numDataColumns;
         NUM_SAMPLES_FOR_PEAK_DETECTION = numSamplesForPeakDetection;
-        FEATURE_WINDOW_WIDTH = featureWindowWidth;
+        MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = numSamplesForHandshakeAnalysis;
         handshakeDetectedAction = hda;
 
         /* Initialize arrays */
@@ -117,7 +118,24 @@ public class MRDFeatureExtractor {
         // load trained decision tree
         loadTrainingFile(J48TrainedDataFile);
 
+    }
 
+    public void clearData() {
+        windowContent.clear();
+
+        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
+            numAscentingSince[col] = 0;
+            numDescendingSince[col] = 0;
+            lastData[col] = 0.0f;
+            maximumCandidateIndex[col] = -1;
+            maximumCandidateValue[col] = 0.0f;
+            maximaIndices[col].clear();
+            maximaValues[col].clear();
+            minimumCandidateIndex[col] = -1;
+            minimumCandidateValue[col] = 0.0f;
+            minimaIndices[col].clear();
+            minimaValues[col].clear();
+        }
     }
 
     public void loadTrainingFile(String J48TrainedDataFile) {
@@ -132,6 +150,21 @@ public class MRDFeatureExtractor {
 
     }
 
+    public void startDataEvent() {
+        clearData();
+    }
+
+    public void endDataEvent() {
+
+        if (windowContent.size() > MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS) {
+            System.out.println("Analyzing data package of " + windowContent.size() + " samples.");
+            analyzeWindowFeatures();
+        }
+        else {
+            System.out.println("Omitting data package of " + windowContent.size() + " samples.");
+        }
+    }
+
 	/* MAIN FUNCTION FOR NEW INCOMING MEASUREMENTS                           */
 	/* --------------------------------------------------------------------- */
 
@@ -142,9 +175,6 @@ public class MRDFeatureExtractor {
         for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
             checkNewValueForPeaks(i, data[i]);
         }
-
-        cleanPeaksOutsideWindow();
-        analyzeWindowFeatures();
 
         lastData = data;
         ++numRecordsProcessed;
@@ -157,33 +187,6 @@ public class MRDFeatureExtractor {
     public void updateWindowContent(float[] newData) {
 
         windowContent.addLast(newData);
-
-        if (windowContent.size() > FEATURE_WINDOW_WIDTH) {
-            windowContent.removeFirst();
-        }
-
-    }
-
-    public void cleanPeaksOutsideWindow() {
-
-        int lastSampleBeforeWindow = numRecordsProcessed - FEATURE_WINDOW_WIDTH;
-
-        for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
-
-            if (minimaIndices[i].size() > 0 &&
-                    minimaIndices[i].getFirst() == lastSampleBeforeWindow) {
-
-                minimaIndices[i].removeFirst();
-                minimaValues[i].removeFirst();
-            }
-
-            if (maximaIndices[i].size() > 0 &&
-                    maximaIndices[i].getFirst() == lastSampleBeforeWindow) {
-
-                maximaIndices[i].removeFirst();
-                maximaValues[i].removeFirst();
-            }
-        }
 
     }
 
@@ -254,8 +257,43 @@ public class MRDFeatureExtractor {
 
     public void analyzeWindowFeatures() {
 
-        if (windowContent.size() == FEATURE_WINDOW_WIDTH &&
-                handshakeClassificationTree != null) {
+        int movingWindowStart = 0;
+        int movingWindowEnd = FEATURE_WINDOW_WIDTH-1;
+        boolean handshakeDetected = false;
+
+        while (movingWindowEnd < windowContent.size()) {
+
+            float[] ranges = computeWindowRanges(movingWindowStart, movingWindowEnd);
+            if (rangesRepresentHandshake(ranges)) {
+                handshakeDetected = true;
+                break;
+            }
+
+            movingWindowStart += 1;
+            movingWindowEnd += 1;
+        }
+
+        if (handshakeDetected) {
+            Log.i("MRDFeatureExtractor", "Classification result: handshake");
+        } else {
+            Log.i("MRDFeatureExtractor", "Classification Result: nothing");
+        }
+
+    }
+
+    public boolean rangesRepresentHandshake(float[] ranges) {
+
+        if (ranges[1] > 20.0f) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public void analyzeWindowFeatures_old() {
+
+        if (handshakeClassificationTree != null) {
 
             float[] currentWindowFeatureVector = createFeatureVector();
 
@@ -296,7 +334,7 @@ public class MRDFeatureExtractor {
         float[] outputVector = new float[9];
 
         float[] averages = computeWindowAverages();
-        float[] ranges = computeWindowRanges();
+        float[] ranges = computeWindowRanges(0, windowContent.size()-1);
         float[] interPeakDistances = computeWindowInterPeakDistances();
 
         outputVector[0] = averages[0];
@@ -324,13 +362,13 @@ public class MRDFeatureExtractor {
         }
 
         for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
-            outputVector[col] = outputVector[col] / FEATURE_WINDOW_WIDTH;
+            outputVector[col] = outputVector[col] / windowContent.size();
         }
 
         return outputVector;
     }
 
-    public float[] computeWindowRanges() {
+    public float[] computeWindowRanges(int startSample, int endSample) {
 
         float[] highestValues = new float[NUM_DATA_COLUMNS];
         float[] lowestValues = new float[NUM_DATA_COLUMNS];
@@ -340,7 +378,9 @@ public class MRDFeatureExtractor {
             lowestValues[col] = 1000000;
         }
 
-        for (float[] record : windowContent) {
+        for (int sample = startSample; sample <= endSample; ++sample) {
+
+            float[] record = windowContent.get(sample);
 
             for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
                 if (record[col] > highestValues[col]) { highestValues[col] = record[col]; }
@@ -362,8 +402,8 @@ public class MRDFeatureExtractor {
         float[] sampleCounters = new float[NUM_DATA_COLUMNS];
         int[] divisors = new int[NUM_DATA_COLUMNS];
 
-        int windowStartId = (numRecordsProcessed-FEATURE_WINDOW_WIDTH+1);
-        int windowEndId = numRecordsProcessed;
+        int windowStartId = 0;
+        int windowEndId = windowContent.size()-1;
 
         for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
 
@@ -395,7 +435,7 @@ public class MRDFeatureExtractor {
                 divisors[col] = mergedIndexList.size() - 1;
 
             } else {
-                sampleCounters[col] = FEATURE_WINDOW_WIDTH-1;
+                sampleCounters[col] = windowContent.size();
                 divisors[col] = 1;
             }
 
