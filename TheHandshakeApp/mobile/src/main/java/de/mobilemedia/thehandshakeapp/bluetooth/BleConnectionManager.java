@@ -31,7 +31,6 @@ public class BleConnectionManager {
 
     private String uid;
 
-
     public BleConnectionManager(Context context) {
         uid = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
 
@@ -56,7 +55,7 @@ public class BleConnectionManager {
         bleScanCallback = new BleScanCallback();
 
         bleAdvData1 = new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
+                .setIncludeDeviceName(false)
                 .setIncludeTxPowerLevel(false)
                 .addManufacturerData(BLE_TAG, myHandshakeData.getMsg().getBytes()).build();
 

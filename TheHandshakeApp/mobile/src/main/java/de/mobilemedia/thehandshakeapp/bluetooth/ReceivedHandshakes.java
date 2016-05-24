@@ -21,6 +21,8 @@ public class ReceivedHandshakes {
 
     private void startProcessing(){
 
+//        TODO: check for internet connection
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -53,11 +55,19 @@ public class ReceivedHandshakes {
         return receivedHandshakes;
     }
 
+    public HashMap<String, HandshakeData> getReceivedHandshakesMap() {
+        return receivedHandshakesMap;
+    }
+
+    public void setReceivedHandshakesMap(HashMap<String, HandshakeData> receivedHandshakesMap) {
+        this.receivedHandshakesMap = receivedHandshakesMap;
+    }
+
     private ReceivedHandshakes(Context c) {
         this.appContext = c;
         this.receivedHandshakesMap = new HashMap<>();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             String key = ""+i;
             HandshakeData data = new HandshakeData("1SRhxGT");
             receivedHandshakesMap.put(key, data);

@@ -13,5 +13,4 @@ public class BleAdvertisingCallback extends AdvertiseCallback {
     public void onStartSuccess(AdvertiseSettings settings) {
         Log.d("BT", "advertising started");
     }
-
 }

@@ -10,7 +10,9 @@ import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 public class BleScanCallback extends ScanCallback {
     private byte[] data;
     @Override public void onScanResult(int callbackType, ScanResult result) {
+
         SparseArray<byte[]> manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData();
+
         long timestampNanos = result.getTimestampNanos();
         String msg = "";
         try {
@@ -20,7 +22,7 @@ public class BleScanCallback extends ScanCallback {
             MainActivity.receivedHandshakes.addHandshake(new HandshakeData(msg));
         }
         catch (Exception e){
-            Log.e("MAN_DATA",e.toString());
+            Log.d("MAN_DATA", "Couldn't find out BLE_TAG, probably some other data.");
         }
     }
 }

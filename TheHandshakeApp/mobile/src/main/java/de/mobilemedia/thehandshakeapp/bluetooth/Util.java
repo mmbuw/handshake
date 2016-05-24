@@ -4,14 +4,21 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Util {
         public static String doApiRequest(URL url) {
@@ -173,5 +180,37 @@ public class Util {
         return sb.toString();
     }
 
+    public static void saveMapToFile(Map map, File file){
+        try {
+            FileOutputStream fileOut = new FileOutputStream(file);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(map);
+            out.close();
+            fileOut.close();
+            Log.d("SAVE", "saved map to file "+file.getAbsolutePath());
+        } catch(IOException i) {
+            Log.d("SAVE", "couldn't save map to file "+file.getAbsolutePath());
+        }
+    }
+
+    public static Map loadMapFromFile(File file){
+        try {
+            FileInputStream fileIn = new FileInputStream(file);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+
+            Map map = (Map) in.readObject();
+
+            in.close();
+            fileIn.close();
+            Log.d("LOAD", "loaded map from file " + file.getAbsolutePath());
+
+            return map;
+        } catch(IOException i) {
+            Log.d("LOAD", "couldn't load map from file "+file.getAbsolutePath());
+        } catch (ClassNotFoundException e) {
+            Log.d("LOAD", "couldn't load map, class not found");
+        }
+        return null;
+    }
 
 }

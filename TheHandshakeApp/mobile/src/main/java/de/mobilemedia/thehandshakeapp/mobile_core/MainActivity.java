@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -15,17 +16,27 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
+import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
+import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
 import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
+
+import static de.mobilemedia.thehandshakeapp.bluetooth.Util.*;
+import static de.mobilemedia.thehandshakeapp.bluetooth.Util.saveMapToFile;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -36,6 +47,8 @@ public class MainActivity extends AppCompatActivity
 
     private AccelerationDataReceiver serviceReceiver;
     private MRDFeatureExtractor featureExtractor;
+
+    private File saveFile;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -53,6 +66,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         /* Request permissions */
@@ -71,6 +85,14 @@ public class MainActivity extends AppCompatActivity
 
         receivedHandshakes
                 = ReceivedHandshakes.getInstance(this);
+
+        saveFile = new File(this.getFilesDir(), "handshakes.map");
+
+        Map savedHandshakes = loadMapFromFile(saveFile);
+
+        if (savedHandshakes != null) {
+            receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -97,6 +119,16 @@ public class MainActivity extends AppCompatActivity
                                                    1000, // maximum handshake window size
                                                    10,   // analysis feature window width
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        HashMap<String, HandshakeData> handshakesMap = receivedHandshakes.getReceivedHandshakesMap();
+        saveFile = new File(this.getFilesDir(), "handshakes.map");
+        saveMapToFile(handshakesMap, saveFile);
+        Log.d("SAVE", "Session Handshakes saved");
+        //getIntent().putExtras();
+        super.onSaveInstanceState(outState);
     }
 
     /* Requests the necessary permissions from the operating system */
