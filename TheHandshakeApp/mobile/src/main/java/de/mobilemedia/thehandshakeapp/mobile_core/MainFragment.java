@@ -62,21 +62,6 @@ public class MainFragment extends Fragment {
         mStatusTextView = (TextView) view.findViewById(R.id.textStatus);
         mFileNameEditText = (EditText) view.findViewById(R.id.inputFileName);
         mShakeButton = (Button) view.findViewById(R.id.shakeButton);
-        mSpinner = (Spinner) view.findViewById(R.id.spinner);
-
-        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        ArrayList<File> files = getFileList(directory);
-        ArrayList<String> spinnerList = new ArrayList<String>();
-
-        for (File f : files) {
-            spinnerList.add(f.getName());
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(parentActivity,
-                                                               android.R.layout.simple_spinner_item,
-                                                               spinnerList);
-        mSpinner.setAdapter(adapter);
-
 
         fileOutputWriter = null;
 
@@ -87,20 +72,6 @@ public class MainFragment extends Fragment {
                 filename = createNewFileWriters(filename);
                 mFileNameEditText.setText("");
                 mStatusTextView.setText("Current file has name " + filename);
-            }
-        });
-
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString();
-                String filename = adapterView.getItemAtPosition(pos).toString();
-                //parentActivity.loadNewTrainingFile(path + "/" + filename);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
@@ -170,26 +141,6 @@ public class MainFragment extends Fragment {
         } else {
             ++messageCount;
         }
-
-    }
-
-    private ArrayList<File> getFileList(File parentDirectory) {
-
-        /*ArrayList<File> inFiles = new ArrayList<File>();
-        File[] files = parentDirectory.listFiles();
-
-        for (File file : files) {
-            if (file.isDirectory()) {
-                inFiles.addAll(getFileList(file));
-            } else {
-                if (file.getName().endsWith(".model")) {
-                    inFiles.add(file);
-                }
-            }
-        }
-
-        return inFiles;*/
-        return new ArrayList<File>();
 
     }
 

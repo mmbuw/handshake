@@ -13,7 +13,9 @@ public class MRDFeatureExtractor {
     public final int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS;
     public final int ANALYSIS_FEATURE_WINDOW_WIDTH;
 
-    public final float HANDSHAKE_Y_AXIS_RANGE_THRESHOLD = 20.0f;
+    public final float HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD = 15.0f;
+    public final float HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD = 20.0f;
+    public final float HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD = 20.0f;
     public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.1f;
 
     // Data record processing helpers
@@ -254,9 +256,9 @@ public class MRDFeatureExtractor {
 
     public boolean rangesRepresentHandshake(float[] ranges) {
 
-        if (    ranges[0] < HANDSHAKE_Y_AXIS_RANGE_THRESHOLD &&
-                ranges[1] > HANDSHAKE_Y_AXIS_RANGE_THRESHOLD &&
-                ranges[2] < HANDSHAKE_Y_AXIS_RANGE_THRESHOLD) {
+        if (    ranges[0] < HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD &&
+                ranges[1] > HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD &&
+                ranges[2] < HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD) {
 
             return true;
 
