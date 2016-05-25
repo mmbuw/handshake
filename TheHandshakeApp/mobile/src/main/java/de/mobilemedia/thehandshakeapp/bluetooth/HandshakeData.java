@@ -8,7 +8,7 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
     private String longUrl;
     private String shortUrl;
     private static String prefix = "http://bit.ly/";
-    private String msg;
+    private String hash;
     private Long timestamp;
     //HandshakeSignature signature;
 
@@ -24,13 +24,14 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
         }
         else{
             this.shortUrl = prefix + urlOrHash;
+            this.hash = urlOrHash;
         }
 
     }
 
     public HandshakeData(String shortUrl, String longUrl){
-        this.msg = shortUrlToHash(shortUrl);
-        Log.d("NEWHASH", this.msg);
+        this.hash = shortUrlToHash(shortUrl);
+        Log.d("NEWHASH", this.hash);
         this.shortUrl = shortUrl;
         this.longUrl = longUrl;
     }
@@ -64,7 +65,7 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
         return tmp[tmp.length-1];
     }
 
-    public String getMsg() { return this.msg; }
+    public String getHash() { return this.hash; }
 
     public long getTimeStamp() {
         return this.timestamp;

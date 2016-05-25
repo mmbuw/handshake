@@ -57,7 +57,7 @@ public class BleConnectionManager {
         bleAdvData1 = new AdvertiseData.Builder()
                 .setIncludeDeviceName(false)
                 .setIncludeTxPowerLevel(false)
-                .addManufacturerData(BLE_TAG, myHandshakeData.getMsg().getBytes()).build();
+                .addManufacturerData(BLE_TAG, myHandshakeData.getHash().getBytes()).build();
 
     }
 
@@ -92,7 +92,7 @@ public class BleConnectionManager {
         bleAdvData1 = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
-                .addManufacturerData(BLE_TAG, myHandshakeData.getMsg().getBytes()).build();
+                .addManufacturerData(BLE_TAG, myHandshakeData.getHash().getBytes()).build();
     }
 
     public String getLongUrl() {

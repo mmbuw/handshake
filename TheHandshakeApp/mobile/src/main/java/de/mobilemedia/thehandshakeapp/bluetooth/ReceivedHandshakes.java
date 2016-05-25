@@ -19,6 +19,63 @@ public class ReceivedHandshakes {
     private HashMap<String, HandshakeData> receivedHandshakesMap;
     private static BlockingQueue<HandshakeData> processingQueue = new LinkedBlockingQueue<HandshakeData>();
 
+    private ReceivedHandshakes(Context c) {
+        this.appContext = c;
+        this.receivedHandshakesMap = new HashMap<>();
+        addHandshake(new HandshakeData("1XUCsew"));
+        addHandshake(new HandshakeData("1SRhxGT"));
+        addHandshake(new HandshakeData("1qwGEEr"));
+        this.startProcessing();
+
+    }
+
+    public static ReceivedHandshakes getInstance(Context c) {
+        if (receivedHandshakes == null){
+            receivedHandshakes = new ReceivedHandshakes(c);
+        }
+        return receivedHandshakes;
+    }
+
+    public HashMap<String, HandshakeData> getReceivedHandshakesMap() {
+        return receivedHandshakesMap;
+    }
+
+    public void setReceivedHandshakesMap(HashMap<String, HandshakeData> receivedHandshakesMap) {
+        this.receivedHandshakesMap = receivedHandshakesMap;
+    }
+
+    public ArrayList<HandshakeData> getHandshakes(){
+        ArrayList<HandshakeData> list = new ArrayList<>();
+
+        for (Map.Entry<String, HandshakeData> entry : receivedHandshakesMap.entrySet()) {
+            list.add(entry.getValue());
+        }
+
+        Collections.sort(list);
+
+        return list;
+    }
+
+    public void addHandshake(HandshakeData hd){
+        String hash = hd.getHash();
+        if(!receivedHandshakesMap.containsKey(hash)){
+            receivedHandshakesMap.put(hash, hd);
+            processingQueue.add(hd);
+            Log.d("MAP_ADD", "Added new Handshake with hash: "+hash);
+        }
+        else{
+            //TODO: Maybe we can do this better.
+            receivedHandshakesMap.get(hash).updateTimestamp(hd.getTimeStamp());
+            Log.d("MAP_ADD", "Message already exists, updated timestamp.");
+        }
+    }
+
+    public void removeHandshake(HandshakeData hd) {
+        String hash = hd.getHash();
+        if (receivedHandshakesMap.containsKey(hash)) receivedHandshakesMap.remove(hash);
+        Log.d("MAP_REMOVE", hash);
+    }
+
     private void startProcessing(){
 
 //        TODO: check for internet connection
@@ -46,61 +103,5 @@ public class ReceivedHandshakes {
             }
         }).start();
 
-    }
-
-    public static ReceivedHandshakes getInstance(Context c) {
-        if (receivedHandshakes == null){
-            receivedHandshakes = new ReceivedHandshakes(c);
-        }
-        return receivedHandshakes;
-    }
-
-    public HashMap<String, HandshakeData> getReceivedHandshakesMap() {
-        return receivedHandshakesMap;
-    }
-
-    public void setReceivedHandshakesMap(HashMap<String, HandshakeData> receivedHandshakesMap) {
-        this.receivedHandshakesMap = receivedHandshakesMap;
-    }
-
-    private ReceivedHandshakes(Context c) {
-        this.appContext = c;
-        this.receivedHandshakesMap = new HashMap<>();
-
-        for (int i = 0; i < 2; i++) {
-            String key = ""+i;
-            HandshakeData data = new HandshakeData("1SRhxGT");
-            receivedHandshakesMap.put(key, data);
-            processingQueue.add(data);
-        }
-
-        this.startProcessing();
-
-    }
-
-    public ArrayList<HandshakeData> getHandshakes(){
-        ArrayList<HandshakeData> list = new ArrayList<>();
-
-        for (Map.Entry<String, HandshakeData> entry : receivedHandshakesMap.entrySet()) {
-            list.add(entry.getValue());
-        }
-
-        Collections.sort(list);
-
-        return list;
-    }
-
-    public void addHandshake(HandshakeData hd){
-        String msg = hd.getShortUrl();
-        if(!receivedHandshakesMap.containsKey(msg)){
-            receivedHandshakesMap.put(msg, hd);
-            processingQueue.add(hd);
-            Log.d("MSG", "Added new message.");
-        }
-        else{
-            //TODO: Maybe we can do this better.
-            receivedHandshakesMap.get(msg).updateTimestamp(hd.getTimeStamp());
-            Log.d("MSG", "Message already exists, updated timestamp.");
-        }
     }
 }

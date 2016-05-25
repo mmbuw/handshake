@@ -276,4 +276,8 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    public void removeHandshake(HandshakeData hd){
+        receivedHandshakes.removeHandshake(hd);
+    }
+
 }
