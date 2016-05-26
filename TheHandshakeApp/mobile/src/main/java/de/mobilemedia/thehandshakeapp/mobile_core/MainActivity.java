@@ -31,8 +31,8 @@ import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
-import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
+import de.mobilemedia.thehandshakeapp.detection.InternalAccelerationListenerService;
 import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 
 import static de.mobilemedia.thehandshakeapp.bluetooth.Util.*;
@@ -119,6 +119,10 @@ public class MainActivity extends AppCompatActivity
                                                    1000, // maximum handshake window size
                                                    10,   // analysis feature window width
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
+
+        /* Start internal acceleration reader */
+        Intent startIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
+        startService(startIntent);
     }
 
     @Override
@@ -180,6 +184,8 @@ public class MainActivity extends AppCompatActivity
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(serviceReceiver);
+        Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
+        stopService(stopIntent);
     }
 
     @Override
@@ -247,29 +253,46 @@ public class MainActivity extends AppCompatActivity
         public float[] GRAVITY_START_EVENT_VALUES = {20.0f, 0.0f, 0.0f};
         public float[] GRAVITY_END_EVENT_VALUES = {-20.0f, 0.0f, 0.0f};
 
+        public float[] latestInternalAcceleration = new float[3];
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle notificationData = intent.getExtras();
-            float[] receivedValues = notificationData.getFloatArray("acceleration");
 
-            if (receivedValues[0] == GRAVITY_START_EVENT_VALUES[0] &&
-                receivedValues[1] == GRAVITY_START_EVENT_VALUES[1] &&
-                receivedValues[2] == GRAVITY_START_EVENT_VALUES[2]) {
+            float[] receivedValuesWatch = notificationData.getFloatArray("acceleration");
+            float[] receivedValuesInternal = notificationData.getFloatArray("internalAcceleration");
 
-                featureExtractor.startDataEvent();
-                System.out.println("Mobile has detected start event");
+            if (receivedValuesWatch != null) {
+
+                if (receivedValuesWatch[0] == GRAVITY_START_EVENT_VALUES[0] &&
+                        receivedValuesWatch[1] == GRAVITY_START_EVENT_VALUES[1] &&
+                        receivedValuesWatch[2] == GRAVITY_START_EVENT_VALUES[2]) {
+
+                    featureExtractor.startDataEvent();
+                    System.out.println("Mobile has detected start event");
+
+                } else if (receivedValuesWatch[0] == GRAVITY_END_EVENT_VALUES[0] &&
+                        receivedValuesWatch[1] == GRAVITY_END_EVENT_VALUES[1] &&
+                        receivedValuesWatch[2] == GRAVITY_END_EVENT_VALUES[2]) {
+
+                    featureExtractor.endDataEvent();
+
+                } else {
+                    float[] concatenated = {receivedValuesWatch[0],
+                                            receivedValuesWatch[1],
+                                            receivedValuesWatch[2],
+                                            latestInternalAcceleration[0],
+                                            latestInternalAcceleration[1],
+                                            latestInternalAcceleration[2]};
+                    mainFragment.processReceivedValues(concatenated);
+                    featureExtractor.processDataRecord(receivedValuesWatch);
+                }
 
             }
-            else if (receivedValues[0] == GRAVITY_END_EVENT_VALUES[0] &&
-                     receivedValues[1] == GRAVITY_END_EVENT_VALUES[1] &&
-                     receivedValues[2] == GRAVITY_END_EVENT_VALUES[2]) {
+            else if (receivedValuesInternal != null) {
 
-                featureExtractor.endDataEvent();
+                latestInternalAcceleration = receivedValuesInternal;
 
-            }
-            else {
-                mainFragment.processReceivedValues(receivedValues);
-                featureExtractor.processDataRecord(receivedValues);
             }
 
         }

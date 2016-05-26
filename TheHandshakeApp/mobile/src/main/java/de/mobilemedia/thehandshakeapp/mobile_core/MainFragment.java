@@ -125,9 +125,20 @@ public class MainFragment extends Fragment {
 
         /* Write data to current file if present */
         if (fileOutputWriter != null) {
-            fileOutputWriter.writeToFile(receivedValues[0] + ", " +
-                    receivedValues[1] + ", " +
-                    receivedValues[2]);
+
+            if (receivedValues.length == 3) {
+                fileOutputWriter.writeToFile(receivedValues[0] + ", " +
+                        receivedValues[1] + ", " +
+                        receivedValues[2]);
+            }
+            else if (receivedValues.length == 6) {
+                fileOutputWriter.writeToFile(receivedValues[0] + ", " +
+                        receivedValues[1] + ", " +
+                        receivedValues[2] + ", " +
+                        receivedValues[3] + ", " +
+                        receivedValues[4] + ", " +
+                        receivedValues[5]);
+            }
         }
 
         /* Update FPS display */
