@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
+import de.mobilemedia.thehandshakeapp.mobile_core.HandshakeListFragment;
 
 public class ItemViewHolder extends RecyclerView.ViewHolder {
 
@@ -32,7 +33,7 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
         this.itemView = itemView;
     }
 
-    public void setContent(HandshakeData hd){
+    public void setContent(HandshakeData hd, final HandshakeListFragment.OnItemTouchListener onItemTouchListener){
 
         String longUrlStr = hd.getLongUrl();
 
@@ -49,6 +50,14 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView date =
                 (TextView) itemView.findViewById(R.id.list_item_date);
         date.setText(hd.getDateString());
+
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemTouchListener.onHandshakeTap(view, getAdapterPosition());
+            }
+        });
+
     }
 
 }
