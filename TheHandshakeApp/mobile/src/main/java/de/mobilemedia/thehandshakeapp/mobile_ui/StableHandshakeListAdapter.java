@@ -2,12 +2,10 @@ package de.mobilemedia.thehandshakeapp.mobile_ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,14 +17,11 @@ import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 public class StableHandshakeListAdapter extends ArrayAdapter<HandshakeData> {
 
     HashMap<HandshakeData, Integer> mIdMap = new HashMap<>();
-    View.OnTouchListener mTouchListener;
     Context mContext;
 
-    public StableHandshakeListAdapter(Context context, ArrayList<HandshakeData> handshakes,
-                                      View.OnTouchListener listener) {
+    public StableHandshakeListAdapter(Context context, ArrayList<HandshakeData> handshakes) {
         super(context, 0, handshakes);
         mContext = context;
-        mTouchListener = listener;
         for (int i = 0; i < handshakes.size(); ++i) {
             mIdMap.put(handshakes.get(i), i);
         }
@@ -56,7 +51,6 @@ public class StableHandshakeListAdapter extends ArrayAdapter<HandshakeData> {
         if (convertView == null){
             convertView = ((Activity) mContext).getLayoutInflater()
                     .inflate(R.layout.list_item, null);
-            convertView.setOnTouchListener(mTouchListener);
         }
 
         HandshakeData hd = getItem(position);

@@ -86,13 +86,7 @@ public class MainActivity extends AppCompatActivity
         receivedHandshakes
                 = ReceivedHandshakes.getInstance(this);
 
-        saveFile = new File(this.getFilesDir(), "handshakes.map");
-
-        Map savedHandshakes = loadMapFromFile(saveFile);
-
-        if (savedHandshakes != null) {
-            receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
-        }
+        if (Config.LOAD_HANDSHAKES) loadHandshakes();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -121,14 +115,26 @@ public class MainActivity extends AppCompatActivity
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
     }
 
+    private void loadHandshakes(){
+        saveFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
+        Map savedHandshakes = loadMapFromFile(saveFile);
+        if (savedHandshakes != null) {
+            receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
+        }
+        Log.d("LOAD", "Session Handshakes loaded");
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        if (Config.SAVE_HANDSHAKES) saveHandshakes();
+        super.onSaveInstanceState(outState);
+    }
+
+    private void saveHandshakes(){
         HashMap<String, HandshakeData> handshakesMap = receivedHandshakes.getReceivedHandshakesMap();
-        saveFile = new File(this.getFilesDir(), "handshakes.map");
+        saveFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
         saveMapToFile(handshakesMap, saveFile);
         Log.d("SAVE", "Session Handshakes saved");
-        //getIntent().putExtras();
-        super.onSaveInstanceState(outState);
     }
 
     /* Requests the necessary permissions from the operating system */
