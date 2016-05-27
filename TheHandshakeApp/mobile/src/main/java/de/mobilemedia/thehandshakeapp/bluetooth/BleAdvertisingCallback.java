@@ -7,10 +7,10 @@ import android.util.Log;
 public class BleAdvertisingCallback extends AdvertiseCallback {
     @Override
     public void onStartFailure(int errorCode) {
-        Log.d("BT", String.format("advertising failed: %d",errorCode));
+        Log.d("BLE", String.format("advertising failed: %d", errorCode));
     }
     @Override
     public void onStartSuccess(AdvertiseSettings settings) {
-        Log.d("BT", "advertising started");
+        Log.d("BLE", "advertising started");
     }
 }

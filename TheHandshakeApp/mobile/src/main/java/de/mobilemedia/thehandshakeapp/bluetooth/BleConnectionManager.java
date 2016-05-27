@@ -9,13 +9,16 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.content.Context;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class BleConnectionManager {
+import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
-    public static final int SCAN_PERIOD = 3000;
-    public static final int BLE_TAG = 0x4343;
+import static de.mobilemedia.thehandshakeapp.mobile_core.Config.*;
+import static de.mobilemedia.thehandshakeapp.mobile_core.Config.BLE_TAG;
+import static de.mobilemedia.thehandshakeapp.mobile_core.Config.INITIAL_HANDSHAKE_LONGURL;
+import static de.mobilemedia.thehandshakeapp.mobile_core.Config.INITIAL_HANDSHAKE_SHORTURL;
+
+public class BleConnectionManager {
 
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothLeScanner bleScanner;
@@ -29,15 +32,10 @@ public class BleConnectionManager {
 
     static HandshakeData myHandshakeData;
 
-    private String uid;
-
     public BleConnectionManager(Context context) {
-        uid = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+        myHandshakeData = new HandshakeData(INITIAL_HANDSHAKE_SHORTURL, INITIAL_HANDSHAKE_LONGURL);
 
-        myHandshakeData = new HandshakeData("http://bit.ly/1mmNNln",
-                "http://www.binaryhexconverter.com/hex-to-decimal-converter");
-
-        Log.d("NEWBLE", "New BleConnectionManager");
+        Log.d("BLE", "new ble connection manager");
 
         bluetoothAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE))
                             .getAdapter();
@@ -46,8 +44,8 @@ public class BleConnectionManager {
         bleAdvCallback = new BleAdvertisingCallback();
 
         bleAdvSettings = new AdvertiseSettings.Builder().
-                setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED).
-                setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH).
+                setAdvertiseMode(ADVERTISE_MODE).
+                setTxPowerLevel(ADVERTISE_TX_POWER_LVL).
                 setConnectable(false).
                 setTimeout(0).
                 build();
@@ -66,9 +64,8 @@ public class BleConnectionManager {
             bleAdvertiser.startAdvertising(bleAdvSettings, bleAdvData1, bleAdvCallback);
             bleScanner.startScan(bleScanCallback);
             isScanActive = true;
-            //shakeButton.setText(R.string.interrupt_scan_button_text);
         } else {
-            Log.d("BLE", "Scan is already active!");
+            Log.d("BLE", "scan is still active");
         }
     }
 
@@ -77,9 +74,8 @@ public class BleConnectionManager {
             bleAdvertiser.stopAdvertising(bleAdvCallback);
             bleScanner.stopScan(bleScanCallback);
             isScanActive = false;
-            //shakeButton.setText(R.string.start_scan_button_text);
         } else {
-            Log.d("BLE", "Scan is already inactive!");
+            Log.d("BLE", "scan is already inactive");
         }
     }
 

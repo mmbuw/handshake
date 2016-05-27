@@ -31,7 +31,6 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
 
     public HandshakeData(String shortUrl, String longUrl){
         this.hash = shortUrlToHash(shortUrl);
-        Log.d("NEWHASH", this.hash);
         this.shortUrl = shortUrl;
         this.longUrl = longUrl;
     }

@@ -1,27 +1,23 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
 
-import android.os.Environment;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
+import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
+
+import static de.mobilemedia.thehandshakeapp.mobile_core.Config.BLE_SCAN_PERIOD;
 
 
 public class MainFragment extends Fragment {
@@ -96,7 +92,7 @@ public class MainFragment extends Fragment {
                 public void run() {
                     bleConnectionManager.stopBle();
                 }
-            }, bleConnectionManager.SCAN_PERIOD);
+            }, BLE_SCAN_PERIOD);
         } else {
             bleConnectionManager.stopBle();
         }
