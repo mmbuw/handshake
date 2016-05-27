@@ -21,43 +21,18 @@ import android.view.View;
 import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
-import de.mobilemedia.thehandshakeapp.mobile_core.HandshakeListFragment;
 
 public class ItemViewHolder extends RecyclerView.ViewHolder {
 
-    public final View itemView;
+    TextView longUrl;
+    TextView shortUrl;
+    TextView date;
 
     public ItemViewHolder(View itemView) {
         super(itemView);
-        this.itemView = itemView;
-    }
-
-    public void setContent(HandshakeData hd, final HandshakeListFragment.OnItemTouchListener onItemTouchListener){
-
-        String longUrlStr = hd.getLongUrl();
-
-        if(longUrlStr != null){
-            TextView longUrl =
-                    (TextView) itemView.findViewById(R.id.list_item_longurl);
-            longUrl.setText(longUrlStr);
-        }
-
-        TextView shortUrl =
-                (TextView) itemView.findViewById(R.id.list_item_shorturl);
-        shortUrl.setText(hd.getShortUrl());
-
-        TextView date =
-                (TextView) itemView.findViewById(R.id.list_item_date);
-        date.setText(hd.getDateString());
-
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onItemTouchListener.onHandshakeTap(view, getAdapterPosition());
-            }
-        });
-
+        longUrl = (TextView) itemView.findViewById(R.id.list_item_longurl);
+        shortUrl = (TextView) itemView.findViewById(R.id.list_item_shorturl);
+        date = (TextView) itemView.findViewById(R.id.list_item_date);
     }
 
 }

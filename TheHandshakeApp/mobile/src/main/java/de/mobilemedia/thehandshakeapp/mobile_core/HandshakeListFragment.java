@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
@@ -25,14 +25,16 @@ public class HandshakeListFragment extends Fragment {
 
     public HandshakeListFragment() {}
     MainActivity parentActivity;
-    ArrayList<HandshakeData> mHandshakes;
+    ReceivedHandshakes mReceivedHandshakes;
+    List<HandshakeData> mHandshakes;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         parentActivity = (MainActivity) getActivity();
         parentActivity.setTitle(parentActivity.getString(R.string.list_title));
-        mHandshakes = ReceivedHandshakes.getInstance(getContext()).getHandshakes();
+        mReceivedHandshakes = ReceivedHandshakes.getInstance(getContext());
+        mHandshakes = mReceivedHandshakes.getHandshakes();
     }
 
     @Nullable
@@ -61,7 +63,7 @@ public class HandshakeListFragment extends Fragment {
             }
         };
 
-        RecyclerListAdapter adapter = new RecyclerListAdapter(mHandshakes, itemTouchListener);
+        RecyclerListAdapter adapter = new RecyclerListAdapter(this, mHandshakes, itemTouchListener);
         recyclerView.setAdapter(adapter);
 
         ItemTouchHelper.Callback callback =
@@ -72,7 +74,12 @@ public class HandshakeListFragment extends Fragment {
     }
 
     public interface OnItemTouchListener {
-        public void onHandshakeTap(View view, int position);
+        void onHandshakeTap(View view, int position);
+    }
+
+    public void removeHandshake(int position){
+        HandshakeData remove = mHandshakes.remove(position);
+        mReceivedHandshakes.removeHandshake(remove);
     }
 
 }

@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.mobilemedia.thehandshakeapp.R;
@@ -15,17 +14,21 @@ import de.mobilemedia.thehandshakeapp.mobile_core.HandshakeListFragment;
 /**
  * Inspiration:
  * https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf#.wu0q1x1c9
+ * https://developer.android.com/training/material/lists-cards.html
+ * http://stackoverflow.com/questions/4184382/how-to-implement-both-ontouch-and-also-onfling-in-a-same-listview
  */
 public class RecyclerListAdapter extends RecyclerView.Adapter<ItemViewHolder>
         implements ItemTouchHelperAdapter {
 
     private final List<HandshakeData> mHandshakes;
     private HandshakeListFragment.OnItemTouchListener onItemTouchListener;
+    private HandshakeListFragment handshakeListFragment;
 
-    public RecyclerListAdapter(List<HandshakeData> handshakes
-            ,HandshakeListFragment.OnItemTouchListener onItemTouchListener) {
+    public RecyclerListAdapter(HandshakeListFragment handshakeListFragment, List<HandshakeData> handshakes
+            , HandshakeListFragment.OnItemTouchListener onItemTouchListener) {
         mHandshakes = handshakes;
         this.onItemTouchListener = onItemTouchListener;
+        this.handshakeListFragment = handshakeListFragment;
     }
 
     @Override
@@ -40,8 +43,25 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<ItemViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(ItemViewHolder holder, int position) {
-        holder.setContent(mHandshakes.get(position), onItemTouchListener);
+    public void onBindViewHolder(ItemViewHolder holder, final int position) {
+
+        HandshakeData hd = mHandshakes.get(position);
+
+        String longUrlStr = hd.getLongUrl();
+
+        if(longUrlStr != null) holder.longUrl.setText(longUrlStr);
+
+        holder.shortUrl.setText(hd.getShortUrl());
+
+        holder.date.setText(hd.getDateString());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemTouchListener.onHandshakeTap(view, position);
+            }
+        });
+        
     }
 
     @Override
@@ -51,7 +71,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<ItemViewHolder>
 
     @Override
     public void onItemDismiss(int position) {
-        mHandshakes.remove(position);
+        this.handshakeListFragment.removeHandshake(position);
         notifyItemRemoved(position);
     }
 }
