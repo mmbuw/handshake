@@ -91,6 +91,10 @@ public class BleConnectionManager {
                 .addManufacturerData(BLE_TAG, myHandshakeData.getHash().getBytes()).build();
     }
 
+    public static HandshakeData getMyHandshakeData() {
+        return myHandshakeData;
+    }
+
     public String getLongUrl() {
         return myHandshakeData.getLongUrl();
     }

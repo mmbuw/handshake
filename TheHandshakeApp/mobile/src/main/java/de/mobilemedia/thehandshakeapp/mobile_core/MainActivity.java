@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -31,7 +30,6 @@ import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
-import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
 import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 
@@ -47,8 +45,6 @@ public class MainActivity extends AppCompatActivity
 
     private AccelerationDataReceiver serviceReceiver;
     private MRDFeatureExtractor featureExtractor;
-
-    private File saveFile;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -86,7 +82,7 @@ public class MainActivity extends AppCompatActivity
         receivedHandshakes
                 = ReceivedHandshakes.getInstance(this);
 
-        if (Config.LOAD_HANDSHAKES) loadHandshakes();
+        if (Config.LOAD_PREV_STATE) loadPrevData();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -115,26 +111,39 @@ public class MainActivity extends AppCompatActivity
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
     }
 
-    private void loadHandshakes(){
-        saveFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
-        Map savedHandshakes = loadMapFromFile(saveFile);
+    private void loadPrevData(){
+        File handshakesFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
+        Map savedHandshakes = loadMapFromFile(handshakesFile);
         if (savedHandshakes != null) {
             receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
+            Log.d("LOAD", "session handshakes loaded");
         }
-        Log.d("LOAD", "Session Handshakes loaded");
+        File settingsFile = new File(this.getFilesDir(), Config.SETTINGS_FILE_NAME);
+        Map settingsMap = loadMapFromFile(settingsFile);
+        if (settingsMap != null) {
+            HandshakeData myHandshake = (HandshakeData) settingsMap.get("MY_HANDSHAKE");
+            if (myHandshake != null) bleConnectionManager.setMyHandshake(myHandshake);
+            Log.d("LOAD", "settings loaded");
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (Config.SAVE_HANDSHAKES) saveHandshakes();
+        if (Config.SAVE_CURR_STATE) saveCurrentData();
         super.onSaveInstanceState(outState);
     }
 
-    private void saveHandshakes(){
+    private void saveCurrentData(){
         HashMap<String, HandshakeData> handshakesMap = receivedHandshakes.getReceivedHandshakesMap();
-        saveFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
-        saveMapToFile(handshakesMap, saveFile);
-        Log.d("SAVE", "Session Handshakes saved");
+        File handshakesFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
+        saveMapToFile(handshakesMap, handshakesFile);
+        Log.d("SAVE", "session handshakes saved");
+
+        HashMap<String, Object> settingsMap = new HashMap<>(1);
+        settingsMap.put("MY_HANDSHAKE", bleConnectionManager.getMyHandshakeData());
+        File settingsFile = new File(this.getFilesDir(), Config.SETTINGS_FILE_NAME);
+        saveMapToFile(settingsMap, settingsFile);
+        Log.d("SAVE", "session settings saved");
     }
 
     /* Requests the necessary permissions from the operating system */
@@ -280,10 +289,6 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-    }
-
-    public void removeHandshake(HandshakeData hd){
-        receivedHandshakes.removeHandshake(hd);
     }
 
 }

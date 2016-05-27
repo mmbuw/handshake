@@ -17,7 +17,8 @@ public class Config {
     public static int ADVERTISE_TX_POWER_LVL = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     public static String HANDSHAKE_FILE_NAME = "handshakes.map";
-    public static boolean LOAD_HANDSHAKES = false;
-    public static boolean SAVE_HANDSHAKES = true;
+    public static String SETTINGS_FILE_NAME = "settings.map";
+    public static boolean LOAD_PREV_STATE = true;
+    public static boolean SAVE_CURR_STATE = true;
 
 }
