@@ -1,6 +1,7 @@
 package de.mobilemedia.thehandshakeapp.detection;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Date;
@@ -18,9 +19,13 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
     @Override
     public void onHandshakeDetected() {
         mFragmentInstance.onScanButtonClick();
+        long precisionTime = System.currentTimeMillis();
         String text = "Handshake detected";
         text += "\n" + new Date().toString();
+        text += "\n" + precisionTime;
         int duration = Toast.LENGTH_SHORT;
+
+        Log.i("HDBluetoothAction", "Handshake at " + precisionTime);
 
         Context context = mFragmentInstance.getContext();
 
