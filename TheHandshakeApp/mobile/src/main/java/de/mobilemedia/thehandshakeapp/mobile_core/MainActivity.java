@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity
                                                    1,    // samples for peak detection
                                                    100,  // minimum handshake window size
                                                    1000, // maximum handshake window size
-                                                   10,   // analysis feature window width
+                                                   15,   // analysis feature window width
                                                    new HandshakeDetectedBluetoothAction(mainFragment));
 
         /* Start internal acceleration reader */

@@ -14,9 +14,9 @@ public class MRDFeatureExtractor {
     public final int ANALYSIS_FEATURE_WINDOW_WIDTH;
 
     public final float HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD = 15.0f;
-    public final float HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD = 20.0f;
-    public final float HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD = 20.0f;
-    public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.1f;
+    public final float HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD = 200.0f; // unbounded
+    public final float HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD = 200.0f; // unbounded
+    public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.3f;
 
     // Data record processing helpers
     public LinkedList<float[]> dataRecords;
