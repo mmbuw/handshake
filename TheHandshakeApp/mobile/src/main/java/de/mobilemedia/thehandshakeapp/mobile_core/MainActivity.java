@@ -104,12 +104,7 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(serviceReceiver, intentSFilter);
 
         /* Init feature extractor */
-        featureExtractor = new MRDFeatureExtractor(3,    // number of data columns
-                                                   1,    // samples for peak detection
-                                                   100,  // minimum handshake window size
-                                                   1000, // maximum handshake window size
-                                                   15,   // analysis feature window width
-                                                   new HandshakeDetectedBluetoothAction(mainFragment));
+        featureExtractor = new MRDFeatureExtractor(new HandshakeDetectedBluetoothAction(mainFragment));
 
         /* Start internal acceleration reader */
         Intent startIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );

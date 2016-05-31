@@ -3,25 +3,13 @@ package de.mobilemedia.thehandshakeapp.detection;
 import android.util.Log;
 
 import java.util.*;
+import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
 public class MRDFeatureExtractor {
 
-    // Constants
-    public final int NUM_DATA_COLUMNS;
-    public final int NUM_SAMPLES_FOR_PEAK_DETECTION;
-    public final int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS;
-    public final int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS;
-    public final int ANALYSIS_FEATURE_WINDOW_WIDTH;
-
-    public final float HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD = 15.0f;
-    public final float HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD = 200.0f; // unbounded
-    public final float HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD = 200.0f; // unbounded
-    public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.25f;
-    public final int HANDSHAKE_OSCILLATION_MIN_LENGTH = 30;
-
-    public final int STREAK_FIRST_ID = 0;
-    public final int STREAK_LENGTH_ID = 1;
-    public final int STREAK_MAX_DIFF = 3;
+    //Array access IDs for readability
+    public final int STREAK_ARRAY_FIRST_ID = 0;
+    public final int STREAK_ARRAY_LENGTH_ID = 1;
 
     // Data record processing helpers
     public LinkedList<float[]> dataRecords;
@@ -47,36 +35,26 @@ public class MRDFeatureExtractor {
 
     //-------------------------------------------------------------------------
 
-    public MRDFeatureExtractor(int numDataColumns,
-                               int numSamplesForPeakDetection,
-                               int minNumSamplesForHandshakeAnalysis,
-                               int maxNumSamplesForHandshakeAnalysis,
-                               int analysisFeatureWindowWidth,
-                               HandshakeDetectedAction hda) {
+    public MRDFeatureExtractor(HandshakeDetectedAction hda) {
 
         /* Parse parameters */
-        NUM_DATA_COLUMNS = numDataColumns;
-        NUM_SAMPLES_FOR_PEAK_DETECTION = numSamplesForPeakDetection;
-        MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = minNumSamplesForHandshakeAnalysis;
-        MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = maxNumSamplesForHandshakeAnalysis;
-        ANALYSIS_FEATURE_WINDOW_WIDTH = analysisFeatureWindowWidth;
         handshakeDetectedAction = hda;
 
         /* Initialize arrays */
         dataRecords = new LinkedList<float[]>();
-        numAscentingSince = new int[NUM_DATA_COLUMNS];
-        numDescendingSince = new int[NUM_DATA_COLUMNS];
-        lastData = new float[NUM_DATA_COLUMNS];
-        maximumCandidateIndex = new int[NUM_DATA_COLUMNS];
-        maximumCandidateValue = new float[NUM_DATA_COLUMNS];
-        maximaIndices = new LinkedList[NUM_DATA_COLUMNS];
-        maximaValues = new LinkedList[NUM_DATA_COLUMNS];
-        minimumCandidateIndex = new int[NUM_DATA_COLUMNS];
-        minimumCandidateValue = new float[NUM_DATA_COLUMNS];
-        minimaIndices = new LinkedList[NUM_DATA_COLUMNS];
-        minimaValues = new LinkedList[NUM_DATA_COLUMNS];
+        numAscentingSince = new int[Config.NUM_DATA_COLUMNS];
+        numDescendingSince = new int[Config.NUM_DATA_COLUMNS];
+        lastData = new float[Config.NUM_DATA_COLUMNS];
+        maximumCandidateIndex = new int[Config.NUM_DATA_COLUMNS];
+        maximumCandidateValue = new float[Config.NUM_DATA_COLUMNS];
+        maximaIndices = new LinkedList[Config.NUM_DATA_COLUMNS];
+        maximaValues = new LinkedList[Config.NUM_DATA_COLUMNS];
+        minimumCandidateIndex = new int[Config.NUM_DATA_COLUMNS];
+        minimumCandidateValue = new float[Config.NUM_DATA_COLUMNS];
+        minimaIndices = new LinkedList[Config.NUM_DATA_COLUMNS];
+        minimaValues = new LinkedList[Config.NUM_DATA_COLUMNS];
 
-        for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
+        for (int i = 0; i < Config.NUM_DATA_COLUMNS; ++i) {
             numAscentingSince[i] = 0;
             numDescendingSince[i] = 0;
             lastData[i] = 0;
@@ -95,7 +73,7 @@ public class MRDFeatureExtractor {
     public void clearData() {
         dataRecords.clear();
 
-        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
+        for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
             numAscentingSince[col] = 0;
             numDescendingSince[col] = 0;
             lastData[col] = 0.0f;
@@ -116,8 +94,8 @@ public class MRDFeatureExtractor {
 
     public void endDataEvent() {
 
-        if (    dataRecords.size() > MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS &&
-                dataRecords.size() < MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS) {
+        if (    dataRecords.size() > Config.MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS &&
+                dataRecords.size() < Config.MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS) {
 
             System.out.println("Analyzing data package of " + dataRecords.size() + " samples.");
             analyzeDataRecordsFeatures();
@@ -135,7 +113,7 @@ public class MRDFeatureExtractor {
 
         updateDataRecordStore(data);
 
-        for (int i = 0; i < NUM_DATA_COLUMNS; ++i) {
+        for (int i = 0; i < Config.NUM_DATA_COLUMNS; ++i) {
             checkNewValueForPeaks(i, data[i]);
         }
 
@@ -168,12 +146,12 @@ public class MRDFeatureExtractor {
             numDescendingSince[column] = 0;
 
             // If enough ascending samples after a peek
-            if (numAscentingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION &&
+            if (numAscentingSince[column] >= Config.NUM_SAMPLES_FOR_PEAK_DETECTION &&
                     minimumCandidateIndex[column] > -1) {
                 handleDetectedMinimum(column, minimumCandidateIndex[column], minimumCandidateValue[column]);
             }
             // Mark maximum candidate if enough samples
-            if (numAscentingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION) {
+            if (numAscentingSince[column] >= Config.NUM_SAMPLES_FOR_PEAK_DETECTION) {
                 maximumCandidateIndex[column] = numRecordsProcessed;
                 maximumCandidateValue[column] = currentValue;
             }
@@ -183,12 +161,12 @@ public class MRDFeatureExtractor {
             numAscentingSince[column] = 0;
 
             // If enough descending samples after a peak
-            if (numDescendingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION &&
+            if (numDescendingSince[column] >= Config.NUM_SAMPLES_FOR_PEAK_DETECTION &&
                     maximumCandidateIndex[column] > -1) {
                 handleDetectedMaximum(column, maximumCandidateIndex[column], maximumCandidateValue[column]);
             }
             // Mark minimum candidate if enough samples
-            if (numDescendingSince[column] >= NUM_SAMPLES_FOR_PEAK_DETECTION) {
+            if (numDescendingSince[column] >= Config.NUM_SAMPLES_FOR_PEAK_DETECTION) {
                 minimumCandidateIndex[column] = numRecordsProcessed;
                 minimumCandidateValue[column] = currentValue;
             }
@@ -222,7 +200,7 @@ public class MRDFeatureExtractor {
 
         // move a window through the data records to check for handshake features
         int movingWindowStart = 0;
-        int movingWindowEnd = ANALYSIS_FEATURE_WINDOW_WIDTH-1;
+        int movingWindowEnd = Config.ANALYSIS_FEATURE_WINDOW_WIDTH-1;
         boolean handshakeDetected = false;
         LinkedList<Integer> positiveWindowEndIds = new LinkedList<Integer>();
 
@@ -239,11 +217,11 @@ public class MRDFeatureExtractor {
         }
 
         int positiveWindows = positiveWindowEndIds.size();
-        int numOfAllWindows = dataRecords.size() - ANALYSIS_FEATURE_WINDOW_WIDTH + 1;
+        int numOfAllWindows = dataRecords.size() - Config.ANALYSIS_FEATURE_WINDOW_WIDTH + 1;
         float positiveWindowFraction = (float) positiveWindows/numOfAllWindows;
 
         int[] longestStreak = findLongestStreak(positiveWindowEndIds);
-        int handshakeOscillationStart = longestStreak[0]-ANALYSIS_FEATURE_WINDOW_WIDTH+1;
+        int handshakeOscillationStart = longestStreak[0]-Config.ANALYSIS_FEATURE_WINDOW_WIDTH+1;
         int handshakeOscillationEnd = (longestStreak[0] + longestStreak[1] - 1);
         int oscillationRegionLength = (handshakeOscillationEnd-handshakeOscillationStart+1);
 
@@ -251,8 +229,8 @@ public class MRDFeatureExtractor {
         Log.i("MRDFeatureExtractor", "Extracted osciallation region length: " + oscillationRegionLength);
 
         // handshake detection criteria
-        if (    oscillationRegionLength > HANDSHAKE_OSCILLATION_MIN_LENGTH &&
-                positiveWindowFraction > HANDSHAKE_POSITIVE_WINDOW_FRACTION) {
+        if (    oscillationRegionLength > Config.HANDSHAKE_OSCILLATION_MIN_LENGTH &&
+                positiveWindowFraction > Config.HANDSHAKE_POSITIVE_WINDOW_FRACTION) {
             handshakeDetected = true;
         }
 
@@ -269,9 +247,9 @@ public class MRDFeatureExtractor {
 
     public boolean rangesRepresentHandshake(float[] ranges) {
 
-        if (    ranges[0] < HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD &&
-                ranges[1] > HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD &&
-                ranges[2] < HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD) {
+        if (    ranges[0] < Config.HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD &&
+                ranges[1] > Config.HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD &&
+                ranges[2] < Config.HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD) {
 
             return true;
 
@@ -293,7 +271,7 @@ public class MRDFeatureExtractor {
 
             for (int winId : positiveWindowList) {
 
-                if (winId - lastWindowId <= STREAK_MAX_DIFF) {
+                if (winId - lastWindowId <= Config.STREAK_MAX_DIFF) {
 
                     // the current streak is increased
                     currentStreakLength = currentStreakLength + (winId - lastWindowId);
@@ -301,9 +279,9 @@ public class MRDFeatureExtractor {
                 } else {
 
                     // the end of a streak was detected
-                    if (currentStreakLength > longestStreak[STREAK_LENGTH_ID]) {
-                        longestStreak[STREAK_FIRST_ID] = currentStreakStart;
-                        longestStreak[STREAK_LENGTH_ID] = currentStreakLength;
+                    if (currentStreakLength > longestStreak[STREAK_ARRAY_LENGTH_ID]) {
+                        longestStreak[STREAK_ARRAY_FIRST_ID] = currentStreakStart;
+                        longestStreak[STREAK_ARRAY_LENGTH_ID] = currentStreakLength;
                     }
 
                     currentStreakLength = 1;
@@ -314,9 +292,9 @@ public class MRDFeatureExtractor {
             }
 
             // the streak ends with the window
-            if (currentStreakLength > longestStreak[STREAK_LENGTH_ID]) {
-                longestStreak[STREAK_FIRST_ID] = currentStreakStart;
-                longestStreak[STREAK_LENGTH_ID] = currentStreakLength;
+            if (currentStreakLength > longestStreak[STREAK_ARRAY_LENGTH_ID]) {
+                longestStreak[STREAK_ARRAY_FIRST_ID] = currentStreakStart;
+                longestStreak[STREAK_ARRAY_LENGTH_ID] = currentStreakLength;
             }
 
             return longestStreak;
@@ -329,10 +307,10 @@ public class MRDFeatureExtractor {
 
     public float[] computeWindowRanges(int startSample, int endSample) {
 
-        float[] highestValues = new float[NUM_DATA_COLUMNS];
-        float[] lowestValues = new float[NUM_DATA_COLUMNS];
+        float[] highestValues = new float[Config.NUM_DATA_COLUMNS];
+        float[] lowestValues = new float[Config.NUM_DATA_COLUMNS];
 
-        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
+        for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
             highestValues[col] = -1000000;
             lowestValues[col] = 1000000;
         }
@@ -341,15 +319,15 @@ public class MRDFeatureExtractor {
 
             float[] record = dataRecords.get(sample);
 
-            for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
+            for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
                 if (record[col] > highestValues[col]) { highestValues[col] = record[col]; }
                 if (record[col] < lowestValues[col]) { lowestValues[col] = record[col]; }
             }
 
         }
 
-        float[] ranges = new float[NUM_DATA_COLUMNS];
-        for (int col = 0; col < NUM_DATA_COLUMNS; ++col) {
+        float[] ranges = new float[Config.NUM_DATA_COLUMNS];
+        for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
             ranges[col] = highestValues[col] - lowestValues[col];
         }
         return ranges;
