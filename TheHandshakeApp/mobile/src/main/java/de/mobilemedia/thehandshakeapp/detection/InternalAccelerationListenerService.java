@@ -17,7 +17,7 @@ public class InternalAccelerationListenerService extends Service implements Sens
     private void sendDataToActivity(float[] data) {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("accelerationAction");
-        broadcastIntent.putExtra("acceleration", data);
+        broadcastIntent.putExtra("internalAcceleration", data);
         sendBroadcast(broadcastIntent);
     }
 
@@ -25,7 +25,7 @@ public class InternalAccelerationListenerService extends Service implements Sens
     public int onStartCommand(Intent intent, int flags, int startId) {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
         return Service.START_STICKY;
     }
 
