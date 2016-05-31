@@ -16,7 +16,12 @@ public class MRDFeatureExtractor {
     public final float HANDSHAKE_Y_AXIS_MIN_RANGE_THRESHOLD = 15.0f;
     public final float HANDSHAKE_X_AXIS_MAX_RANGE_THRESHOLD = 200.0f; // unbounded
     public final float HANDSHAKE_Z_AXIS_MAX_RANGE_THRESHOLD = 200.0f; // unbounded
-    public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.3f;
+    public final float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.25f;
+    public final int HANDSHAKE_OSCILLATION_MIN_LENGTH = 30;
+
+    public final int STREAK_FIRST_ID = 0;
+    public final int STREAK_LENGTH_ID = 1;
+    public final int STREAK_MAX_DIFF = 3;
 
     // Data record processing helpers
     public LinkedList<float[]> dataRecords;
@@ -219,27 +224,35 @@ public class MRDFeatureExtractor {
         int movingWindowStart = 0;
         int movingWindowEnd = ANALYSIS_FEATURE_WINDOW_WIDTH-1;
         boolean handshakeDetected = false;
-
-        int positiveWindows = 0;
+        LinkedList<Integer> positiveWindowEndIds = new LinkedList<Integer>();
 
         while (movingWindowEnd < dataRecords.size()) {
 
-            float[] ranges = computeDataRecordRanges(movingWindowStart, movingWindowEnd);
+            float[] ranges = computeWindowRanges(movingWindowStart, movingWindowEnd);
 
             if (rangesRepresentHandshake(ranges)) {
-                positiveWindows++;
+                positiveWindowEndIds.add(movingWindowEnd);
             }
 
             movingWindowStart += 1;
             movingWindowEnd += 1;
         }
 
+        int positiveWindows = positiveWindowEndIds.size();
         int numOfAllWindows = dataRecords.size() - ANALYSIS_FEATURE_WINDOW_WIDTH + 1;
         float positiveWindowFraction = (float) positiveWindows/numOfAllWindows;
+
+        int[] longestStreak = findLongestStreak(positiveWindowEndIds);
+        int handshakeOscillationStart = longestStreak[0]-ANALYSIS_FEATURE_WINDOW_WIDTH+1;
+        int handshakeOscillationEnd = (longestStreak[0] + longestStreak[1] - 1);
+        int oscillationRegionLength = (handshakeOscillationEnd-handshakeOscillationStart+1);
+
         Log.i("MRDFeatureExtractor", "Positive window fraction: " + positiveWindowFraction);
+        Log.i("MRDFeatureExtractor", "Extracted osciallation region length: " + oscillationRegionLength);
 
         // handshake detection criteria
-        if (positiveWindowFraction > HANDSHAKE_POSITIVE_WINDOW_FRACTION) {
+        if (    oscillationRegionLength > HANDSHAKE_OSCILLATION_MIN_LENGTH &&
+                positiveWindowFraction > HANDSHAKE_POSITIVE_WINDOW_FRACTION) {
             handshakeDetected = true;
         }
 
@@ -268,7 +281,53 @@ public class MRDFeatureExtractor {
 
     }
 
-    public float[] computeDataRecordRanges(int startSample, int endSample) {
+    public int[] findLongestStreak(LinkedList<Integer> positiveWindowList) {
+
+        if (positiveWindowList != null &&
+                positiveWindowList.size() > 0) {
+
+            int lastWindowId = 0;
+            int currentStreakStart = positiveWindowList.getFirst();
+            int currentStreakLength = 1;
+            int[] longestStreak = new int[2]; // holds first streak window and length
+
+            for (int winId : positiveWindowList) {
+
+                if (winId - lastWindowId <= STREAK_MAX_DIFF) {
+
+                    // the current streak is increased
+                    currentStreakLength = currentStreakLength + (winId - lastWindowId);
+
+                } else {
+
+                    // the end of a streak was detected
+                    if (currentStreakLength > longestStreak[STREAK_LENGTH_ID]) {
+                        longestStreak[STREAK_FIRST_ID] = currentStreakStart;
+                        longestStreak[STREAK_LENGTH_ID] = currentStreakLength;
+                    }
+
+                    currentStreakLength = 1;
+                    currentStreakStart = winId;
+                }
+
+                lastWindowId = winId;
+            }
+
+            // the streak ends with the window
+            if (currentStreakLength > longestStreak[STREAK_LENGTH_ID]) {
+                longestStreak[STREAK_FIRST_ID] = currentStreakStart;
+                longestStreak[STREAK_LENGTH_ID] = currentStreakLength;
+            }
+
+            return longestStreak;
+
+        } else {
+            int[] failure = {-1, -1};
+            return failure;
+        }
+    }
+
+    public float[] computeWindowRanges(int startSample, int endSample) {
 
         float[] highestValues = new float[NUM_DATA_COLUMNS];
         float[] lowestValues = new float[NUM_DATA_COLUMNS];
