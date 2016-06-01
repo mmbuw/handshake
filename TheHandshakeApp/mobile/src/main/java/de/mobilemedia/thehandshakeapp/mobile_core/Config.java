@@ -29,14 +29,17 @@ public class Config {
     //Number of consecutive ascenting or descending samples in order to detect a peak
     public static int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 
+    //Number of incoming data events to merge together
+    public static int NUM_SAMPLES_TO_MERGE = 5;
+
     //Minimum number of samples to start checking for a handshake
-    public static int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 100;
+    public static int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 20;
 
     //Maximum number of samples to start checking for a handshake
-    public static int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 1000;
+    public static int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 200;
 
     //Width of the moving window on data packages for handshake analysis
-    public static int ANALYSIS_FEATURE_WINDOW_WIDTH = 15;
+    public static int ANALYSIS_FEATURE_WINDOW_WIDTH = 7;
 
     //Lower bound which must be fulfilled by the y-axis range in the ANALYSIS_FEATURE_WINDOW
     //in order to have a positive window for handshake detection
@@ -54,7 +57,7 @@ public class Config {
     public static float HANDSHAKE_POSITIVE_WINDOW_FRACTION = 0.25f;
 
     //Minimum number of consecutive positive windows in a data package for handshake detection
-    public static int HANDSHAKE_OSCILLATION_MIN_LENGTH = 30;
+    public static int HANDSHAKE_OSCILLATION_MIN_LENGTH = 6;
 
     //Maximum number of non-continuous positive windows a positive window streak is allowed to have
     public static int STREAK_MAX_DIFF = 3;

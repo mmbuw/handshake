@@ -13,6 +13,7 @@ public class MRDFeatureExtractor {
 
     // Data record processing helpers
     public LinkedList<float[]> dataRecords;
+    public LinkedList<float[]> recordMergeStorage;
     public int numRecordsProcessed = 0;
     public int[] numAscentingSince;
     public int[] numDescendingSince;
@@ -42,6 +43,7 @@ public class MRDFeatureExtractor {
 
         /* Initialize arrays */
         dataRecords = new LinkedList<float[]>();
+        recordMergeStorage = new LinkedList<float[]>();
         numAscentingSince = new int[Config.NUM_DATA_COLUMNS];
         numDescendingSince = new int[Config.NUM_DATA_COLUMNS];
         lastData = new float[Config.NUM_DATA_COLUMNS];
@@ -72,6 +74,7 @@ public class MRDFeatureExtractor {
 
     public void clearData() {
         dataRecords.clear();
+        recordMergeStorage.clear();
 
         for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
             numAscentingSince[col] = 0;
@@ -111,14 +114,35 @@ public class MRDFeatureExtractor {
 
     public void processDataRecord(float[] data) {
 
-        updateDataRecordStore(data);
+        recordMergeStorage.addLast(data);
 
-        for (int i = 0; i < Config.NUM_DATA_COLUMNS; ++i) {
-            checkNewValueForPeaks(i, data[i]);
+        if (recordMergeStorage.size() == Config.NUM_SAMPLES_TO_MERGE) {
+
+            // merge the previous samples to one using the average
+            float[] merged = new float[data.length];
+            for (float[] record : recordMergeStorage) {
+                for (int col = 0; col < merged.length; ++col) {
+                    merged[col] += record[col];
+                }
+            }
+            for (int col = 0; col < merged.length; ++col) {
+                merged[col] = merged[col] / Config.NUM_SAMPLES_TO_MERGE;
+            }
+
+            // process newly obtained data record
+            updateDataRecordStore(merged);
+
+            for (int i = 0; i < Config.NUM_DATA_COLUMNS; ++i) {
+                checkNewValueForPeaks(i, merged[i]);
+            }
+
+            lastData = merged;
+            ++numRecordsProcessed;
+
+            recordMergeStorage.clear();
         }
 
-        lastData = data;
-        ++numRecordsProcessed;
+
     }
 
 
@@ -216,12 +240,13 @@ public class MRDFeatureExtractor {
             movingWindowEnd += 1;
         }
 
+        // anaylze the moving window results
         int positiveWindows = positiveWindowEndIds.size();
         int numOfAllWindows = dataRecords.size() - Config.ANALYSIS_FEATURE_WINDOW_WIDTH + 1;
         float positiveWindowFraction = (float) positiveWindows/numOfAllWindows;
 
         int[] longestStreak = findLongestStreak(positiveWindowEndIds);
-        int handshakeOscillationStart = longestStreak[0]-Config.ANALYSIS_FEATURE_WINDOW_WIDTH+1;
+        int handshakeOscillationStart = longestStreak[0];
         int handshakeOscillationEnd = (longestStreak[0] + longestStreak[1] - 1);
         int oscillationRegionLength = (handshakeOscillationEnd-handshakeOscillationStart+1);
 
@@ -239,6 +264,27 @@ public class MRDFeatureExtractor {
         if (handshakeDetected) {
             handshakeDetectedAction.onHandshakeDetected();
             Log.i("MRDFeatureExtractor", "Classification result: handshake");
+
+            int[] zeroCrossings = computeWindowZeroCrossings(handshakeOscillationStart, handshakeOscillationEnd);
+            float[] RMSValues = computeWindowRMSValues(handshakeOscillationStart, handshakeOscillationEnd);
+            float[] ranges = computeWindowRanges(handshakeOscillationStart, handshakeOscillationEnd);
+            float[] meanValues = computeWindowMeans(handshakeOscillationStart, handshakeOscillationEnd);
+            float[] stdDevs = computeWindowStdDevs(handshakeOscillationStart, handshakeOscillationEnd);
+            float totalEnergy = computeWindowTotalEnergy(handshakeOscillationStart, handshakeOscillationEnd);
+
+            Log.i("MRDFeatureExtractor", "Handshake region features\n---------------------------");
+            Log.i("MRDFeatureExtractor", "Zero crossings: " + zeroCrossings[1] + "\n" +
+                                         "RMS: " + RMSValues[1] + "\n" +
+                                         "Range: " + ranges[1] + "\n" +
+                                         "Mean: " + meanValues[1] + "\n" +
+                                         "Standard deviation: " + stdDevs[1] + "\n" +
+                                         "Total energy: " + totalEnergy);
+
+            String fingerprint = computeFingerprint(oscillationRegionLength, zeroCrossings[1], RMSValues[1],
+                                                    ranges[1], meanValues[1], stdDevs[1], totalEnergy);
+
+            Log.i("MRDFeatureExtractor", "FINGERPRINT: " + fingerprint);
+
         } else {
             Log.i("MRDFeatureExtractor", "Classification Result: nothing");
         }
@@ -305,6 +351,50 @@ public class MRDFeatureExtractor {
         }
     }
 
+    public int[] computeWindowZeroCrossings(int startSample, int endSample) {
+
+        int[] numZeroCrossings = new int[Config.NUM_DATA_COLUMNS];
+        float[] lastRecord = new float[Config.NUM_DATA_COLUMNS];
+
+        for (int sample = startSample; sample <= endSample; ++sample) {
+
+            float[] record = dataRecords.get(sample);
+
+            for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+                if ((record[col] > 0.0f && lastRecord[col] < 0.0f) ||
+                        (record[col] < 0.0f && lastRecord[col] > 0.0f)) {
+                    numZeroCrossings[col]++;
+                }
+            }
+
+            lastRecord = record;
+        }
+
+        return numZeroCrossings;
+    }
+
+    public float[] computeWindowRMSValues(int startSample, int endSample) {
+
+        float[] RMSValues = new float[Config.NUM_DATA_COLUMNS];
+
+        for (int sample = startSample; sample <= endSample; ++sample) {
+
+            float[] record = dataRecords.get(sample);
+
+            for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+                RMSValues[col] += record[col]*record[col];
+            }
+
+        }
+
+        for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+            RMSValues[col] = RMSValues[col] / ((float) (endSample-startSample+1));
+            RMSValues[col] = (float) Math.sqrt(RMSValues[col]);
+        }
+
+        return RMSValues;
+    }
+
     public float[] computeWindowRanges(int startSample, int endSample) {
 
         float[] highestValues = new float[Config.NUM_DATA_COLUMNS];
@@ -330,7 +420,147 @@ public class MRDFeatureExtractor {
         for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
             ranges[col] = highestValues[col] - lowestValues[col];
         }
-        return ranges;
 
+        return ranges;
+    }
+
+    public float[] computeWindowMeans(int startSample, int endSample) {
+
+        float[] meanValues = new float[Config.NUM_DATA_COLUMNS];
+
+        for (int sample = startSample; sample <= endSample; ++sample) {
+
+            float[] record = dataRecords.get(sample);
+
+            for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+                meanValues[col] += record[col];
+            }
+
+        }
+
+        for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+            meanValues[col] = meanValues[col] / ((float) (endSample-startSample+1));
+        }
+
+        return meanValues;
+    }
+
+    public float[] computeWindowStdDevs(int startSample, int endSample) {
+
+        float[] meanValues = computeWindowMeans(startSample, endSample);
+        float[] standardDeviations = new float[Config.NUM_DATA_COLUMNS];
+
+        for (int sample = startSample; sample <= endSample; ++sample) {
+
+            float[] record = dataRecords.get(sample);
+
+            for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+                standardDeviations[col] += (meanValues[col]-record[col])*(meanValues[col]-record[col]);
+            }
+        }
+
+        for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+            standardDeviations[col] = standardDeviations[col] / ((float) (endSample-startSample+1));
+            standardDeviations[col] = (float) Math.sqrt(standardDeviations[col]);
+        }
+
+        return standardDeviations;
+
+    }
+
+    public float computeWindowTotalEnergy(int startSample, int endSample) {
+
+        float totalEnergy = 0.0f;
+
+        for (int sample = startSample; sample <= endSample; ++sample) {
+
+            float[] record = dataRecords.get(sample);
+            float contribution = 0.0f;
+
+            for (int col = 0; col < Config.NUM_DATA_COLUMNS; ++col) {
+                contribution += record[col]*record[col];
+            }
+
+            totalEnergy += contribution;
+
+        }
+
+        return totalEnergy;
+    }
+
+
+    /* FINGERPRINT FUNCTIONALITIES                                           */
+	/* --------------------------------------------------------------------- */
+
+    public String computeFingerprint(int windowSize, int zeroCrossings, float RMSValue,
+                                     float range, float mean, float stdDev, float totalEnergy) {
+
+        LinkedList<String> fingerprintComponents = new LinkedList<String>();
+        fingerprintComponents.addLast(sortToBin(windowSize, 6, 30, 1));
+        fingerprintComponents.addLast(sortToBin(zeroCrossings, 3, 9, 1));
+        fingerprintComponents.addLast(sortToBin(RMSValue, 8, 14, 1));
+        //fingerprintComponents.addLast(sortToBin(range, 30, 40, 1));
+        //fingerprintComponents.addLast(sortToBin(mean, -5, 0, 2));
+        fingerprintComponents.addLast(sortToBin(stdDev, 5, 15, 1));
+        //fingerprintComponents.addLast(sortToBin(totalEnergy, 50, 100, 2));
+
+        String finalString = "";
+        for (String component : fingerprintComponents)
+            finalString += component + " ";
+        return finalString;
+
+    }
+
+    public String sortToBin(float value, float minValue, float maxValue, int numBits) {
+
+        // Cap values if they are outside the specified ranges
+        float valueToProcess = value;
+        if (valueToProcess < minValue)
+            valueToProcess = minValue;
+        if (valueToProcess >= maxValue)
+            valueToProcess = maxValue - 0.00001f;
+
+        // Compute bin
+        float percentageInRange = (valueToProcess - minValue)/(maxValue - minValue);
+        int numBins = (int) Math.pow(2,  numBits);
+        float binSize = 1.0f/numBins;
+        int binID = (int) Math.floor(percentageInRange / binSize);
+
+        float lowerBinDistance = (percentageInRange/binSize) - (float) Math.floor(percentageInRange / binSize);
+        float higherBinDistance = (float) Math.ceil(percentageInRange / binSize) - (percentageInRange/binSize);
+        float shortestBinBorderDistance = Math.min(lowerBinDistance, higherBinDistance);
+
+
+        // Convert bin ID to binary form
+        String binaryBinID = padBinaryString(Integer.toBinaryString(binID), numBits);
+
+        if (shortestBinBorderDistance < 0.2) {
+            if (Math.min(lowerBinDistance, higherBinDistance) == lowerBinDistance &&
+                    binID-1 >= 0) {
+
+                String alternative = padBinaryString(Integer.toBinaryString(binID-1), numBits);
+                binaryBinID += "||" + alternative;
+
+            } else if (Math.min(lowerBinDistance, higherBinDistance) == higherBinDistance &&
+                    binID+1 < numBins) {
+
+                String alternative = padBinaryString(Integer.toBinaryString(binID+1), numBits);
+                binaryBinID += "||" + alternative;
+
+            }
+        }
+
+        return binaryBinID;
+    }
+
+    public String padBinaryString(String binary, int numBits) {
+
+        String output = binary;
+
+        while (output.length() < numBits) {
+            output = "0" + output;
+        }
+
+        return output;
     }
 }
