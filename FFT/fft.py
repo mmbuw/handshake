@@ -4,6 +4,7 @@ from scipy.fftpack import fft, rfft, ifft
 from scipy import spatial
 from os import listdir
 from os.path import isfile, join
+import matplotlib.pyplot as plt
 
 #
 #
@@ -28,9 +29,8 @@ def get_fft_vector_list(values, window_size, step_size):
 	while j < len(values):
 		window = values[i:j]
 		vector = fft(window)
-		# print(vector)
-		# sys.exit(0)
-		vector = vector[:len(vector)/2]
+		vector = vector[2:35]
+		#vector = vector[1:len(vector)/2]
 		for u in range(len(vector)):
 			vector[u] = abs(vector[u])
 		vectors.append(vector)
@@ -58,16 +58,28 @@ def evaluate(file1, file2):
 	
 	max_sim = 0
 	#print file1 + " - " + file2
-	for result in results:
+	max_result = ()
+	for idx, result in enumerate(results):
 		sim = result[2]*100
 		if sim > max_sim:
 			max_sim = sim
+			idx1 = result[0]
+			idx2 = result[1]
+			max_result = (sim, vlist1[idx1], vlist2[idx2])
 	#	print str(result[0]) +" : "+ str(result[1]) +"\t"+ str(sim)
-	return max_sim
+	return max_result
+
+def get_title_from_path(path):
+	return path.split('/')[-1].split('.')[0]
+
+def get_plot_title(result):
+	title1 = get_title_from_path(result[0][0])
+	title2 = get_title_from_path(result[0][1])
+	return title1 + ' - ' +title2
 
 def main():
 	file_dir = sys.argv[1]
-	txtfiles = [f for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
+	txtfiles = [join(file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
 	txtfilepairs = list(itertools.combinations(txtfiles, 2))
 	results = []
 	for pair in txtfilepairs:
@@ -75,11 +87,19 @@ def main():
 	
 	results.sort()
 
-	for result in results:
-		print result[0][0] +" - "+ result[0][1] +":\t"+ str(abs(result[1]))
-		if result[0][0][:6] == result[0][1][:6]:
-			print "---------------------------"
-
+	plot_size = len(results)
+	fig = plt.figure()
+	title = ''
+	for i, result in enumerate(results):
+		plt.subplot(plot_size/3, 3, i)
+		plt.plot(result[1][1].real)
+		plt.plot(result[1][2].real)
+		sim = str(result[1][0])[1:7]
+		plt.title(get_plot_title(result)+"\nsim: "+sim)
+	fig.set_size_inches(16, 10)
+	plt.tight_layout()
+	plt.savefig(file_dir+'/fft.png', dpi = 300)
+	#plt.show()
 
 
 if __name__ == '__main__':
