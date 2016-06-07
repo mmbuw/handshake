@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 import java.util.Date;
+import java.util.LinkedList;
 
 public class HandshakeDetectedToastAction extends HandshakeDetectedAction {
 
@@ -14,7 +15,9 @@ public class HandshakeDetectedToastAction extends HandshakeDetectedAction {
     }
 
     @Override
-    public void onHandshakeDetected() {
+    public void onHandshakeDetected(LinkedList<float[]> data,
+                                    int startSample,
+                                    int endSample) {
 
         String text = "Handshake detected";
         text += "\n" + new Date().toString();

@@ -262,7 +262,7 @@ public class MRDFeatureExtractor {
 
         // actions performed when handshake was (not) detected
         if (handshakeDetected) {
-            handshakeDetectedAction.onHandshakeDetected();
+            handshakeDetectedAction.onHandshakeDetected(dataRecords, handshakeOscillationStart, handshakeOscillationEnd);
             Log.i("MRDFeatureExtractor", "Classification result: handshake");
 
             int[] zeroCrossings = computeWindowZeroCrossings(handshakeOscillationStart, handshakeOscillationEnd);

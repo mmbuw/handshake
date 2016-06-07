@@ -30,16 +30,16 @@ public class Config {
     public static int NUM_SAMPLES_FOR_PEAK_DETECTION = 1;
 
     //Number of incoming data events to merge together
-    public static int NUM_SAMPLES_TO_MERGE = 5;
+    public static int NUM_SAMPLES_TO_MERGE = 1;
 
     //Minimum number of samples to start checking for a handshake
-    public static int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 20;
+    public static int MINIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 100;
 
     //Maximum number of samples to start checking for a handshake
-    public static int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 200;
+    public static int MAXIMUM_DATA_SAMPLES_FOR_HANDSHAKE_ANALYSIS = 1000;
 
     //Width of the moving window on data packages for handshake analysis
-    public static int ANALYSIS_FEATURE_WINDOW_WIDTH = 7;
+    public static int ANALYSIS_FEATURE_WINDOW_WIDTH = 20;
 
     //Lower bound which must be fulfilled by the y-axis range in the ANALYSIS_FEATURE_WINDOW
     //in order to have a positive window for handshake detection
