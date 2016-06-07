@@ -15,6 +15,7 @@ import android.widget.Toast;
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.Util;
+import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
 
 public class SettingsFragment extends Fragment {
 
@@ -23,6 +24,7 @@ public class SettingsFragment extends Fragment {
     Button settingsApplyButton;
     Button clearButton;
     TextView urlTextView;
+    TextView filePostfixTextView;
 
     public SettingsFragment() {}
 
@@ -42,10 +44,13 @@ public class SettingsFragment extends Fragment {
         settingsApplyButton = (Button) view.findViewById(R.id.settings_apply_button);
         clearButton = (Button) view.findViewById(R.id.button_clear);
         urlTextView = (TextView) view.findViewById(R.id.setting_url_field);
+        filePostfixTextView = (TextView) view.findViewById(R.id.file_postfix_field);
 
         String currentUrl = parentActivity.getBleConnectionManager().getLongUrl();
+        String currentPostfix = FileOutputWriter.filePostfix;
 
         urlTextView.setText( currentUrl );
+        filePostfixTextView.setText(currentPostfix);
 
         settingsApplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +72,9 @@ public class SettingsFragment extends Fragment {
     public void onSettingsApplyButtonClick() {
 
         String longUrl = urlTextView.getText().toString();
+        String filePostfix = filePostfixTextView.getText().toString();
+        FileOutputWriter.filePostfix = filePostfix;
+
         Log.i("NEWURL", longUrl);
 
         try {
@@ -79,6 +87,7 @@ public class SettingsFragment extends Fragment {
             /*TODO: do it better or add wait screen*/
             Toast.makeText(parentActivity, "Applied new Handshake URL:\n" + shortUrl, Toast.LENGTH_SHORT).show();
             Log.i("NEWSHORTURL", shortUrl);
+
         } catch (Exception e) {
             Toast.makeText(parentActivity, "Couldn't convert URL.", Toast.LENGTH_SHORT).show();
         }

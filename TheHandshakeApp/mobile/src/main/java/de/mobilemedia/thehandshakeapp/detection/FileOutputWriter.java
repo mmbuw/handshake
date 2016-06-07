@@ -8,13 +8,21 @@ import java.io.IOException;
 
 public class FileOutputWriter {
 
+    public static String filePostfix = "";
     private FileOutputStream outputStream;
 
     public FileOutputWriter(String fileName) {
 
+        String extendedFileName = fileName;
+        if (!filePostfix.isEmpty())
+         extendedFileName = fileName + "-" + filePostfix;
+        extendedFileName += ".txt";
+
+        System.out.println(extendedFileName);
+
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File tmpFile = new File(path, fileName);
+            File tmpFile = new File(path, extendedFileName);
 
             try {
                 outputStream = new FileOutputStream(tmpFile);
