@@ -1,6 +1,7 @@
 package de.mobilemedia.thehandshakeapp.detection;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,12 +14,7 @@ public class FileOutputWriter {
 
     public FileOutputWriter(String fileName) {
 
-        String extendedFileName = fileName;
-        if (!filePostfix.isEmpty())
-         extendedFileName = fileName + "-" + filePostfix;
-        extendedFileName += ".txt";
-
-        System.out.println(extendedFileName);
+        String extendedFileName = extendFileName(fileName);
 
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -32,6 +28,21 @@ public class FileOutputWriter {
 
         } catch (Exception e) { e.printStackTrace(); }
 
+    }
+
+    public static String extendFileName(String fileName) {
+
+        String extendedFileName = fileName;
+        if (!filePostfix.isEmpty())
+            extendedFileName = fileName + "-" + filePostfix;
+        extendedFileName += ".txt";
+
+        return extendedFileName;
+    }
+
+    public static File getFileHandleOf(String fileName) {
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        return new File(path, extendFileName(fileName));
     }
 
     public void writeToFile(String line) {

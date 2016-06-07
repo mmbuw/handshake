@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -40,6 +41,8 @@ import static de.mobilemedia.thehandshakeapp.bluetooth.Util.saveMapToFile;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static String ANDROID_ID;
+
     private Toolbar toolbar;
     private NavigationView navigationView;
     private MainFragment mainFragment;
@@ -65,6 +68,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        ANDROID_ID = Settings.Secure.getString(getContentResolver(),
+                     Settings.Secure.ANDROID_ID);
 
         /* Request permissions */
         verifyPermissions();
