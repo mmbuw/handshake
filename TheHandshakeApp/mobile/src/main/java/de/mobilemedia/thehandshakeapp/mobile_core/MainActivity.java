@@ -1,6 +1,7 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -114,6 +115,10 @@ public class MainActivity extends AppCompatActivity
         /* Start internal acceleration reader */
         Intent startIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         startService(startIntent);
+
+        /* Bluetooth event broadcast receiver */
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(bleConnectionManager, filter);
     }
 
     private void loadPrevData(){
@@ -202,6 +207,7 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(serviceReceiver);
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
+        unregisterReceiver(bleConnectionManager);
     }
 
     @Override
