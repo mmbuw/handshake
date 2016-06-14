@@ -16,9 +16,9 @@ def simCos(v1, v2):
 	return 1 - spatial.distance.cosine(v1, v2)
 
 def get_fft_vector(vector, window_size, minF=2, maxF=15):
-	vector += [0] * (window_size - len(vector)) #padding with zeroes
+	#vector += [0] * (window_size - len(vector)) #padding with zeroes
 	vector = fft(vector)
-	vector = vector[0:len(vector)*0.07]
+	vector = vector[0:70]
 	for u in range(len(vector)):
 		vector[u] = abs(vector[u])
 	return vector.real

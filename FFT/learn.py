@@ -31,9 +31,9 @@ def get_instance_from_pair(pair):
 
 	val1 = [float(x) for x in load_values_from_file(file1, 2)]
 	val2 = [float(x) for x in load_values_from_file(file2, 1)]
-	
+
 	values = np.array([])
-	values = np.concatenate((values, get_fft_difference(file1, file2, 10000, 0)))
+	values = np.concatenate((values, get_fft_difference(file1, file2, 250, 0)))
 
 	#print len(values)
 
@@ -49,9 +49,9 @@ def get_instance_from_pair(pair):
 		feature_names.append("range")
 		feature_names.append("zero_cross")
 
-	values = np.concatenate((values, get_fft_difference(file1, file2, 10000, 1)))
+	values = np.concatenate((values, get_fft_difference(file1, file2, 250, 1)))
 	#print len(values)
-	values = np.concatenate((values, get_fft_difference(file1, file2, 10000, 2)))
+	values = np.concatenate((values, get_fft_difference(file1, file2, 250, 2)))
 	#print len(values)
 
 	mean_difference = abs(np.mean(val1) - np.mean(val2))
@@ -74,7 +74,15 @@ def get_data_and_target():
 	for pair in txtfilepairs:
 		if is_same_device(pair[0], pair[1]):
 			continue
+		if is_signal_too_short(pair[0], pair[1]):
+			continue
 		instance_values, instance_target = get_instance_from_pair(pair)
+
+		if instance_target == 1:
+			for x in range(40):
+				data.append(instance_values)
+				target.append(instance_target)
+
 		data.append(instance_values)
 		target.append(instance_target)
 	return (data, target)
@@ -91,6 +99,11 @@ def is_same_device(file1, file2):
 	device_id1 = file1.split('/')[-1].split('-')[1]
 	device_id2 = file2.split('/')[-1].split('-')[1]
 	return device_id1 == device_id2
+
+def is_signal_too_short(file1, file2):
+	x = len(load_values_from_file(file1, 0))
+	y = len(load_values_from_file(file2, 0))
+	return min(x,y) < 80
 
 def main():
 	(data, target) = get_data_and_target()
