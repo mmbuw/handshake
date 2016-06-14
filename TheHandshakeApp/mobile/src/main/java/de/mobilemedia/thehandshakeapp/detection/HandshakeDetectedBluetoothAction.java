@@ -3,7 +3,6 @@ package de.mobilemedia.thehandshakeapp.detection;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -17,6 +16,7 @@ import java.util.LinkedList;
 
 import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 import de.mobilemedia.thehandshakeapp.mobile_core.MainFragment;
+import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 
 public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
 
@@ -43,7 +43,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
         Log.i("HDBluetoothAction", "Handshake at " + precisionTime);
 
         //Save handshake data to a file
-        int timestamp = getCurrentUnixTimestamp();
+        int timestamp = Util.getCurrentUnixTimestamp();
         String filename = timestamp + "-" + MainActivity.ANDROID_ID;
         FileOutputWriter fileOutputWriter = new FileOutputWriter(filename);
 
@@ -77,10 +77,6 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
             toast.show();
         }
 
-    }
-
-    private int getCurrentUnixTimestamp() {
-        return (int) (System.currentTimeMillis() / 1000L);
     }
 
     public class FTPUploadTask extends AsyncTask<String, Void, Void> {

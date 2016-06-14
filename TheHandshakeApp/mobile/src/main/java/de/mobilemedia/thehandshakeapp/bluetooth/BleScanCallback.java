@@ -9,7 +9,10 @@ import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 
 public class BleScanCallback extends ScanCallback {
+
     private byte[] data;
+    private int decodeWindowWidth = 1;
+
     @Override public void onScanResult(int callbackType, ScanResult result) {
         SparseArray<byte[]> manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData();
 
@@ -17,11 +20,35 @@ public class BleScanCallback extends ScanCallback {
                 , manufacturerSpecificData.toString()));
 
         try {
-            String msg = new String(manufacturerSpecificData.get(Config.BLE_TAG));
 
-            Log.d("BLE", String.format("data contained the message %s", msg));
+            byte[] receivedBytes = manufacturerSpecificData.get(Config.BLE_TAG);
+            int unixTimestamp = Util.getCurrentUnixTimestamp();
+            String decodedMessage = null;
 
-            MainActivity.receivedHandshakes.addHandshake(new HandshakeData(msg));
+            System.out.println("IN DATA IS: ");
+            Util.printByteArray(receivedBytes);
+
+            for (int timePos = unixTimestamp-decodeWindowWidth;
+                 timePos <= unixTimestamp+decodeWindowWidth;
+                 ++timePos) {
+
+                byte[] decoded = Util.endecrypt(receivedBytes, timePos);
+                String msg = new String(decoded);
+                System.out.println("Testing key " + timePos + " with result " + msg);
+
+                if (msg.startsWith("!") && msg.length() == 8) {
+                    decodedMessage = msg.substring(1);
+                    break;
+                }
+
+            }
+
+            if (decodedMessage != null) {
+                Log.d("BLE", String.format("data contained the message %s", decodedMessage));
+                MainActivity.receivedHandshakes.addHandshake(new HandshakeData(decodedMessage));
+            } else {
+                Log.e("BLE", "Error decoding the received message.");
+            }
         }
         catch (Exception e){
             Log.d("BLE", "couldn't find our BLE_TAG, probably some other data.");

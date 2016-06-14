@@ -16,6 +16,7 @@ import android.widget.TextView;
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
+import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 
 import static de.mobilemedia.thehandshakeapp.mobile_core.Config.BLE_SCAN_PERIOD;
 
@@ -100,7 +101,7 @@ public class MainFragment extends Fragment {
 
     public String createNewFileWriters(String filename) {
 
-        int unixTime = getCurrentUnixTimestamp();
+        int unixTime = Util.getCurrentUnixTimestamp();
 
         if (fileOutputWriter != null) {
             fileOutputWriter.closeStream();
@@ -149,10 +150,6 @@ public class MainFragment extends Fragment {
             ++messageCount;
         }
 
-    }
-
-    private int getCurrentUnixTimestamp() {
-        return (int) (System.currentTimeMillis() / 1000L);
     }
 
 }

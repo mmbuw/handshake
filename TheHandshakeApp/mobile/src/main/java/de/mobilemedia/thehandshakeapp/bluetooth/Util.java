@@ -15,6 +15,9 @@ import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -211,6 +214,74 @@ public class Util {
             Log.d("LOAD", "couldn't load map, class not found");
         }
         return null;
+    }
+
+    public static int getCurrentUnixTimestamp() {
+        return (int) (System.currentTimeMillis() / 1000L);
+    }
+
+    /* ENCRYPTION AND DECRYPTION HELPER FUNCTIONS */
+
+    public static byte[] endecrypt(byte[] inputText, int key) {
+
+        byte[] keyBytes = ByteBuffer.allocate(4).putInt(key).array();
+        byte[] stretchedKeyBytes = stretchKeySHA1(keyBytes, inputText.length);
+        byte[] encryption = xorBytes(inputText, stretchedKeyBytes);
+
+        return encryption;
+    }
+
+    public static byte[] stretchKeySHA1(byte[] keyByteArray, int outputLength) {
+
+        MessageDigest md = null;
+
+        try {
+            md = MessageDigest.getInstance("SHA-512");
+        } catch (NoSuchAlgorithmException nsae) {
+            nsae.printStackTrace();
+            return null;
+        }
+
+        byte[] sha1 = md.digest(keyByteArray);
+        byte[] trimmedOutput = new byte[outputLength];
+
+        if (outputLength > sha1.length) {
+            System.err.println("Error: message too long");
+            return null;
+        }
+
+        for (int pos = 0; pos < outputLength; ++pos) {
+            trimmedOutput[pos] = sha1[pos];
+        }
+
+        return trimmedOutput;
+
+    }
+
+    public static byte[] xorBytes(byte[] lhs, byte[] rhs) {
+
+        if (lhs.length != rhs.length) {
+            System.err.println("Error (xor): Array sizes do not match.");
+        }
+
+        byte[] output = new byte[lhs.length];
+
+        for (int pos = 0; pos < lhs.length; ++pos) {
+            output[pos] = (byte) (lhs[pos] ^ rhs[pos]);
+        }
+
+        return output;
+
+    }
+
+    public static void printByteArray(byte[] toPrint) {
+        String printString = "";
+
+        for (byte b : toPrint) {
+            printString += String.format("%02X ", b);
+        }
+
+        System.out.println(printString);
     }
 
 }

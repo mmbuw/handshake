@@ -5,6 +5,9 @@ import android.util.Log;
 import java.io.Serializable;
 
 public class HandshakeData implements Serializable, Comparable<HandshakeData> {
+
+    public static final String MESSAGE_START_DELIMETER = "!";
+
     private String longUrl;
     private String shortUrl;
     private static String prefix = "http://bit.ly/";
@@ -72,5 +75,9 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
 
     public void setLongUrl(String longUrl) {
         this.longUrl = longUrl;
+    }
+
+    public String getMessageToTransceive() {
+        return MESSAGE_START_DELIMETER + getHash();
     }
 }

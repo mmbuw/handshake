@@ -83,6 +83,20 @@ public class BleConnectionManager extends BroadcastReceiver {
         }
 
         if (!isScanActive) {
+
+            String messageToTransceive = myHandshakeData.getMessageToTransceive();
+            int unixTimestamp = Util.getCurrentUnixTimestamp();
+            byte[] encryptedMessageBytes = Util.endecrypt(messageToTransceive.getBytes(), unixTimestamp);
+            System.out.println("OUT DATA AT TIME " + unixTimestamp + " IS: ");
+            Util.printByteArray(encryptedMessageBytes);
+            byte[] selftest = Util.endecrypt(encryptedMessageBytes, unixTimestamp);
+            Log.i("BLE", "Self test: " + new String(selftest));
+
+            bleAdvData1 = new AdvertiseData.Builder()
+                    .setIncludeDeviceName(true)
+                    .setIncludeTxPowerLevel(false)
+                    .addManufacturerData(BLE_TAG, encryptedMessageBytes).build();
+
             bleAdvertiser.startAdvertising(bleAdvSettings, bleAdvData1, bleAdvCallback);
             bleScanner.startScan(bleScanCallback);
             isScanActive = true;
@@ -107,10 +121,6 @@ public class BleConnectionManager extends BroadcastReceiver {
 
     public void setMyHandshake(HandshakeData handshakeData) {
         myHandshakeData = handshakeData;
-        bleAdvData1 = new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
-                .setIncludeTxPowerLevel(false)
-                .addManufacturerData(BLE_TAG, myHandshakeData.getHash().getBytes()).build();
     }
 
     public static HandshakeData getMyHandshakeData() {
@@ -122,6 +132,7 @@ public class BleConnectionManager extends BroadcastReceiver {
     }
 
 
+    /* Method of BroadcastReceiver to detect changes in Bluetooth activation state */
     @Override
     public void onReceive(Context context, Intent intent) {
 
