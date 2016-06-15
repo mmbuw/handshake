@@ -11,7 +11,7 @@ import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 public class BleScanCallback extends ScanCallback {
 
     private byte[] data;
-    private int decodeWindowWidth = 1;
+    private int decodeWindowWidth = 5;
 
     @Override public void onScanResult(int callbackType, ScanResult result) {
         SparseArray<byte[]> manufacturerSpecificData = result.getScanRecord().getManufacturerSpecificData();

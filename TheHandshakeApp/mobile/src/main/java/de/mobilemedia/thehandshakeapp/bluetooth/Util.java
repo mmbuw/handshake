@@ -225,13 +225,13 @@ public class Util {
     public static byte[] endecrypt(byte[] inputText, int key) {
 
         byte[] keyBytes = ByteBuffer.allocate(4).putInt(key).array();
-        byte[] stretchedKeyBytes = stretchKeySHA1(keyBytes, inputText.length);
+        byte[] stretchedKeyBytes = stretchKeySHA512(keyBytes, inputText.length);
         byte[] encryption = xorBytes(inputText, stretchedKeyBytes);
 
         return encryption;
     }
 
-    public static byte[] stretchKeySHA1(byte[] keyByteArray, int outputLength) {
+    public static byte[] stretchKeySHA512(byte[] keyByteArray, int outputLength) {
 
         MessageDigest md = null;
 
@@ -242,16 +242,16 @@ public class Util {
             return null;
         }
 
-        byte[] sha1 = md.digest(keyByteArray);
+        byte[] sha512 = md.digest(keyByteArray);
         byte[] trimmedOutput = new byte[outputLength];
 
-        if (outputLength > sha1.length) {
+        if (outputLength > sha512.length) {
             System.err.println("Error: message too long");
             return null;
         }
 
         for (int pos = 0; pos < outputLength; ++pos) {
-            trimmedOutput[pos] = sha1[pos];
+            trimmedOutput[pos] = sha512[pos];
         }
 
         return trimmedOutput;
@@ -262,6 +262,7 @@ public class Util {
 
         if (lhs.length != rhs.length) {
             System.err.println("Error (xor): Array sizes do not match.");
+            return null;
         }
 
         byte[] output = new byte[lhs.length];

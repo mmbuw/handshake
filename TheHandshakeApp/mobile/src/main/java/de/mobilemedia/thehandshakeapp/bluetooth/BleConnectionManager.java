@@ -89,8 +89,6 @@ public class BleConnectionManager extends BroadcastReceiver {
             byte[] encryptedMessageBytes = Util.endecrypt(messageToTransceive.getBytes(), unixTimestamp);
             System.out.println("OUT DATA AT TIME " + unixTimestamp + " IS: ");
             Util.printByteArray(encryptedMessageBytes);
-            byte[] selftest = Util.endecrypt(encryptedMessageBytes, unixTimestamp);
-            Log.i("BLE", "Self test: " + new String(selftest));
 
             bleAdvData1 = new AdvertiseData.Builder()
                     .setIncludeDeviceName(true)
