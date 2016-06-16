@@ -83,6 +83,7 @@ public class MainFragment extends Fragment {
     public void onScanButtonClick() {
 
         final BTLEConnectionManager bleConnectionManager = parentActivity.getBleConnectionManager();
+        bleConnectionManager.setButtonToGreyOut(mShakeButton);
         bleConnectionManager.scanBTLE(true);
         bleConnectionManager.advertiseBTLE(true);
     }

@@ -3,6 +3,7 @@ package de.mobilemedia.thehandshakeapp.bluetooth;
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
@@ -16,9 +17,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -28,21 +28,23 @@ import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
 public class BTLEConnectionManager {
 
+    public static final String LOG_TAG = "BTLETest";
+
     private Activity mParentActivity;
 
-    private BluetoothAdapter mBluetoothAdapter;
+    public static BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private AdvertiseSettings mAdvertiseSettings;
     private ScanFilter mScanFilter;
     private ScanSettings mScanSettings;
 
+    private Button mButtonToGreyOut;
+
     private boolean mScanning;
     private boolean mAdvertising;
     private Handler mHandler;
     private static HandshakeData myHandshakeData;
-
-    public static final String LOG_TAG = "BTLETest";
 
     public BTLEConnectionManager(Activity parentActivity) {
 
@@ -119,12 +121,20 @@ public class BTLEConnectionManager {
 
             mBluetoothLeAdvertiser.startAdvertising(mAdvertiseSettings, dataToAdvertise, callback);
             mAdvertising = true;
+
+            if (mButtonToGreyOut != null)
+                mButtonToGreyOut.setEnabled(false);
+
             Log.i(LOG_TAG, "Start advertising");
 
         } else {
 
             mBluetoothLeAdvertiser.stopAdvertising(new AdvertiseCallback() {} );
             mAdvertising = false;
+
+            if (mButtonToGreyOut != null && !mScanning)
+                mButtonToGreyOut.setEnabled(true);
+
             Log.i(LOG_TAG, "Stop advertising");
 
         }
@@ -132,8 +142,6 @@ public class BTLEConnectionManager {
     }
 
     public void scanBTLE(final boolean enable) {
-
-        //Button actionButton = (Button) mParentActivity.findViewById(R.id.action_button);
 
         if (enable) {
             // Stops scanning after a pre-defined scan period
@@ -148,14 +156,20 @@ public class BTLEConnectionManager {
             List<ScanFilter> filterList = new ArrayList<ScanFilter>();
             filterList.add(mScanFilter);
             mBluetoothLeScanner.startScan(filterList, mScanSettings, new BTLEScanCallback(){} );
-            //actionButton.setEnabled(false);
+
+            if (mButtonToGreyOut != null)
+                mButtonToGreyOut.setEnabled(false);
+
             Log.i(LOG_TAG, "Start scanning");
 
         } else {
 
             mScanning = false;
             mBluetoothLeScanner.stopScan(new ScanCallback() {} );
-            //actionButton.setEnabled(true);
+
+            if (mButtonToGreyOut != null && !mAdvertising)
+                mButtonToGreyOut.setEnabled(true);
+
             Log.i(LOG_TAG, "Stop scanning");
 
         }
@@ -171,6 +185,10 @@ public class BTLEConnectionManager {
 
     public String getLongUrl() {
         return myHandshakeData.getLongUrl();
+    }
+
+    public void setButtonToGreyOut(Button buttonToGreyOut) {
+        mButtonToGreyOut = buttonToGreyOut;
     }
 
 }

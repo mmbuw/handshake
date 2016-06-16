@@ -1,8 +1,11 @@
 package de.mobilemedia.thehandshakeapp.bluetooth;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.Context;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -21,6 +24,13 @@ public class BTLEScanCallback extends ScanCallback {
 
     @Override
     public void onScanResult(int callbackType, ScanResult result) {
+
+        String remote = result.getDevice().getAddress();
+        String local = BTLEConnectionManager.mBluetoothAdapter.getAddress();
+
+        if (remote.equals(local)) {
+            return;
+        }
 
         try {
             byte[] receivedBytes = result.getScanRecord().getManufacturerSpecificData(Config.BLE_TAG);
