@@ -15,11 +15,8 @@ import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
-import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
 import de.mobilemedia.thehandshakeapp.bluetooth.Util;
-
-import static de.mobilemedia.thehandshakeapp.mobile_core.Config.BLE_SCAN_PERIOD;
 
 
 public class MainFragment extends Fragment {
