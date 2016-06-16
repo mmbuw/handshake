@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
+import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
 import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
 import de.mobilemedia.thehandshakeapp.bluetooth.Util;
@@ -84,19 +85,9 @@ public class MainFragment extends Fragment {
 
     public void onScanButtonClick() {
 
-        final BleConnectionManager bleConnectionManager = parentActivity.getBleConnectionManager();
-
-        if (!bleConnectionManager.isScanActive()) {
-            bleConnectionManager.startBle();
-            scanHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    bleConnectionManager.stopBle();
-                }
-            }, BLE_SCAN_PERIOD);
-        } else {
-            bleConnectionManager.stopBle();
-        }
+        final BTLEConnectionManager bleConnectionManager = parentActivity.getBleConnectionManager();
+        bleConnectionManager.scanBTLE(true);
+        bleConnectionManager.advertiseBTLE(true);
     }
 
     public String createNewFileWriters(String filename) {

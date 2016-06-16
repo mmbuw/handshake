@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.bluetooth.BleConnectionManager;
+import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity
             Manifest.permission.READ_PHONE_STATE
     };
 
-    private BleConnectionManager bleConnectionManager;
+    private BTLEConnectionManager bleConnectionManager;
     public static ReceivedHandshakes receivedHandshakes;
 
     private GoogleApiClient client;
@@ -117,8 +117,8 @@ public class MainActivity extends AppCompatActivity
         startService(startIntent);
 
         /* Bluetooth event broadcast receiver */
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(bleConnectionManager, filter);
+        //IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        //registerReceiver(bleConnectionManager, filter);
     }
 
     private void loadPrevData(){
@@ -194,10 +194,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void createBleConnectionManager() {
-        bleConnectionManager = new BleConnectionManager(getApplicationContext());
+        bleConnectionManager = new BTLEConnectionManager(this);
     }
 
-    public BleConnectionManager getBleConnectionManager() {
+    public BTLEConnectionManager getBleConnectionManager() {
         return bleConnectionManager;
     }
 
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(serviceReceiver);
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
-        unregisterReceiver(bleConnectionManager);
+        //unregisterReceiver(bleConnectionManager);
     }
 
     @Override
