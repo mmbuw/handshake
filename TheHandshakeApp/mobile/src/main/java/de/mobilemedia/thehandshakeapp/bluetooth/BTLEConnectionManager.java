@@ -81,6 +81,7 @@ public class BTLEConnectionManager {
                 .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .setConnectable(false)
+                .setTimeout(Config.BLE_ADVERTISE_PERIOD)
                 .build();
 
         mScanSettings = new ScanSettings.Builder()

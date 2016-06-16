@@ -17,6 +17,7 @@ import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
 import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
 import de.mobilemedia.thehandshakeapp.bluetooth.Util;
+import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 
 
 public class MainFragment extends Fragment {
@@ -86,6 +87,7 @@ public class MainFragment extends Fragment {
         bleConnectionManager.setButtonToGreyOut(mShakeButton);
         bleConnectionManager.scanBTLE(true);
         bleConnectionManager.advertiseBTLE(true);
+        MRDFeatureExtractor.myLastShakeTime = Util.getCurrentUnixTimestamp();
     }
 
     public String createNewFileWriters(String filename) {

@@ -2,7 +2,10 @@ package de.mobilemedia.thehandshakeapp.detection;
 
 import android.util.Log;
 
+import java.security.Timestamp;
 import java.util.*;
+
+import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
 public class MRDFeatureExtractor {
@@ -33,6 +36,9 @@ public class MRDFeatureExtractor {
 
     // Action when a handshake was detected
     HandshakeDetectedAction handshakeDetectedAction;
+
+    //Last handshake
+    public static int myLastShakeTime;
 
     //-------------------------------------------------------------------------
 
@@ -262,6 +268,7 @@ public class MRDFeatureExtractor {
 
         // actions performed when handshake was (not) detected
         if (handshakeDetected) {
+            myLastShakeTime = Util.getCurrentUnixTimestamp();
             handshakeDetectedAction.onHandshakeDetected(dataRecords, handshakeOscillationStart, handshakeOscillationEnd);
             Log.i("MRDFeatureExtractor", "Classification result: handshake");
 

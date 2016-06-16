@@ -11,6 +11,7 @@ import android.util.Log;
 import java.util.HashSet;
 import java.util.List;
 
+import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 
@@ -18,7 +19,7 @@ import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 public class BTLEScanCallback extends ScanCallback {
 
     public static final String LOG_TAG = BTLEScanCallback.class.getSimpleName();
-    public static final int DECODE_WINDOW_WIDTH = 5;
+    public static final int DECODE_WINDOW_WIDTH = 20;
 
     private HashSet<Integer> receivedMessages = new HashSet<Integer>();
 
@@ -36,16 +37,17 @@ public class BTLEScanCallback extends ScanCallback {
             byte[] receivedBytes = result.getScanRecord().getManufacturerSpecificData(Config.BLE_TAG);
 
             // prevent same message to be presented multiple times
-            if (processNewMessageBytes(receivedBytes)) {
+            //if (processNewMessageBytes(receivedBytes)) {
+            if (true) {
 
-                int unixTimestamp = Util.getCurrentUnixTimestamp();
+                int unixTimestampOfLastShake = MRDFeatureExtractor.myLastShakeTime;
                 String decodedMessage = null;
 
                 Log.d(LOG_TAG, "IN DATA IS: ");
                 Util.printByteArray(receivedBytes);
 
-                for (int timePos = unixTimestamp-DECODE_WINDOW_WIDTH;
-                     timePos <= unixTimestamp+DECODE_WINDOW_WIDTH;
+                for (int timePos = unixTimestampOfLastShake-DECODE_WINDOW_WIDTH;
+                     timePos <= unixTimestampOfLastShake+DECODE_WINDOW_WIDTH;
                      ++timePos) {
 
                     byte[] decoded = Util.endecrypt(receivedBytes, timePos);
