@@ -10,6 +10,8 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,6 +20,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
@@ -29,6 +34,8 @@ public class BTLEConnectionManager {
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private AdvertiseSettings mAdvertiseSettings;
+    private ScanFilter mScanFilter;
+    private ScanSettings mScanSettings;
 
     private boolean mScanning;
     private boolean mAdvertising;
@@ -72,6 +79,19 @@ public class BTLEConnectionManager {
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .setConnectable(false)
                 .build();
+
+        mScanSettings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setReportDelay(0)
+                .build();
+
+        byte[] manufacturerDataToMatch = {0};
+        byte[] dataMask = {0};
+
+        mScanFilter = new ScanFilter.Builder()
+                .setManufacturerData(Config.BLE_TAG, manufacturerDataToMatch, dataMask)
+                .build();
+
     }
 
     public void advertiseBTLE(final boolean enable) {
@@ -93,6 +113,7 @@ public class BTLEConnectionManager {
 
             AdvertiseData dataToAdvertise = new AdvertiseData.Builder()
                     .addManufacturerData(Config.BLE_TAG, encryptedMessageBytes)
+                    .setIncludeDeviceName(true)
                     .build();
             BTLEAdvertiseCallback callback = new BTLEAdvertiseCallback();
 
@@ -124,7 +145,9 @@ public class BTLEConnectionManager {
             }, Config.BLE_SCAN_PERIOD);
 
             mScanning = true;
-            mBluetoothLeScanner.startScan(new BTLEScanCallback() {} );
+            List<ScanFilter> filterList = new ArrayList<ScanFilter>();
+            filterList.add(mScanFilter);
+            mBluetoothLeScanner.startScan(filterList, mScanSettings, new BTLEScanCallback(){} );
             //actionButton.setEnabled(false);
             Log.i(LOG_TAG, "Start scanning");
 
