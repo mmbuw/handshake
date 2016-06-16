@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public class HandshakeData implements Serializable, Comparable<HandshakeData> {
 
-    public static final String MESSAGE_START_DELIMETER = "!";
+    public static final String MESSAGE_START_DELIMETER = "!!";
 
     private String longUrl;
     private String shortUrl;

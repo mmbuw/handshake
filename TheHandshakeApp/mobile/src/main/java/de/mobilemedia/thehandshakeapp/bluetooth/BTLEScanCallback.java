@@ -52,8 +52,8 @@ public class BTLEScanCallback extends ScanCallback {
                     String msg = new String(decoded);
                     Log.d(LOG_TAG, "Testing key " + timePos + " with result " + msg);
 
-                    if (msg.startsWith("!") && msg.length() == 8) {
-                        decodedMessage = msg.substring(1);
+                    if (msg.startsWith("!!") && msg.length() == 9) {
+                        decodedMessage = msg.substring(2);
                         break;
                     }
 

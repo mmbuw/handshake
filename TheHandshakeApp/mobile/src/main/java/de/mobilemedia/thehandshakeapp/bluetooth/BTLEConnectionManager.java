@@ -12,6 +12,7 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
@@ -165,7 +166,7 @@ public class BTLEConnectionManager {
         } else {
 
             mScanning = false;
-            mBluetoothLeScanner.stopScan(new ScanCallback() {} );
+            mBluetoothLeScanner.stopScan(new ScanCallback() {});
 
             if (mButtonToGreyOut != null && !mAdvertising)
                 mButtonToGreyOut.setEnabled(true);
