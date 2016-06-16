@@ -282,7 +282,7 @@ public class Util {
             printString += String.format("%02X ", b);
         }
 
-        System.out.println(printString);
+        Log.d("Util", printString);
     }
 
 }
