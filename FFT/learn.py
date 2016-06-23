@@ -1,4 +1,4 @@
-from fft_utils import get_fft_difference, load_values_from_file
+import fft_utils
 from sklearn import tree
 from sklearn.datasets import load_iris
 from sklearn.externals.six import StringIO
@@ -12,8 +12,6 @@ from sklearn.metrics import confusion_matrix
 import numpy as np
 from subprocess import call
 
-positive_samples = 0
-negative_samples = 0
 feature_names = []
 
 def get_instance_from_pair(pair):
@@ -22,20 +20,11 @@ def get_instance_from_pair(pair):
 
 	target = get_target(file1, file2)
 
-	if target == 1:
-		global positive_samples
-		positive_samples+=1
-	else:
-		global negative_samples
-		negative_samples+=1
-
-	val1 = [float(x) for x in load_values_from_file(file1, 2)]
-	val2 = [float(x) for x in load_values_from_file(file2, 1)]
+	val1 = [float(x) for x in fft_utils.load_values_from_file(file1, 2)]
+	val2 = [float(x) for x in fft_utils.load_values_from_file(file2, 1)]
 
 	values = np.array([])
-	values = np.concatenate((values, get_fft_difference(file1, file2, 250, 0)))
-
-	#print len(values)
+	values = np.concatenate((values, fft_utils.get_fft_difference(file1, file2, 0)))
 
 	global feature_names
 	if len(feature_names) == 0:
@@ -45,14 +34,24 @@ def get_instance_from_pair(pair):
 			feature_names.append("fft_y_"+str(i))
 		for i in range(len(values)):
 			feature_names.append("fft_z_"+str(i))
+		for i in range(len(values)):
+			feature_names.append("fft_xy_"+str(i))
+		for i in range(len(values)):
+			feature_names.append("fft_xz_"+str(i))			
+		for i in range(len(values)):
+			feature_names.append("fft_yz_"+str(i))
+		for i in range(len(values)):
+			feature_names.append("magnitude_"+str(i))		
 		feature_names.append("mean")
 		feature_names.append("range")
 		feature_names.append("zero_cross")
 
-	values = np.concatenate((values, get_fft_difference(file1, file2, 250, 1)))
-	#print len(values)
-	values = np.concatenate((values, get_fft_difference(file1, file2, 250, 2)))
-	#print len(values)
+	values = np.concatenate((values, fft_utils.get_fft_difference(file1, file2, 1)))
+	values = np.concatenate((values, fft_utils.get_fft_difference(file1, file2, 2)))
+	values = np.concatenate((values, fft_utils.get_fft_xy_difference(file1, file2)))
+	values = np.concatenate((values, fft_utils.get_fft_xz_difference(file1, file2)))
+	values = np.concatenate((values, fft_utils.get_fft_yz_difference(file1, file2)))
+	values = np.concatenate((values, fft_utils.get_fft_magnitude_difference(file1, file2)))
 
 	mean_difference = abs(np.mean(val1) - np.mean(val2))
 	values = np.concatenate((values, [mean_difference]))
@@ -74,8 +73,8 @@ def get_data_and_target():
 	for pair in txtfilepairs:
 		if is_same_device(pair[0], pair[1]):
 			continue
-		if is_signal_too_short(pair[0], pair[1]):
-			continue
+		#if is_signal_too_short(pair[0], pair[1]):
+			#continue
 		instance_values, instance_target = get_instance_from_pair(pair)
 
 		if instance_target == 1:
@@ -107,9 +106,6 @@ def is_signal_too_short(file1, file2):
 
 def main():
 	(data, target) = get_data_and_target()
-	global positive_samples,negative_samples
-	print "positive samples:\t"+str(positive_samples)
-	print "negative samples:\t"+str(negative_samples)
 
 	with open("data.arff", 'w') as f:
 		f.write('@RELATION handshake_matching\n')
@@ -127,13 +123,12 @@ def main():
 	clf = tree.DecisionTreeClassifier(
 		criterion="entropy"
 	)
+
 	clf = clf.fit(data, target)
 
 	predicted = clf.predict(data)
 
 	cm = confusion_matrix(target, predicted)
-
-	print cm
 
 	scores = cross_validation.cross_val_score(clf, data, target, cv=4)
 	print  "cross validation mean:\t"+str(np.mean(scores))
