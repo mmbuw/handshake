@@ -13,6 +13,7 @@ public class Config {
 
     public static int BLE_ADVERTISE_MODE = AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
     public static int BLE_ADVERTISE_TX_POWER_LVL = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
+    public static int BLE_MIN_RSSI = -75;
 
     public static String HANDSHAKE_FILE_NAME = "handshakes.map";
     public static String SETTINGS_FILE_NAME = "settings.map";

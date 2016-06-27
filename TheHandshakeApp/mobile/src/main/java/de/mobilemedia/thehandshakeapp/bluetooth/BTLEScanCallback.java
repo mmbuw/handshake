@@ -1,11 +1,8 @@
 package de.mobilemedia.thehandshakeapp.bluetooth;
 
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.Context;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -19,7 +16,7 @@ import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 public class BTLEScanCallback extends ScanCallback {
 
     public static final String LOG_TAG = BTLEScanCallback.class.getSimpleName();
-    public static final int DECODE_WINDOW_WIDTH = 20;
+    public static final int DECODE_WINDOW_WIDTH = 2;
 
     private HashSet<Integer> receivedMessages = new HashSet<Integer>();
 
@@ -29,8 +26,14 @@ public class BTLEScanCallback extends ScanCallback {
         String remote = result.getDevice().getAddress();
         String local = BTLEConnectionManager.mBluetoothAdapter.getAddress();
 
+        System.out.println(result.getRssi());
+
         if (remote.equals(local)) {
             return;
+        }
+
+        if (result.getRssi() < Config.BLE_MIN_RSSI) {
+            Log.d(LOG_TAG, "Omitting package due to RSSI value.");
         }
 
         try {

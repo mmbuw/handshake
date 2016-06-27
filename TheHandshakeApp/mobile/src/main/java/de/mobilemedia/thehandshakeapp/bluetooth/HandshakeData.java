@@ -1,7 +1,5 @@
 package de.mobilemedia.thehandshakeapp.bluetooth;
 
-import android.util.Log;
-
 import java.io.Serializable;
 
 public class HandshakeData implements Serializable, Comparable<HandshakeData> {
@@ -13,7 +11,6 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
     private static String prefix = "http://bit.ly/";
     private String hash;
     private Long timestamp;
-    //HandshakeSignature signature;
 
     public HandshakeData(String urlOrHash){
         this.timestamp = System.currentTimeMillis();

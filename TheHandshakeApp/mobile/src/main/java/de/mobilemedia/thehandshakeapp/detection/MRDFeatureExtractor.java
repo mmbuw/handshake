@@ -2,7 +2,6 @@ package de.mobilemedia.thehandshakeapp.detection;
 
 import android.util.Log;
 
-import java.security.Timestamp;
 import java.util.*;
 
 import de.mobilemedia.thehandshakeapp.bluetooth.Util;

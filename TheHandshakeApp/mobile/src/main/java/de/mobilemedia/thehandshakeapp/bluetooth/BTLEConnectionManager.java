@@ -1,9 +1,7 @@
 package de.mobilemedia.thehandshakeapp.bluetooth;
 
-import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
@@ -12,7 +10,6 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
@@ -78,8 +75,8 @@ public class BTLEConnectionManager {
         mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
 
         mAdvertiseSettings = new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+                .setAdvertiseMode(Config.BLE_ADVERTISE_MODE)
+                .setTxPowerLevel(Config.BLE_ADVERTISE_TX_POWER_LVL)
                 .setConnectable(false)
                 .setTimeout(Config.BLE_ADVERTISE_PERIOD)
                 .build();
@@ -117,7 +114,6 @@ public class BTLEConnectionManager {
 
             AdvertiseData dataToAdvertise = new AdvertiseData.Builder()
                     .addManufacturerData(Config.BLE_TAG, encryptedMessageBytes)
-                    .setIncludeDeviceName(true)
                     .build();
             BTLEAdvertiseCallback callback = new BTLEAdvertiseCallback();
 
