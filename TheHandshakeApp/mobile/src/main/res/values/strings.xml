@@ -5,6 +5,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="explanation">Find a nice person and shake hands to exchange your contact information!</string>
+    <string name="you_are">You are broadcasting the following ID:</string>
     <string name="artificial_handshake_button_text">Artificial Handshake</string>
 
     <string name="token">d9bf1e2bdc0a4d6f585829ec9bf0d128b6be586c</string>

@@ -6,13 +6,11 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * Created by neffle on 12.05.16.
- */
 public class ReceivedHandshakes {
     private static ReceivedHandshakes receivedHandshakes;
     private Context appContext;

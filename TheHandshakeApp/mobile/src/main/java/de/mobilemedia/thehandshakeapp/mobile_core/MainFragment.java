@@ -25,9 +25,9 @@ public class MainFragment extends Fragment {
 
     MainActivity parentActivity;
 
-    private TextView mTextView;
     private Button mShakeButton;
     private ImageView mImageView;
+    private TextView mYouAreView;
 
     private FileOutputWriter fileOutputWriter;
     private Handler mHandler;
@@ -79,9 +79,11 @@ public class MainFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mTextView = (TextView) view.findViewById(R.id.mainTextView);
         mShakeButton = (Button) view.findViewById(R.id.shakeButton);
         mImageView = (ImageView) view.findViewById(R.id.handshakeImageView);
+        mYouAreView = (TextView) view.findViewById(R.id.you_are_value);
+
+        displayOwnHandshakeData();
 
         fileOutputWriter = null;
         mShakeButton.setOnClickListener(new View.OnClickListener() {
@@ -92,6 +94,20 @@ public class MainFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public void displayOwnHandshakeData() {
+        try {
+            String youAreValue = parentActivity.getBleConnectionManager().getMyHandshakeData().getHash();
+            mYouAreView.setText(youAreValue);
+        } catch (Exception e) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    displayOwnHandshakeData();
+                }
+            }, 1000);
+        }
     }
 
     public void onHandshake() {
@@ -146,7 +162,7 @@ public class MainFragment extends Fragment {
 
 
         /* Update visualization */
-        mImageView.setColorFilter(Color.BLUE);
+        mImageView.setColorFilter(0xff444444);
 
         mHandler.removeCallbacksAndMessages(null);
         mHandler.postDelayed(new Runnable() {
