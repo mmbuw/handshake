@@ -33,14 +33,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
                                     int startSample,
                                     int endSample) {
 
-        mFragmentInstance.onScanButtonClick();
-        long precisionTime = System.currentTimeMillis();
-        String text = "Handshake detected";
-        text += "\n" + new Date().toString();
-        text += "\n" + precisionTime;
-        int duration = Toast.LENGTH_SHORT;
-
-        Log.i("HDBluetoothAction", "Handshake at " + precisionTime);
+        mFragmentInstance.onHandshake();
 
         //Save handshake data to a file
         int timestamp = Util.getCurrentUnixTimestamp();
@@ -68,14 +61,6 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
 
         FTPUploadTask ftpu = new FTPUploadTask();
         ftpu.execute(filename);
-
-        //Show a toast to show detected handshake
-        Context context = mFragmentInstance.getContext();
-
-        if (context != null) {
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-        }
 
     }
 
