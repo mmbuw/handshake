@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static String ANDROID_ID;
+    public static boolean isOpen;
 
     private Toolbar toolbar;
     private NavigationView navigationView;
@@ -118,6 +119,12 @@ public class MainActivity extends AppCompatActivity
         /* Bluetooth event broadcast receiver */
         //IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         //registerReceiver(bleConnectionManager, filter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isOpen = true;
     }
 
     private void loadPrevData(){
@@ -206,6 +213,7 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(serviceReceiver);
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
+        isOpen = true;
         //unregisterReceiver(bleConnectionManager);
     }
 

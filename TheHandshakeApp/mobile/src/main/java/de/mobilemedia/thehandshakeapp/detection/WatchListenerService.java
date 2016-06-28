@@ -1,6 +1,7 @@
 package de.mobilemedia.thehandshakeapp.detection;
 
 import android.content.Intent;
+import android.util.Log;
 
 
 import com.google.android.gms.wearable.MessageEvent;
@@ -9,6 +10,8 @@ import com.google.android.gms.wearable.WearableListenerService;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+
+import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 
 public class WatchListenerService extends WearableListenerService {
 
@@ -39,10 +42,19 @@ public class WatchListenerService extends WearableListenerService {
     }
 
     private void sendDataToActivity(float[] data) {
+
+        if (!MainActivity.isOpen) {
+            Intent startIntent = new Intent(this, MainActivity.class);
+            startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startIntent);
+        }
+
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("accelerationAction");
         broadcastIntent.putExtra("acceleration", data);
         sendBroadcast(broadcastIntent);
+
+
     }
 
 }
