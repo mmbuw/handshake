@@ -4,9 +4,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="start_scan_button_text">shake your booty</string>
-    <string name="interrupt_scan_button_text">stop shaking</string>
+    <string name="explanation">Find a nice person and shake hands to exchange your contact information!</string>
+    <string name="artificial_handshake_button_text">Artificial Handshake</string>
 
     <string name="token">d9bf1e2bdc0a4d6f585829ec9bf0d128b6be586c</string>
     <string name="list_title">Received Handshakes</string>

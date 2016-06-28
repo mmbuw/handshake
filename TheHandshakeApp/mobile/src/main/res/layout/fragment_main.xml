@@ -2,62 +2,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.mobilemedia.thehandshakeapp.mobile_core.MainFragment">
+    tools:context="de.mobilemedia.thehandshakeapp.mobile_core.MainFragment"
+    android:weightSum="1">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/mainTextView"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="122dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create new recording file"
-        android:id="@+id/butNewFile"
-        android:layout_marginTop="31dp"
-        android:layout_below="@+id/mainTextView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        <ImageView
+            android:layout_width="230dp"
+            android:layout_height="260dp"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:id="@+id/handshakeImageView"
+            android:src="@drawable/ic_menu_handshake" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Please create a new recording file"
-        android:id="@+id/textStatus"
-        android:layout_below="@+id/butNewFile"
-        android:layout_alignParentStart="true" />
+        <TextView
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:text="@string/explanation"
+            android:id="@+id/mainTextView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/inputFileName"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="26dp"
-        android:layout_alignEnd="@+id/butNewFile" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="File name (optional)"
-        android:id="@+id/textView"
-        android:layout_below="@+id/textStatus"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="47dp" />
+    </LinearLayout>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/start_scan_button_text"
+        android:layout_gravity="center"
+        android:text="@string/artificial_handshake_button_text"
         android:id="@+id/shakeButton"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="93dp" />
+        android:layout_marginBottom="20dp"/>
 
 </RelativeLayout>

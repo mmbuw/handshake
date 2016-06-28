@@ -1,6 +1,6 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
-
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -8,9 +8,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
@@ -25,18 +26,15 @@ public class MainFragment extends Fragment {
     MainActivity parentActivity;
 
     private TextView mTextView;
-    private Button mNewFileButton;
-    private TextView mStatusTextView;
-    private EditText mFileNameEditText;
     private Button mShakeButton;
-    private Spinner mSpinner;
+    private ImageView mImageView;
 
     private FileOutputWriter fileOutputWriter;
+    private Handler mHandler;
 
-    private final Handler scanHandler = new Handler();
-    private long lastMessageTimestamp = System.currentTimeMillis();
-    private int messageCount = 0;
-
+    private Animation mShakeAnimation;
+    private int mCurrentAnimationRepeatCount;
+    private int mAnimationRepeats;
 
     public MainFragment() {}
 
@@ -45,6 +43,34 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         parentActivity = (MainActivity) getActivity();
         parentActivity.setTitle(R.string.app_name);
+
+        mHandler = new Handler();
+
+        mShakeAnimation = AnimationUtils.loadAnimation(parentActivity, R.anim.handshake_animation);
+        mShakeAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+                if (mCurrentAnimationRepeatCount < mAnimationRepeats-1) {
+                    Animation repeat = AnimationUtils.loadAnimation(parentActivity, R.anim.handshake_animation);
+                    repeat.setAnimationListener(this);
+                    mImageView.startAnimation(repeat);
+                    mCurrentAnimationRepeatCount++;
+                }
+                else {
+                    mCurrentAnimationRepeatCount = 0;
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+
+        mCurrentAnimationRepeatCount = 0;
+        mAnimationRepeats = 5;
     }
 
     @Override
@@ -54,40 +80,29 @@ public class MainFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         mTextView = (TextView) view.findViewById(R.id.mainTextView);
-        mNewFileButton = (Button) view.findViewById(R.id.butNewFile);
-        mStatusTextView = (TextView) view.findViewById(R.id.textStatus);
-        mFileNameEditText = (EditText) view.findViewById(R.id.inputFileName);
         mShakeButton = (Button) view.findViewById(R.id.shakeButton);
+        mImageView = (ImageView) view.findViewById(R.id.handshakeImageView);
 
         fileOutputWriter = null;
-
-        mNewFileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String filename = mFileNameEditText.getText().toString();
-                filename = createNewFileWriters(filename);
-                mFileNameEditText.setText("");
-                mStatusTextView.setText("Current file has name " + filename);
-            }
-        });
-
         mShakeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onScanButtonClick();
+                onHandshake();
             }
         });
 
         return view;
     }
 
-    public void onScanButtonClick() {
+    public void onHandshake() {
 
         final BTLEConnectionManager bleConnectionManager = parentActivity.getBleConnectionManager();
         bleConnectionManager.setButtonToGreyOut(mShakeButton);
         bleConnectionManager.scanBTLE(true);
         bleConnectionManager.advertiseBTLE(true);
         MRDFeatureExtractor.myLastShakeTime = Util.getCurrentUnixTimestamp();
+
+        mImageView.startAnimation(mShakeAnimation);
     }
 
     public String createNewFileWriters(String filename) {
@@ -129,17 +144,17 @@ public class MainFragment extends Fragment {
             }
         }
 
-        /* Update FPS display */
-        if (messageCount == 10) {
-            long nowTime = System.currentTimeMillis();
-            long diffTime = nowTime - lastMessageTimestamp;
-            double diffSeconds = diffTime / 1000.0;
-            mTextView.setText(10.0 / diffSeconds + "");
-            messageCount = 0;
-            lastMessageTimestamp = nowTime;
-        } else {
-            ++messageCount;
-        }
+
+        /* Update visualization */
+        mImageView.setColorFilter(Color.BLUE);
+
+        mHandler.removeCallbacksAndMessages(null);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mImageView.setColorFilter(Color.BLACK);
+            }
+        }, 200);
 
     }
 
