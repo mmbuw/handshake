@@ -116,10 +116,6 @@ public class MainActivity extends AppCompatActivity
         /* Start internal acceleration reader */
         Intent startIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         startService(startIntent);
-
-        /* Bluetooth event broadcast receiver */
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(bleConnectionManager, filter);
     }
 
     @Override
@@ -189,6 +185,10 @@ public class MainActivity extends AppCompatActivity
 
     public void createBleConnectionManager() {
         bleConnectionManager = new BTLEConnectionManager(this);
+
+        /* Bluetooth event broadcast receiver */
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(bleConnectionManager, filter);
     }
 
     public BTLEConnectionManager getBleConnectionManager() {
@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
         isOpen = false;
+        unregisterReceiver(bleConnectionManager);
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Toast;
 
 import de.mobilemedia.thehandshakeapp.R;
@@ -31,6 +32,8 @@ public class PrefsFragement extends PreferenceFragmentCompat implements SharedPr
         mUrlShortPrefName = getString(R.string.url_short_pref_id);
         mSuffixPrefName = getString(R.string.suffix_pref_id);
 
+
+        //Set summaries of preferences
         Preference urlPref = findPreference(mUrlPrefName);
         urlPref.setSummary(beautifyPreferenceString(mSharedPreferences.getString(mUrlPrefName, "")));
         Preference urlShortPref = findPreference(mUrlShortPrefName);
@@ -38,6 +41,27 @@ public class PrefsFragement extends PreferenceFragmentCompat implements SharedPr
         urlShortPref.setEnabled(false);
         Preference suffixPref = findPreference(mSuffixPrefName);
         suffixPref.setSummary(beautifyPreferenceString(mSharedPreferences.getString(mSuffixPrefName, "")));
+
+        //URL preference validation
+        urlPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String newUrl = (String) newValue;
+
+                if (!newUrl.startsWith("http://")) {
+                    Toast.makeText(mParentActivity, "Error: URL must start with http://", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                else if (!Patterns.WEB_URL.matcher(newUrl).matches()) {
+                    Toast.makeText(mParentActivity, "Error: this is not a valid URL", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                return true;
+            }
+        });
+
     }
 
     @Override
