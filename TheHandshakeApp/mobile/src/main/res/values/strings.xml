@@ -8,6 +8,20 @@
     <string name="you_are">You are broadcasting the following ID:</string>
     <string name="artificial_handshake_button_text">Artificial Handshake</string>
 
+    <string name="url_pref_id">url_preference</string>
+    <string name="url_short_pref_id">url_short_preference</string>
+    <string name="suffix_pref_id">suffix_preference</string>
+
+    <string name="url_pref_title">URL to broadcast</string>
+    <string name="url_short_pref_title">Shortened URL</string>
+    <string name="suffix_pref_title">Handshake file suffix</string>
+    <string name="url_pref_desc">Please enter the URL to be broadcasted</string>
+    <string name="url_short_pref_desc">--- edited automatically ---</string>
+    <string name="suffix_pref_desc">Please enter the suffix for handshake files</string>
+    <string name="url_pref_default">http://www.binaryhexconverter.com/hex-to-decimal-converter</string>
+    <string name="url_short_pref_default">http://bit.ly/1mmNNln</string>
+    <string name="suffix_pref_default"></string>
+
     <string name="token">d9bf1e2bdc0a4d6f585829ec9bf0d128b6be586c</string>
     <string name="list_title">Received Handshakes</string>
     <string name="fragment_setting_title">Settings</string>

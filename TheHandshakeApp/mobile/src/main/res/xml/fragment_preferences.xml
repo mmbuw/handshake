@@ -1,0 +1,25 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+
+    <EditTextPreference
+        android:key="@string/url_pref_id"
+        android:title="@string/url_pref_title"
+        android:dialogTitle="@string/url_pref_desc"
+        android:defaultValue="@string/url_pref_default" />
+
+    <EditTextPreference
+        android:key="@string/url_short_pref_id"
+        android:title="@string/url_short_pref_title"
+        android:dialogTitle="@string/url_short_pref_desc"
+        android:defaultValue="@string/url_short_pref_default" />
+
+    <EditTextPreference
+        android:key="@string/suffix_pref_id"
+        android:title="@string/suffix_pref_title"
+        android:dialogTitle="@string/suffix_pref_desc"
+        android:defaultValue="@string/suffix_pref_default" />
+
+</PreferenceScreen>

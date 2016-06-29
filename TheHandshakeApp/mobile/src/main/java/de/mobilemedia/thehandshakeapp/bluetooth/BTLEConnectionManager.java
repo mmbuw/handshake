@@ -14,8 +14,10 @@ import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
 public class BTLEConnectionManager extends BroadcastReceiver {
@@ -49,8 +52,13 @@ public class BTLEConnectionManager extends BroadcastReceiver {
 
         mParentActivity = parentActivity;
         mHandler = new Handler();
-        myHandshakeData = new HandshakeData(Config.INITIAL_HANDSHAKE_SHORTURL,
-                                            Config.INITIAL_HANDSHAKE_LONGURL);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mParentActivity);
+        String longUrl = prefs.getString(mParentActivity.getString(R.string.url_pref_id),
+                                         mParentActivity.getString(R.string.url_pref_default));
+        String shortUrl = prefs.getString(mParentActivity.getString(R.string.url_short_pref_id),
+                                          mParentActivity.getString(R.string.url_short_pref_default));
+        myHandshakeData = new HandshakeData(shortUrl, longUrl);
 
         // Determine whether BLE is supported on the device
         if (!mParentActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {

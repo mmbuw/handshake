@@ -135,13 +135,6 @@ public class MainActivity extends AppCompatActivity
             receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
             Log.d("LOAD", "session handshakes loaded");
         }
-        File settingsFile = new File(this.getFilesDir(), Config.SETTINGS_FILE_NAME);
-        Map settingsMap = loadMapFromFile(settingsFile);
-        if (settingsMap != null) {
-            HandshakeData myHandshake = (HandshakeData) settingsMap.get("MY_HANDSHAKE");
-            if (myHandshake != null) bleConnectionManager.setMyHandshake(myHandshake);
-            Log.d("LOAD", "settings loaded");
-        }
     }
 
     @Override
@@ -155,12 +148,6 @@ public class MainActivity extends AppCompatActivity
         File handshakesFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
         saveMapToFile(handshakesMap, handshakesFile);
         Log.d("SAVE", "session handshakes saved");
-
-        HashMap<String, Object> settingsMap = new HashMap<>(1);
-        settingsMap.put("MY_HANDSHAKE", bleConnectionManager.getMyHandshakeData());
-        File settingsFile = new File(this.getFilesDir(), Config.SETTINGS_FILE_NAME);
-        saveMapToFile(settingsMap, settingsFile);
-        Log.d("SAVE", "session settings saved");
     }
 
     /* Requests the necessary permissions from the operating system */
@@ -242,8 +229,8 @@ public class MainActivity extends AppCompatActivity
             HandshakeListFragment listFragment = new HandshakeListFragment();
             fragmentTransaction.replace(R.id.fragment_container, listFragment);
         } else if (id == R.id.nav_settings) {
-            SettingsFragment settingsFragment = new SettingsFragment();
-            fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
+            PrefsFragement prefsFragement = new PrefsFragement();
+            fragmentTransaction.replace(R.id.fragment_container, prefsFragement);
         }
 
         fragmentTransaction.commit();
