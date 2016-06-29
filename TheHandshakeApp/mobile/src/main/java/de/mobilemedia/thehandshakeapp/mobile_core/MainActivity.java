@@ -202,7 +202,6 @@ public class MainActivity extends AppCompatActivity
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
         isOpen = false;
-        unregisterReceiver(bleConnectionManager);
     }
 
     @Override
