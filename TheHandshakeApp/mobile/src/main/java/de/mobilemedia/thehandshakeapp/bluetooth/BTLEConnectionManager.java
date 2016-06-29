@@ -11,6 +11,7 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,7 +25,7 @@ import java.util.List;
 
 import de.mobilemedia.thehandshakeapp.mobile_core.Config;
 
-public class BTLEConnectionManager {
+public class BTLEConnectionManager extends BroadcastReceiver {
 
     public static final String LOG_TAG = "BTLETest";
 
@@ -69,7 +70,14 @@ public class BTLEConnectionManager {
         } else if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             mParentActivity.startActivityForResult(enableBtIntent, 1);
+        } else {
+            initBluetoothObjects();
         }
+
+
+    }
+
+    public void initBluetoothObjects() {
 
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
@@ -96,6 +104,15 @@ public class BTLEConnectionManager {
     }
 
     public void advertiseBTLE(final boolean enable) {
+
+        if (!mBluetoothAdapter.isEnabled()) {
+            Toast toast = Toast.makeText(mParentActivity,
+                    "Could not broadcast URL. Bluetooth is not enabled.",
+                    Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
 
         if (enable) {
             // Stops advertising after a pre-defined scan period
@@ -140,6 +157,14 @@ public class BTLEConnectionManager {
     }
 
     public void scanBTLE(final boolean enable) {
+
+        if (!mBluetoothAdapter.isEnabled()) {
+            Toast toast = Toast.makeText(mParentActivity,
+                    "Could not start scan. Bluetooth is not enabled.",
+                    Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
 
         if (enable) {
             // Stops scanning after a pre-defined scan period
@@ -187,6 +212,26 @@ public class BTLEConnectionManager {
 
     public void setButtonToGreyOut(Button buttonToGreyOut) {
         mButtonToGreyOut = buttonToGreyOut;
+    }
+
+
+    /* Method of BroadcastReceiver to detect changes in Bluetooth activation state */
+    @Override
+    public void onReceive(Context context, Intent intent) {
+
+        final String action = intent.getAction();
+
+        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+
+            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                    BluetoothAdapter.ERROR);
+
+            if (state == BluetoothAdapter.STATE_ON) {
+                initBluetoothObjects();
+            }
+
+        }
+
     }
 
 }
