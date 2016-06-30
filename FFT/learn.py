@@ -11,8 +11,21 @@ from sklearn import cross_validation
 from sklearn.metrics import confusion_matrix
 import numpy as np
 from subprocess import call
+import matplotlib.pyplot as plt
 
 feature_names = []
+
+fft_y_0 = []
+fft_y_2 = []
+fft_y_1 = []
+fft_magnitude_0 = []
+fft_yz_3 = []
+fft_magnitude_3 = []
+fft_yz_0 = []
+fft_z_6 = []
+fft_xy_1 = []
+fft_yz_2 = []
+fft_z_0 = []
 
 def get_instance_from_pair(pair):
 	file1 = pair[0]
@@ -24,7 +37,8 @@ def get_instance_from_pair(pair):
 	val2 = [float(x) for x in fft_utils.load_values_from_file(file2, 1)]
 
 	values = np.array([])
-	values = np.concatenate((values, fft_utils.get_fft_difference(file1, file2, 0)))
+	fft_x = fft_utils.get_fft_difference(file1, file2, 0)
+	values = np.concatenate((values, fft_x))
 
 	global feature_names
 	if len(feature_names) == 0:
@@ -45,13 +59,51 @@ def get_instance_from_pair(pair):
 		feature_names.append("mean")
 		feature_names.append("range")
 		feature_names.append("zero_cross")
+	
 
-	values = np.concatenate((values, fft_utils.get_fft_difference(file1, file2, 1)))
-	values = np.concatenate((values, fft_utils.get_fft_difference(file1, file2, 2)))
-	values = np.concatenate((values, fft_utils.get_fft_xy_difference(file1, file2)))
-	values = np.concatenate((values, fft_utils.get_fft_xz_difference(file1, file2)))
-	values = np.concatenate((values, fft_utils.get_fft_yz_difference(file1, file2)))
-	values = np.concatenate((values, fft_utils.get_fft_magnitude_difference(file1, file2)))
+	fft_y = fft_utils.get_fft_difference(file1, file2, 1)
+	values = np.concatenate((values, fft_y))
+
+	fft_z = fft_utils.get_fft_difference(file1, file2, 2)
+	values = np.concatenate((values, fft_z))
+
+	fft_xy = fft_utils.get_fft_xy_difference(file1, file2)
+	values = np.concatenate((values, fft_xy))
+
+	fft_xz  = fft_utils.get_fft_xz_difference(file1, file2)
+	values = np.concatenate((values, fft_xz))
+
+	fft_yz = fft_utils.get_fft_yz_difference(file1, file2)
+	values = np.concatenate((values, fft_yz))
+
+	fft_magnitude = fft_utils.get_fft_magnitude_difference(file1, file2)
+	values = np.concatenate((values, fft_magnitude))
+
+	if target == 1:
+		fft_y_0.append(fft_y[0])
+		fft_y_2.append(fft_y[2])
+		fft_y_1.append(fft_y[1])
+		fft_magnitude_0.append(fft_magnitude[0])
+		fft_yz_3.append(fft_yz[3])
+		fft_magnitude_3.append(fft_magnitude[3])
+		fft_yz_0.append(fft_yz[0])
+		fft_z_6.append(fft_z[6])
+		fft_xy_1.append(fft_xy[1])
+		fft_yz_2.append(fft_yz[2])
+		fft_z_0.append(fft_z[0])
+		#print "fft_y[2]: "+str(fft_y[2])
+		#print "fft_y[1]: "+str(fft_y[1])
+		#print "fft_magnitude[0]: "+str(fft_magnitude[0])
+		#print "fft_yz[3]: "+str(fft_yz[3])
+		#print "fft_magnitude[3]: "+str(fft_magnitude[3])
+		#print "fft_yz[0]: "+str(fft_yz[0])
+		#print "fft_z[6]: "+str(fft_z[6])
+		#print "fft_xy[1]: "+str(fft_xy[1])
+		#print "fft_yz[2]: "+str(fft_yz[2])
+		#print "fft_z[0]: "+str(fft_z[0])
+		#print "#######################"
+		#print
+
 
 	mean_difference = abs(np.mean(val1) - np.mean(val2))
 	values = np.concatenate((values, [mean_difference]))
@@ -78,7 +130,7 @@ def get_data_and_target():
 		instance_values, instance_target = get_instance_from_pair(pair)
 
 		if instance_target == 1:
-			for x in range(40):
+			for x in range(20):
 				data.append(instance_values)
 				target.append(instance_target)
 
@@ -104,8 +156,58 @@ def is_signal_too_short(file1, file2):
 	y = len(load_values_from_file(file2, 0))
 	return min(x,y) < 80
 
+def createBoxplot():
+	boxplot_data = [
+				fft_y_0,
+				fft_y_2,
+				fft_y_1,
+				fft_magnitude_0,
+				fft_yz_3,
+				fft_magnitude_3,
+				fft_yz_0,
+				fft_z_6,
+				fft_xy_1,
+				fft_yz_2,
+				fft_z_0,
+			]
+
+	ticks = [
+				"fft_y_0",
+				"fft_y_2",
+				"fft_y_1",
+				"fft_magnitude_0",
+				"fft_yz_3",
+				"fft_magnitude_3",
+				"fft_yz_0",
+				"fft_z_6",
+				"fft_xy_1",
+				"fft_yz_2",
+				"fft_z_0",
+			]
+
+	# Create a figure instance
+	fig = plt.figure(1, figsize=(16, 9))
+
+	# Create an axes instance
+	ax = fig.add_subplot(111)
+
+	# Create the boxplot
+	bp = ax.boxplot(boxplot_data)
+
+	ax.set_xticklabels(ticks)
+
+	## Remove top axes and right axes ticks
+	ax.get_xaxis().tick_bottom()
+	ax.get_yaxis().tick_left()
+
+	# Save the figure
+	fig.savefig('boxplot.png', bbox_inches='tight')
+	print "created boxplot"
+
+
 def main():
 	(data, target) = get_data_and_target()
+	createBoxplot()
 
 	with open("data.arff", 'w') as f:
 		f.write('@RELATION handshake_matching\n')
@@ -129,6 +231,7 @@ def main():
 	predicted = clf.predict(data)
 
 	cm = confusion_matrix(target, predicted)
+	print cm
 
 	scores = cross_validation.cross_val_score(clf, data, target, cv=4)
 	print  "cross validation mean:\t"+str(np.mean(scores))

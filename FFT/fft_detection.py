@@ -7,21 +7,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from scipy import spatial
+from numpy import linalg as la
 
 def plot_all_files_in_dir(file_dir):
 
 	#with open('fft_avg.pickle', 'r') as f:
-	fft_avg = pickle.load(open('perfect_shake.pickle', 'r'))
+	#fft_avg = pickle.load(open('perfect_shake.pickle', 'r'))
+
+	fft_avg = [0.5, 0.2, 3, 0.1]
+	fft_avg = fft_avg / la.norm(fft_avg)
+
+	thres = 0.7
+
+	print fft_avg
 
 	txtfiles = [join(file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
 	for file in txtfiles:
 		values = load_values_from_file(file)
-		(start_max, stop_max, sim_max) = detect(values, fft_avg)
+		(start_max, stop_max, sim_max) = detect2(values, fft_avg)
 		try:
-			(start_first, stop_first, sim_first) = detect_first(values, fft_avg, 0.89)
-			plot(file, start_max, stop_max, sim_max, start_first, stop_first, sim_first, show_plot=False)
+			(start_first, stop_first, sim_first) = detect2_first(values, fft_avg, thres)
+			plot(file, start_max, stop_max, sim_max, start_first, stop_first, sim_first, fft_avg, show_plot=False)
 		except Exception, e:
-			print "didn't find any in "+file
+			print e
 
 def simCos(v1, v2):
 	return 1 - spatial.distance.cosine(v1, v2)
@@ -37,6 +45,21 @@ def load_values_from_file(file):
 			values.append(float(value))
 	return values
 
+def detect2(values, fft_avg):
+	window_size = 80
+	peak = 0
+	maxSim = 0
+	for i in range(0,len(values)-window_size):
+		window = values[i:i+window_size]
+		fft_values = get_fft_magnitude(window)
+		fft_values = fft_values / la.norm(fft_values)
+		fft_values = fft_values[:len(fft_avg)]
+		sim = simCos(fft_values, fft_avg)
+		if sim > maxSim:
+			maxSim = sim
+			peak = i
+	return (peak, peak + window_size, maxSim)
+
 def detect(values, fft_avg):
 	window_size = len(fft_avg)*2
 	peak = 0
@@ -50,12 +73,14 @@ def detect(values, fft_avg):
 			peak = i
 	return (peak, peak + window_size, maxSim)
 
-def detect_first(values, fft_avg, thres):
-	window_size = len(fft_avg)*2
+def detect2_first(values, fft_avg, thres):
+	window_size = 80
 	for i in range(0,len(values)-window_size):
 		window = values[i:i+window_size]
 		fft_values = get_fft_magnitude(window)
-		sim = simCos(fft_avg, fft_values)
+		fft_values = fft_values / la.norm(fft_values)
+		fft_values = fft_values[:len(fft_avg)]
+		sim = simCos(fft_values, fft_avg)
 		if sim > thres:
 			return (i, i + window_size, sim)
 
@@ -66,7 +91,7 @@ def get_fft_magnitude(values):
 	return fft_values
 
 
-def plot(file, start_max, stop_max, sim_max, start_first, stop_first, sim_first, show_plot=True):
+def plot(file, start_max, stop_max, sim_max, start_first, stop_first, sim_first, fft_avg, show_plot=True):
 	values = []
 
 	with open(file, 'r') as f:
@@ -108,7 +133,7 @@ def plot(file, start_max, stop_max, sim_max, start_first, stop_first, sim_first,
 
 	plt.title(title)
 
-	plt.subplot(3,1,1)
+	plt.subplot(4,1,1)
 	plt.grid(True)
 	plt.axvline(start, color="red")
 	plt.axvline(start_max, color="green")
@@ -120,17 +145,23 @@ def plot(file, start_max, stop_max, sim_max, start_first, stop_first, sim_first,
 	plt.ylim([-30,30])
 	plt.xlim([0,400])
 	
-	plt.subplot(3,1,2)
+	plt.subplot(4,1,2)
 	plt.grid(True)
 	plt.plot(fft_values)
 	plt.ylim([0,2000])
 	plt.xlim([0,200])
 	
-	plt.subplot(3,1,3)
+	plt.subplot(4,1,3)
 	plt.grid(True)
 	plt.ylim([0,1000])
 	plt.xlim([0,80])
 	plt.plot(fft_values_cut)
+
+	plt.subplot(4,1,4)
+	plt.grid(True)
+	plt.ylim([0,1])
+	plt.xlim([0,80])
+	plt.plot(fft_avg)
 	
 	plt.tight_layout()
 
@@ -146,9 +177,4 @@ def get_title_from_path(path):
 
 if __name__ == '__main__':
 	file = sys.argv[1]
-	if isfile(file):
-		plot(file)
-	if isdir(file):
-		plot_all_files_in_dir(file)
-	else:
-		print "Wrong input."
+	plot_all_files_in_dir(file)

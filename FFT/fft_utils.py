@@ -34,7 +34,7 @@ def load_values_from_file(file_path, channel):
 			devicename = meta_data[0]
 			timestamp = meta_data[1]
 			start = int(meta_data[2])
-			stop = int(meta_data[3])
+			stop = start+70#int(meta_data[3])
 			lines = lines[start+1:start+50]
 
 		for line in lines:
@@ -52,7 +52,7 @@ def load_and_multiply_values_from_file(file_path, c1, c2):
 			devicename = meta_data[0]
 			timestamp = meta_data[1]
 			start = int(meta_data[2])
-			stop = int(meta_data[3])
+			stop = start+70#int(meta_data[3])
 			lines = lines[start+1:start+50]
 
 		for line in lines:
@@ -74,7 +74,7 @@ def load_magnitude_values_from_file(file_path):
 			devicename = meta_data[0]
 			timestamp = meta_data[1]
 			start = int(meta_data[2])
-			stop = int(meta_data[3])
+			stop = start+70#int(meta_data[3])
 			lines = lines[start+1:start+50]
 
 		for line in lines:
@@ -101,7 +101,7 @@ def get_window_size(file_path):
 			devicename = meta_data[0]
 			timestamp = meta_data[1]
 			start = int(meta_data[2])
-			stop = int(meta_data[3])
+			stop = start+70#int(meta_data[3])
 			return stop - start
 
 

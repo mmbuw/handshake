@@ -10,8 +10,24 @@ from numpy import linalg as la
 def plot_all_files_in_dir(file_dir):
 	txtfiles = [join(file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
 	for file in txtfiles:
-		plot(file, show_plot= False)
+		plot(file, show_plot=False)
 
+def add_new_start_for_all(file_dir):
+	txtfiles = [join(file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
+	txtfiles.sort()
+	for file in txtfiles:
+		print get_title_from_path(file)
+		new_start = input('enter new start: ')
+		add_new_start(file, new_start)
+		print
+
+def add_new_start(file, new_start):
+	with open(file, 'r+') as f:
+		lines = f.readlines()
+		lines[0] = lines[0].strip() + ', ' + str(new_start) + '\n'
+		f.seek(0)
+		for line in lines:
+			f.write(line)
 
 def plot(file, show_plot=True):
 	values = []
@@ -23,8 +39,8 @@ def plot(file, show_plot=True):
 			meta_data = lines[0].split(', ')
 			devicename = meta_data[0]
 			timestamp = meta_data[1]
-			meta_start = int(meta_data[2]) + 1
-			meta_stop = meta_start+70 #int(meta_data[3]) + 1
+			meta_start = int(meta_data[2]) #+ 1
+			meta_stop = int(meta_data[3]) #+ 1
 			lines = lines[1:]
 
 		for line in lines:
@@ -39,48 +55,41 @@ def plot(file, show_plot=True):
 		stop = meta_stop
 
 
-	fft_values_complex = fft(values)
-	fft_values = abs(fft(fft_values_complex)).real
+	stop = start + 70
+
+	fft_values = fft(values[start:stop])
+	fft_values = abs(fft_values).real
 	fft_values = fft_values[:len(fft_values)/2]
-	fft_values_cut = abs(fft(values[start:stop])).real
-	fft_values_cut = fft_values_cut[:len(fft_values_cut)/2]
 
 	title = get_title_from_path(file)
 
 	fig_title = "%s start: %s stop: %s" % (title, start, stop)
-	fig = plt.figure()
+	fig = plt.figure(figsize=(16,9))
 	fig.suptitle(fig_title)
 
 	plt.title(title)
 
-	plt.subplot(4,1,1)
+	plt.subplot(3,1,1)
+	plt.axvline(start, color="red")
 	plt.grid(True)
+	plt.plot(values)
+	plt.ylim([-25,25])
+	plt.xlim([start-35,start+35])
+	plt.xticks(np.arange(start-35, start+35, 2.0))
+	
+	plt.subplot(3,1,2)
 	plt.axvline(start, color="red")
 	plt.axvline(stop, color="red")
-	plt.plot(values)
-	plt.ylim([-30,30])
-	plt.xlim([0,500])
-	
-	plt.subplot(4,1,2)
 	plt.grid(True)
-	plt.plot(fft_values)
-	plt.ylim([0,2000])
-	plt.xlim([0,250])
+	plt.plot(values)
+	plt.ylim([-25,25])
+	plt.xlim([0,300])
 	
-	plt.subplot(4,1,3)
+	plt.subplot(3,1,3)
 	plt.grid(True)
 	plt.ylim([0,1000])
 	plt.xlim([0,40])
-	plt.plot(fft_values_cut)
-
-	fft_values_cut = fft_values_cut[0:10]
-	fft_values_cut = fft_values_cut / la.norm(fft_values_cut)
-
-	plt.subplot(4,1,4)
-	plt.grid(True)
-	plt.ylim([0,1])
-	plt.xlim([0,10])
-	plt.plot(fft_values_cut)
+	plt.plot(fft_values)
 
 	plt.tight_layout()
 
@@ -99,6 +108,7 @@ if __name__ == '__main__':
 	if isfile(file):
 		plot(file)
 	if isdir(file):
-		plot_all_files_in_dir(file)
+		add_new_start_for_all(file)
+		#plot_all_files_in_dir(file)
 	else:
 		print "Wrong input."

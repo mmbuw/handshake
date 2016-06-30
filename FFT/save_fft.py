@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import pickle
 import numpy as np
 
-
-
 def load_values_from_file(file):
 	values = []
 	with open(file, 'r') as f:
@@ -25,10 +23,10 @@ def get_fft_magnitude(values):
 	fft_values = fft_values[:len(fft_values)/2]
 	return fft_values
 
-def save_fft(values, outfile):
-	fft_values = get_fft_magnitude(values)
-	print len(fft_values)
+def save_values(values, outfile):
 	pickle.dump(fft_values, open(outfile, 'w'))
+
+
 
 if __name__ == '__main__':
 	infile = sys.argv[1]
@@ -37,4 +35,7 @@ if __name__ == '__main__':
 	stop = int(sys.argv[4])
 	values = load_values_from_file(infile)
 	values = values[start:stop]
-	save_fft(values, outfile)
+	fft_values = get_fft_magnitude(values)
+	save_values(fft_values, outfile)
+
+	
