@@ -32,6 +32,7 @@ import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
+import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedAction;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
 import de.mobilemedia.thehandshakeapp.detection.InternalAccelerationListenerService;
 import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     private MainFragment mainFragment;
 
-    private BroadcastReceiver mNotificationReceiver;
+    private BroadcastReceiver mServiceNotificationReceiver;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -104,25 +105,32 @@ public class MainActivity extends AppCompatActivity
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         /* Notification receiver */
-        mNotificationReceiver = new BroadcastReceiver() {
+        mServiceNotificationReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mainFragment.updateUiOnValuesReceived();
+
+                String action = intent.getStringExtra(WatchListenerService.ACTION_EXTRA_TAG);
+
+                if (action.equals(WatchListenerService.DATA_NOTIFICATION_ACTION))
+                    mainFragment.updateUiOnValuesReceived();
+                else if (action.equals(WatchListenerService.HANDSHAKE_NOTIFICATION_ACTION))
+                    mainFragment.updateUiOnHandshake();
             }
         };
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        LocalBroadcastManager.getInstance(this).registerReceiver((mNotificationReceiver),
-                new IntentFilter(WatchListenerService.DATA_NOTIFICATION_TAG)
+        LocalBroadcastManager.getInstance(this).registerReceiver((mServiceNotificationReceiver),
+                new IntentFilter(WatchListenerService.INTENT_TO_ACTIVITY_NAME)
         );
     }
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mServiceNotificationReceiver);
         super.onStop();
     }
 

@@ -118,6 +118,9 @@ public class MainFragment extends Fragment {
         bleConnectionManager.advertiseBTLE(true);
         MRDFeatureExtractor.myLastShakeTime = Util.getCurrentUnixTimestamp();
 
+    }
+
+    public void updateUiOnHandshake() {
         mImageView.startAnimation(mShakeAnimation);
     }
 

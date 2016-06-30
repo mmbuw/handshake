@@ -15,7 +15,10 @@ import java.io.IOException;
 public class WatchListenerService extends WearableListenerService {
 
     public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/accelerometer_data";
-    public static final String DATA_NOTIFICATION_TAG = "WatchListenerServiceOnData";
+    public static final String INTENT_TO_ACTIVITY_NAME = "watchListenerToActivity";
+    public static final String ACTION_EXTRA_TAG = "action";
+    public static final String DATA_NOTIFICATION_ACTION = "onData";
+    public static final String HANDSHAKE_NOTIFICATION_ACTION = "onHandshake";
     public static final String LOG_TAG = WatchListenerService.class.getSimpleName();
 
     public float[] GRAVITY_START_EVENT_VALUES = {20.0f, 0.0f, 0.0f};
@@ -54,16 +57,17 @@ public class WatchListenerService extends WearableListenerService {
 
             } else {
 
-                notifyActiviyOnValuesReceived();
+                notifyActivityOnValuesReceived();
                 mFeatureExtractor.processDataRecord(receivedValues);
             }
 
         }
     }
 
-    private void notifyActiviyOnValuesReceived() {
+    private void notifyActivityOnValuesReceived() {
 
-        Intent intent = new Intent(DATA_NOTIFICATION_TAG);
+        Intent intent = new Intent(INTENT_TO_ACTIVITY_NAME);
+        intent.putExtra(ACTION_EXTRA_TAG, DATA_NOTIFICATION_ACTION);
         mLocalBroadcastManager.sendBroadcast(intent);
 
     }

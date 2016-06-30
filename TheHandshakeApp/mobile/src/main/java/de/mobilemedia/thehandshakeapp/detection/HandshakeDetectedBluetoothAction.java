@@ -2,7 +2,9 @@ package de.mobilemedia.thehandshakeapp.detection;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,6 +41,8 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
 
         Log.d("HDBLUETOOTH", "ON HANDSHAKE DETECTED");
 
+        notifyActivityOnHandshake();
+
         //mFragmentInstance.onHandshake();
 
         //Save handshake data to a file
@@ -67,6 +71,14 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
 
         FTPUploadTask ftpu = new FTPUploadTask();
         ftpu.execute(filename);*/
+
+    }
+
+    private void notifyActivityOnHandshake() {
+
+        Intent intent = new Intent(WatchListenerService.INTENT_TO_ACTIVITY_NAME);
+        intent.putExtra(WatchListenerService.ACTION_EXTRA_TAG, WatchListenerService.HANDSHAKE_NOTIFICATION_ACTION);
+        LocalBroadcastManager.getInstance(new Activity()).sendBroadcast(intent);
 
     }
 
