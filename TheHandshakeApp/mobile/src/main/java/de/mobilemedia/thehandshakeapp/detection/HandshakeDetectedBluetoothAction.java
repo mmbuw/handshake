@@ -37,7 +37,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
         mParentService.onHandshake();
 
         //Save handshake data to a file
-        /*int timestamp = Util.getCurrentUnixTimestamp();
+        int timestamp = Util.getCurrentUnixTimestamp();
         String filename = timestamp + "-" + MainActivity.ANDROID_ID;
         FileOutputWriter fileOutputWriter = new FileOutputWriter(filename);
 
@@ -61,7 +61,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
         fileOutputWriter.closeStream();
 
         FTPUploadTask ftpu = new FTPUploadTask();
-        ftpu.execute(filename);*/
+        ftpu.execute(filename);
 
     }
 
