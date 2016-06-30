@@ -121,45 +121,7 @@ public class MainFragment extends Fragment {
         mImageView.startAnimation(mShakeAnimation);
     }
 
-    public String createNewFileWriters(String filename) {
-
-        int unixTime = Util.getCurrentUnixTimestamp();
-
-        if (fileOutputWriter != null) {
-            fileOutputWriter.closeStream();
-        }
-
-        if (filename.isEmpty()) {
-            filename = "watch-" + unixTime + ".txt";
-        }
-        else {
-            if (!filename.endsWith(".txt")) { filename += ".txt"; }
-        }
-
-        fileOutputWriter = new FileOutputWriter(filename);
-        return filename;
-    }
-
-    public void processReceivedValues(float[] receivedValues) {
-
-        /* Write data to current file if present */
-        if (fileOutputWriter != null) {
-
-            if (receivedValues.length == 3) {
-                fileOutputWriter.writeToFile(receivedValues[0] + ", " +
-                        receivedValues[1] + ", " +
-                        receivedValues[2]);
-            }
-            else if (receivedValues.length == 6) {
-                fileOutputWriter.writeToFile(receivedValues[0] + ", " +
-                        receivedValues[1] + ", " +
-                        receivedValues[2] + ", " +
-                        receivedValues[3] + ", " +
-                        receivedValues[4] + ", " +
-                        receivedValues[5]);
-            }
-        }
-
+    public void updateUiOnValuesReceived() {
 
         /* Update visualization */
         mImageView.setColorFilter(0xff444444);

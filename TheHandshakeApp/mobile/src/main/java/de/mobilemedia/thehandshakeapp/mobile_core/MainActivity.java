@@ -12,13 +12,13 @@ import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.appindexing.AppIndex;
@@ -35,6 +35,7 @@ import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
 import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
 import de.mobilemedia.thehandshakeapp.detection.InternalAccelerationListenerService;
 import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
+import de.mobilemedia.thehandshakeapp.detection.WatchListenerService;
 
 import static de.mobilemedia.thehandshakeapp.bluetooth.Util.*;
 import static de.mobilemedia.thehandshakeapp.bluetooth.Util.saveMapToFile;
@@ -43,14 +44,12 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static String ANDROID_ID;
-    public static boolean isOpen;
 
     private Toolbar toolbar;
     private NavigationView navigationView;
     private MainFragment mainFragment;
 
-    private AccelerationDataReceiver serviceReceiver;
-    private MRDFeatureExtractor featureExtractor;
+    private BroadcastReceiver mNotificationReceiver;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -101,27 +100,30 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
         /* Create Google API client */
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        /* Register broadcast receiver */
-        serviceReceiver = new AccelerationDataReceiver();
-        IntentFilter intentSFilter = new IntentFilter("accelerationAction");
-        registerReceiver(serviceReceiver, intentSFilter);
-
-        /* Init feature extractor */
-        featureExtractor = new MRDFeatureExtractor(new HandshakeDetectedBluetoothAction(mainFragment));
-
-        /* Start internal acceleration reader */
-        Intent startIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
-        startService(startIntent);
+        /* Notification receiver */
+        mNotificationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mainFragment.updateUiOnValuesReceived();
+            }
+        };
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        isOpen = true;
+        LocalBroadcastManager.getInstance(this).registerReceiver((mNotificationReceiver),
+                new IntentFilter(WatchListenerService.DATA_NOTIFICATION_TAG)
+        );
+    }
+
+    @Override
+    protected void onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationReceiver);
+        super.onStop();
     }
 
     private void loadPrevData(){
@@ -198,10 +200,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(serviceReceiver);
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
-        isOpen = false;
         unregisterReceiver(bleConnectionManager);
     }
 
@@ -238,60 +238,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-
-
-    /* Internal receiver class to get data from background service */
-    public class AccelerationDataReceiver extends BroadcastReceiver {
-
-        public float[] GRAVITY_START_EVENT_VALUES = {20.0f, 0.0f, 0.0f};
-        public float[] GRAVITY_END_EVENT_VALUES = {-20.0f, 0.0f, 0.0f};
-
-        public float[] latestInternalAcceleration = new float[3];
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Bundle notificationData = intent.getExtras();
-
-            float[] receivedValuesWatch = notificationData.getFloatArray("acceleration");
-            float[] receivedValuesInternal = notificationData.getFloatArray("internalAcceleration");
-
-            if (receivedValuesWatch != null) {
-
-                if (receivedValuesWatch[0] == GRAVITY_START_EVENT_VALUES[0] &&
-                        receivedValuesWatch[1] == GRAVITY_START_EVENT_VALUES[1] &&
-                        receivedValuesWatch[2] == GRAVITY_START_EVENT_VALUES[2]) {
-
-                    featureExtractor.startDataEvent();
-                    System.out.println("Mobile has detected start event");
-
-                } else if (receivedValuesWatch[0] == GRAVITY_END_EVENT_VALUES[0] &&
-                        receivedValuesWatch[1] == GRAVITY_END_EVENT_VALUES[1] &&
-                        receivedValuesWatch[2] == GRAVITY_END_EVENT_VALUES[2]) {
-
-                    featureExtractor.endDataEvent();
-
-                } else {
-                    float[] concatenated = {receivedValuesWatch[0],
-                                            receivedValuesWatch[1],
-                                            receivedValuesWatch[2],
-                                            latestInternalAcceleration[0],
-                                            latestInternalAcceleration[1],
-                                            latestInternalAcceleration[2]};
-                    mainFragment.processReceivedValues(concatenated);
-                    featureExtractor.processDataRecord(receivedValuesWatch);
-                }
-
-            }
-            else if (receivedValuesInternal != null) {
-
-                latestInternalAcceleration = receivedValuesInternal;
-
-            }
-
-        }
-
     }
 
 }

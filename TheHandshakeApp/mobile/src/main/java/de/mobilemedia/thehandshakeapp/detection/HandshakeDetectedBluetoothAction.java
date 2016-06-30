@@ -23,9 +23,13 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
     MainFragment mFragmentInstance;
     Activity mParentActivity;
 
-    public HandshakeDetectedBluetoothAction(MainFragment fragmentInstance) {
-        mFragmentInstance = fragmentInstance;
-        mParentActivity = mFragmentInstance.getActivity();
+    //public HandshakeDetectedBluetoothAction(MainFragment fragmentInstance) {
+    //    mFragmentInstance = fragmentInstance;
+    //    mParentActivity = mFragmentInstance.getActivity();
+    //}
+
+    public HandshakeDetectedBluetoothAction() {
+
     }
 
     @Override
@@ -33,10 +37,12 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
                                     int startSample,
                                     int endSample) {
 
-        mFragmentInstance.onHandshake();
+        Log.d("HDBLUETOOTH", "ON HANDSHAKE DETECTED");
+
+        //mFragmentInstance.onHandshake();
 
         //Save handshake data to a file
-        int timestamp = Util.getCurrentUnixTimestamp();
+        /*int timestamp = Util.getCurrentUnixTimestamp();
         String filename = timestamp + "-" + MainActivity.ANDROID_ID;
         FileOutputWriter fileOutputWriter = new FileOutputWriter(filename);
 
@@ -60,7 +66,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
         fileOutputWriter.closeStream();
 
         FTPUploadTask ftpu = new FTPUploadTask();
-        ftpu.execute(filename);
+        ftpu.execute(filename);*/
 
     }
 
