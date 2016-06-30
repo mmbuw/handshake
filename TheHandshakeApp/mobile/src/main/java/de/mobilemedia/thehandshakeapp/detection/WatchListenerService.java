@@ -55,7 +55,7 @@ public class WatchListenerService extends WearableListenerService {
         mFeatureExtractor = new MRDFeatureExtractor(new HandshakeDetectedBluetoothAction(this));
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mBleConnectionManager = new BTLEConnectionManager(this);
-        mReceivedHandshakes = new ReceivedHandshakes();
+        mReceivedHandshakes = new ReceivedHandshakes(true);
 
         mArtificialHandshakeReceiver = new BroadcastReceiver() {
             @Override
@@ -141,7 +141,7 @@ public class WatchListenerService extends WearableListenerService {
         Map savedHandshakes = loadMapFromFile(handshakesFile);
         if (savedHandshakes != null) {
             mReceivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
-            Log.d("LOAD", "handshakes loaded");
+            //Log.d("LOAD", "handshakes loaded");
         }
     }
 
@@ -149,7 +149,7 @@ public class WatchListenerService extends WearableListenerService {
         HashMap<String, HandshakeData> handshakesMap = mReceivedHandshakes.getReceivedHandshakesMap();
         File handshakesFile = new File(FILE_STORAGE_PATH, Config.HANDSHAKE_FILE_NAME);
         saveMapToFile(handshakesMap, handshakesFile);
-        Log.d("SAVE", "handshakes saved");
+        //Log.d("SAVE", "handshakes saved");
     }
 
 }

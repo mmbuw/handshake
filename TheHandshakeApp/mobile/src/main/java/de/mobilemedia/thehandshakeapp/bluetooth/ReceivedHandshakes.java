@@ -9,13 +9,19 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import de.mobilemedia.thehandshakeapp.detection.WatchListenerService;
+import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
+
 public class ReceivedHandshakes {
 
     private HashMap<String, HandshakeData> receivedHandshakesMap;
     private static BlockingQueue<HandshakeData> processingQueue = new LinkedBlockingQueue<HandshakeData>();
 
-    public ReceivedHandshakes() {
+    private boolean mInBackground;
+
+    public ReceivedHandshakes(boolean inBackground) {
         this.receivedHandshakesMap = new HashMap<>();
+        mInBackground = inBackground;
         addHandshake(new HandshakeData("1XUCsew"));
         addHandshake(new HandshakeData("1SRhxGT"));
         addHandshake(new HandshakeData("1qwGEEr"));
@@ -48,18 +54,18 @@ public class ReceivedHandshakes {
         if(!receivedHandshakesMap.containsKey(hash)){
             receivedHandshakesMap.put(hash, hd);
             processingQueue.add(hd);
-            Log.d("MAP_ADD", "Added new Handshake with hash: "+hash);
+            //Log.d("MAP_ADD", "Added new Handshake with hash: "+hash);
         }
         else{
             receivedHandshakesMap.get(hash).updateTimestamp(hd.getTimeStamp());
-            Log.d("MAP_ADD", "Message already exists, updated timestamp.");
+            //Log.d("MAP_ADD", "Message already exists, updated timestamp.");
         }
     }
 
     public void removeHandshake(HandshakeData hd) {
         String hash = hd.getHash();
         if (receivedHandshakesMap.containsKey(hash)) receivedHandshakesMap.remove(hash);
-        Log.d("MAP_REMOVE", hash);
+        //Log.d("MAP_REMOVE", hash);
     }
 
     private void startProcessing(){
@@ -72,13 +78,18 @@ public class ReceivedHandshakes {
                         HandshakeData hd = processingQueue.take();
                         if (hd.getLongUrl() != null) continue;
                         String shortUrl = hd.getShortUrl();
-                        Log.d("QUEUE", "Expanding URL: " + shortUrl);
+                        //Log.d("QUEUE", "Expanding URL: " + shortUrl);
                         String longUrl = new Util.BitlyRequest()
                                 .setContentType("&shortUrl=")
                                 .setMethod("/v3/expand")
                                 .execute(shortUrl)
                                 .get();
                         hd.setLongUrl(longUrl);
+
+                        if (mInBackground)
+                            WatchListenerService.saveCurrentData();
+                        else
+                            MainActivity.saveCurrentData();
                     }
                     catch (Exception e){
                         Log.e("QUEUE", "Processing Queue interrupted.");

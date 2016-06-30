@@ -33,8 +33,6 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
                                     int startSample,
                                     int endSample) {
 
-        Log.d("HDBLUETOOTH", "ON HANDSHAKE DETECTED");
-
         notifyActivityOnHandshake();
         mParentService.onHandshake();
 

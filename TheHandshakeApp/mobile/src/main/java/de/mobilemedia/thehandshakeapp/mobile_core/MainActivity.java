@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        receivedHandshakes = new ReceivedHandshakes();
+        receivedHandshakes = new ReceivedHandshakes(false);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
         Map savedHandshakes = loadMapFromFile(handshakesFile);
         if (savedHandshakes != null) {
             receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
-            Log.d(LOG_TAG, "Handshakes loaded");
+            //Log.d(LOG_TAG, "Handshakes loaded");
         }
     }
 
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity
         HashMap<String, HandshakeData> handshakesMap = receivedHandshakes.getReceivedHandshakesMap();
         File handshakesFile = new File(FILE_STORAGE_PATH, Config.HANDSHAKE_FILE_NAME);
         saveMapToFile(handshakesMap, handshakesFile);
-        Log.d(LOG_TAG, "Handshakes saved");
+        //Log.d(LOG_TAG, "Handshakes saved");
     }
 
     @Override
