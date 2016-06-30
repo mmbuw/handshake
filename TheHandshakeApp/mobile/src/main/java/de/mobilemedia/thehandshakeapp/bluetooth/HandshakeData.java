@@ -39,10 +39,10 @@ public class HandshakeData implements Serializable, Comparable<HandshakeData> {
         this.timestamp = ts;
     }
 
-    @Override
-    public String toString() {
-        return shortUrl+"\n"+Util.nanoTimeToDateString(timestamp);
-    }
+    //@Override
+    //public String toString() {
+    //    return shortUrl+"\n"+Util.nanoTimeToDateString(timestamp);
+    //}
 
     @Override
     public int compareTo(HandshakeData hd) {

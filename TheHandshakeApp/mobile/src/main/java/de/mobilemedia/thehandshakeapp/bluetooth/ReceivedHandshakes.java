@@ -1,12 +1,10 @@
 package de.mobilemedia.thehandshakeapp.bluetooth;
 
-import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -60,7 +58,6 @@ public class ReceivedHandshakes {
             Log.d("MAP_ADD", "Added new Handshake with hash: "+hash);
         }
         else{
-            //TODO: Maybe we can do this better.
             receivedHandshakesMap.get(hash).updateTimestamp(hd.getTimeStamp());
             Log.d("MAP_ADD", "Message already exists, updated timestamp.");
         }
