@@ -4,8 +4,7 @@ import android.bluetooth.le.AdvertiseSettings;
 
 public class Config {
 
-    public static int BLE_SCAN_PERIOD = 4000;
-    public static int BLE_ADVERTISE_PERIOD = 4000;
+    public static int BLE_SCAN_AND_ADVERTISE_PERIOD = 4000;
     public static int BLE_TAG = 0x4343;
 
     public static int BLE_ADVERTISE_MODE = AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;

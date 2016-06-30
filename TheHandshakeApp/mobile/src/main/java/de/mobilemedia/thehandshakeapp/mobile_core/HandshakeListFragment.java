@@ -33,7 +33,7 @@ public class HandshakeListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         parentActivity = (MainActivity) getActivity();
         parentActivity.setTitle(parentActivity.getString(R.string.list_title));
-        mReceivedHandshakes = ReceivedHandshakes.getInstance(getContext());
+        mReceivedHandshakes = ReceivedHandshakes.getInstance();
         mHandshakes = mReceivedHandshakes.getHandshakes();
     }
 

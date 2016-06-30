@@ -22,16 +22,10 @@ import de.mobilemedia.thehandshakeapp.bluetooth.Util;
 
 public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
 
-    MainFragment mFragmentInstance;
-    Activity mParentActivity;
+    WatchListenerService mParentService;
 
-    //public HandshakeDetectedBluetoothAction(MainFragment fragmentInstance) {
-    //    mFragmentInstance = fragmentInstance;
-    //    mParentActivity = mFragmentInstance.getActivity();
-    //}
-
-    public HandshakeDetectedBluetoothAction() {
-
+    public HandshakeDetectedBluetoothAction(WatchListenerService parentService) {
+        mParentService = parentService;
     }
 
     @Override
@@ -42,8 +36,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
         Log.d("HDBLUETOOTH", "ON HANDSHAKE DETECTED");
 
         notifyActivityOnHandshake();
-
-        //mFragmentInstance.onHandshake();
+        mParentService.onHandshake();
 
         //Save handshake data to a file
         /*int timestamp = Util.getCurrentUnixTimestamp();

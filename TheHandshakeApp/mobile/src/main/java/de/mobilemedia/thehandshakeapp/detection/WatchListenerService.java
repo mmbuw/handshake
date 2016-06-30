@@ -12,6 +12,9 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
+import de.mobilemedia.thehandshakeapp.bluetooth.Util;
+
 public class WatchListenerService extends WearableListenerService {
 
     public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/accelerometer_data";
@@ -26,12 +29,14 @@ public class WatchListenerService extends WearableListenerService {
 
     private MRDFeatureExtractor mFeatureExtractor;
     private LocalBroadcastManager mLocalBroadcastManager;
+    private BTLEConnectionManager mBleConnectionManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mFeatureExtractor = new MRDFeatureExtractor(new HandshakeDetectedBluetoothAction());
+        mFeatureExtractor = new MRDFeatureExtractor(new HandshakeDetectedBluetoothAction(this));
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        mBleConnectionManager = new BTLEConnectionManager(this);
     }
 
     /* When a message is received via the data API, perform theses actions */
@@ -69,6 +74,14 @@ public class WatchListenerService extends WearableListenerService {
         Intent intent = new Intent(INTENT_TO_ACTIVITY_NAME);
         intent.putExtra(ACTION_EXTRA_TAG, DATA_NOTIFICATION_ACTION);
         mLocalBroadcastManager.sendBroadcast(intent);
+    }
+
+    public void onHandshake() {
+
+        //bleConnectionManager.setButtonToGreyOut(mShakeButton);
+        mBleConnectionManager.scanBTLE(true);
+        mBleConnectionManager.advertiseBTLE(true);
+        MRDFeatureExtractor.myLastShakeTime = Util.getCurrentUnixTimestamp();
 
     }
 

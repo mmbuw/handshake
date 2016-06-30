@@ -13,12 +13,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class ReceivedHandshakes {
     private static ReceivedHandshakes receivedHandshakes;
-    private Context appContext;
     private HashMap<String, HandshakeData> receivedHandshakesMap;
     private static BlockingQueue<HandshakeData> processingQueue = new LinkedBlockingQueue<HandshakeData>();
 
-    private ReceivedHandshakes(Context c) {
-        this.appContext = c;
+    private ReceivedHandshakes() {
         this.receivedHandshakesMap = new HashMap<>();
         addHandshake(new HandshakeData("1XUCsew"));
         addHandshake(new HandshakeData("1SRhxGT"));
@@ -27,9 +25,9 @@ public class ReceivedHandshakes {
 
     }
 
-    public static ReceivedHandshakes getInstance(Context c) {
+    public static ReceivedHandshakes getInstance() {
         if (receivedHandshakes == null){
-            receivedHandshakes = new ReceivedHandshakes(c);
+            receivedHandshakes = new ReceivedHandshakes();
         }
         return receivedHandshakes;
     }
@@ -75,8 +73,6 @@ public class ReceivedHandshakes {
     }
 
     private void startProcessing(){
-
-//        TODO: check for internet connection
 
         new Thread(new Runnable() {
             @Override

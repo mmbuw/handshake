@@ -1,8 +1,10 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -15,10 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
-import de.mobilemedia.thehandshakeapp.detection.FileOutputWriter;
-import de.mobilemedia.thehandshakeapp.bluetooth.Util;
-import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 
 
 public class MainFragment extends Fragment {
@@ -29,7 +27,6 @@ public class MainFragment extends Fragment {
     private ImageView mImageView;
     private TextView mYouAreView;
 
-    private FileOutputWriter fileOutputWriter;
     private Handler mHandler;
 
     private Animation mShakeAnimation;
@@ -85,42 +82,18 @@ public class MainFragment extends Fragment {
 
         displayOwnHandshakeData();
 
-        fileOutputWriter = null;
-        mShakeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onHandshake();
-            }
-        });
-
         return view;
     }
 
     public void displayOwnHandshakeData() {
-        try {
-            String youAreValue = parentActivity.getBleConnectionManager().getMyHandshakeData().getHash();
-            mYouAreView.setText(youAreValue);
-        } catch (Exception e) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    displayOwnHandshakeData();
-                }
-            }, 1000);
-        }
-    }
-
-    public void onHandshake() {
-
-        final BTLEConnectionManager bleConnectionManager = parentActivity.getBleConnectionManager();
-        bleConnectionManager.setButtonToGreyOut(mShakeButton);
-        bleConnectionManager.scanBTLE(true);
-        bleConnectionManager.advertiseBTLE(true);
-        MRDFeatureExtractor.myLastShakeTime = Util.getCurrentUnixTimestamp();
-
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(parentActivity);
+        String shortUrl = prefs.getString(parentActivity.getString(R.string.url_short_pref_id),
+                parentActivity.getString(R.string.url_short_pref_default));
+        mYouAreView.setText(shortUrl);
     }
 
     public void updateUiOnHandshake() {
+        greyOutButton();
         mImageView.startAnimation(mShakeAnimation);
     }
 
@@ -137,6 +110,17 @@ public class MainFragment extends Fragment {
             }
         }, 200);
 
+    }
+
+    public void greyOutButton() {
+        mShakeButton.setEnabled(false);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mShakeButton.setEnabled(true);
+            }
+        }, Config.BLE_SCAN_AND_ADVERTISE_PERIOD);
     }
 
 }

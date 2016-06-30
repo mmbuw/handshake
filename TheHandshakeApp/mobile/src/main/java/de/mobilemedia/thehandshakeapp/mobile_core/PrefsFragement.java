@@ -103,7 +103,7 @@ public class PrefsFragement extends PreferenceFragmentCompat implements SharedPr
             editor.putString(mUrlShortPrefName, shortUrl);
             editor.commit();
 
-            mParentActivity.getBleConnectionManager().setMyHandshake(newHandshakeData);
+            //mParentActivity.getBleConnectionManager().setMyHandshake(newHandshakeData);
             /*TODO: do it better or add wait screen*/
             Toast.makeText(mParentActivity, "Applied new Handshake URL:\n" + shortUrl, Toast.LENGTH_SHORT).show();
             Log.i("NEWSHORTURL", shortUrl);

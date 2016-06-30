@@ -1,6 +1,5 @@
 package de.mobilemedia.thehandshakeapp.bluetooth;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
@@ -22,6 +21,8 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.wearable.WearableListenerService;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class BTLEConnectionManager extends BroadcastReceiver {
 
     public static final String LOG_TAG = "BTLETest";
 
-    private Activity mParentActivity;
+    private WearableListenerService mParentService;
 
     public static BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
@@ -41,43 +42,35 @@ public class BTLEConnectionManager extends BroadcastReceiver {
     private ScanFilter mScanFilter;
     private ScanSettings mScanSettings;
 
-    private Button mButtonToGreyOut;
-
     private boolean mScanning;
     private boolean mAdvertising;
     private Handler mHandler;
     private static HandshakeData myHandshakeData;
 
-    public BTLEConnectionManager(Activity parentActivity) {
+    public BTLEConnectionManager(WearableListenerService parentService) {
 
-        mParentActivity = parentActivity;
+        mParentService = parentService;
         mHandler = new Handler();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mParentActivity);
-        String longUrl = prefs.getString(mParentActivity.getString(R.string.url_pref_id),
-                                         mParentActivity.getString(R.string.url_pref_default));
-        String shortUrl = prefs.getString(mParentActivity.getString(R.string.url_short_pref_id),
-                                          mParentActivity.getString(R.string.url_short_pref_default));
-        myHandshakeData = new HandshakeData(shortUrl, longUrl);
-
         // Determine whether BLE is supported on the device
-        if (!mParentActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(mParentActivity, "BTLE not supported", Toast.LENGTH_LONG).show();
+        if (!mParentService.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(mParentService, "BTLE not supported", Toast.LENGTH_LONG).show();
             return;
         }
 
         // Get bluetooth adapter
         final BluetoothManager bluetoothManager =
-                (BluetoothManager) mParentActivity.getSystemService(Context.BLUETOOTH_SERVICE);
+                (BluetoothManager) mParentService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
         // Checks if Bluetooth is supported
         if (mBluetoothAdapter == null) {
-            Toast.makeText(mParentActivity, "BT not supported", Toast.LENGTH_LONG).show();
+            Toast.makeText(mParentService, "BT not supported", Toast.LENGTH_LONG).show();
             return;
         } else if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mParentActivity.startActivityForResult(enableBtIntent, 1);
+            //Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            //mParentService.startActivityForResult(enableBtIntent, 1);
+            System.out.println("BTLE NOT ENABLED");
         } else {
             initBluetoothObjects();
         }
@@ -94,7 +87,7 @@ public class BTLEConnectionManager extends BroadcastReceiver {
                 .setAdvertiseMode(Config.BLE_ADVERTISE_MODE)
                 .setTxPowerLevel(Config.BLE_ADVERTISE_TX_POWER_LVL)
                 .setConnectable(false)
-                .setTimeout(Config.BLE_ADVERTISE_PERIOD)
+                .setTimeout(Config.BLE_SCAN_AND_ADVERTISE_PERIOD)
                 .build();
 
         mScanSettings = new ScanSettings.Builder()
@@ -114,12 +107,20 @@ public class BTLEConnectionManager extends BroadcastReceiver {
     public void advertiseBTLE(final boolean enable) {
 
         if (!mBluetoothAdapter.isEnabled()) {
-            Toast toast = Toast.makeText(mParentActivity,
+            Toast toast = Toast.makeText(mParentService,
                     "Could not broadcast URL. Bluetooth is not enabled.",
                     Toast.LENGTH_SHORT);
             toast.show();
             return;
         }
+
+        // Update myHandshakeData according to preferences
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mParentService);
+        String longUrl = prefs.getString(mParentService.getString(R.string.url_pref_id),
+                mParentService.getString(R.string.url_pref_default));
+        String shortUrl = prefs.getString(mParentService.getString(R.string.url_short_pref_id),
+                mParentService.getString(R.string.url_short_pref_default));
+        myHandshakeData = new HandshakeData(shortUrl, longUrl);
 
 
         if (enable) {
@@ -129,11 +130,12 @@ public class BTLEConnectionManager extends BroadcastReceiver {
                 public void run() {
                     advertiseBTLE(false);
                 }
-            }, Config.BLE_ADVERTISE_PERIOD);
+            }, Config.BLE_SCAN_AND_ADVERTISE_PERIOD);
 
             String messageToTransceive = myHandshakeData.getMessageToTransceive();
             int unixTimestamp = Util.getCurrentUnixTimestamp();
             byte[] encryptedMessageBytes = Util.endecrypt(messageToTransceive.getBytes(), unixTimestamp);
+            Log.d(LOG_TAG, "Plain text: " + myHandshakeData.getShortUrl());
             Log.d(LOG_TAG, "OUT DATA AT TIME " + unixTimestamp + " IS: ");
             Util.printByteArray(encryptedMessageBytes);
 
@@ -144,22 +146,12 @@ public class BTLEConnectionManager extends BroadcastReceiver {
 
             mBluetoothLeAdvertiser.startAdvertising(mAdvertiseSettings, dataToAdvertise, callback);
             mAdvertising = true;
-
-            if (mButtonToGreyOut != null)
-                mButtonToGreyOut.setEnabled(false);
-
             Log.i(LOG_TAG, "Start advertising");
 
         } else {
-
             mBluetoothLeAdvertiser.stopAdvertising(new AdvertiseCallback() {} );
             mAdvertising = false;
-
-            if (mButtonToGreyOut != null && !mScanning)
-                mButtonToGreyOut.setEnabled(true);
-
             Log.i(LOG_TAG, "Stop advertising");
-
         }
 
     }
@@ -167,7 +159,7 @@ public class BTLEConnectionManager extends BroadcastReceiver {
     public void scanBTLE(final boolean enable) {
 
         if (!mBluetoothAdapter.isEnabled()) {
-            Toast toast = Toast.makeText(mParentActivity,
+            Toast toast = Toast.makeText(mParentService,
                     "Could not start scan. Bluetooth is not enabled.",
                     Toast.LENGTH_SHORT);
             toast.show();
@@ -181,45 +173,19 @@ public class BTLEConnectionManager extends BroadcastReceiver {
                 public void run() {
                     scanBTLE(false);
                 }
-            }, Config.BLE_SCAN_PERIOD);
+            }, Config.BLE_SCAN_AND_ADVERTISE_PERIOD);
 
             mScanning = true;
             List<ScanFilter> filterList = new ArrayList<ScanFilter>();
             filterList.add(mScanFilter);
             mBluetoothLeScanner.startScan(filterList, mScanSettings, new BTLEScanCallback(){} );
-
-            if (mButtonToGreyOut != null)
-                mButtonToGreyOut.setEnabled(false);
-
             Log.i(LOG_TAG, "Start scanning");
 
         } else {
-
             mScanning = false;
             mBluetoothLeScanner.stopScan(new ScanCallback() {});
-
-            if (mButtonToGreyOut != null && !mAdvertising)
-                mButtonToGreyOut.setEnabled(true);
-
             Log.i(LOG_TAG, "Stop scanning");
-
         }
-    }
-
-    public void setMyHandshake(HandshakeData handshakeData) {
-        myHandshakeData = handshakeData;
-    }
-
-    public static HandshakeData getMyHandshakeData() {
-        return myHandshakeData;
-    }
-
-    public String getLongUrl() {
-        return myHandshakeData.getLongUrl();
-    }
-
-    public void setButtonToGreyOut(Button buttonToGreyOut) {
-        mButtonToGreyOut = buttonToGreyOut;
     }
 
 

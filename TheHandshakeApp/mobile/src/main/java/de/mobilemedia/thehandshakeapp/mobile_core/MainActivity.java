@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity
             Manifest.permission.READ_PHONE_STATE
     };
 
-    private BTLEConnectionManager bleConnectionManager;
     public static ReceivedHandshakes receivedHandshakes;
 
     private GoogleApiClient client;
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         receivedHandshakes
-                = ReceivedHandshakes.getInstance(this);
+                = ReceivedHandshakes.getInstance();
 
         if (Config.LOAD_PREV_STATE) loadPrevData();
 
@@ -171,38 +170,7 @@ public class MainActivity extends AppCompatActivity
         if (permissionRequestNeeded) {
             ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 1);
         }
-        else {
-            createBleConnectionManager();
-        }
 
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-
-        for (int i = 0; i < permissions.length; ++i) {
-
-            if (permissions[i].equals("android.permission.READ_PHONE_STATE") &&
-                    grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-
-                /* Create Bluetooth LE connection manager */
-                createBleConnectionManager();
-            }
-        }
-
-    }
-
-    public void createBleConnectionManager() {
-        bleConnectionManager = new BTLEConnectionManager(this);
-
-        /* Bluetooth event broadcast receiver */
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(bleConnectionManager, filter);
-    }
-
-    public BTLEConnectionManager getBleConnectionManager() {
-        return bleConnectionManager;
     }
 
     @Override
@@ -210,7 +178,7 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
-        unregisterReceiver(bleConnectionManager);
+        //unregisterReceiver(bleConnectionManager);
     }
 
     @Override
