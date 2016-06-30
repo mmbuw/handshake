@@ -69,7 +69,7 @@ public class HandshakeDetectedBluetoothAction extends HandshakeDetectedAction {
 
     private void notifyActivityOnHandshake() {
 
-        Intent intent = new Intent(WatchListenerService.INTENT_TO_ACTIVITY_NAME);
+        Intent intent = new Intent(WatchListenerService.SERVICE_TO_ACTIVITY_NAME);
         intent.putExtra(WatchListenerService.ACTION_EXTRA_TAG, WatchListenerService.HANDSHAKE_NOTIFICATION_ACTION);
         LocalBroadcastManager.getInstance(new Activity()).sendBroadcast(intent);
 

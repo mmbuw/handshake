@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver((mServiceNotificationReceiver),
-                new IntentFilter(WatchListenerService.INTENT_TO_ACTIVITY_NAME)
+                new IntentFilter(WatchListenerService.SERVICE_TO_ACTIVITY_NAME)
         );
     }
 

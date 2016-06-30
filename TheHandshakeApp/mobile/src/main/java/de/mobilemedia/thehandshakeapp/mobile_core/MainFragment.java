@@ -1,5 +1,7 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -7,6 +9,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.mobilemedia.thehandshakeapp.R;
+import de.mobilemedia.thehandshakeapp.detection.WatchListenerService;
 
 
 public class MainFragment extends Fragment {
@@ -79,6 +83,15 @@ public class MainFragment extends Fragment {
         mShakeButton = (Button) view.findViewById(R.id.shakeButton);
         mImageView = (ImageView) view.findViewById(R.id.handshakeImageView);
         mYouAreView = (TextView) view.findViewById(R.id.you_are_value);
+
+        mShakeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(WatchListenerService.ACTIVITY_TO_SERVICE_NAME);
+                LocalBroadcastManager.getInstance(new Activity()).sendBroadcast(intent);
+                updateUiOnHandshake();
+            }
+        });
 
         displayOwnHandshakeData();
 

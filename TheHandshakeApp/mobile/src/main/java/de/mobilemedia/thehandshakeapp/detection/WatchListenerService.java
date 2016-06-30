@@ -1,6 +1,9 @@
 package de.mobilemedia.thehandshakeapp.detection;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -27,7 +30,8 @@ import static de.mobilemedia.thehandshakeapp.bluetooth.Util.saveMapToFile;
 public class WatchListenerService extends WearableListenerService {
 
     public static final String ACCELEROMETER_DATA_TRANSCRIPTION_PATH = "/accelerometer_data";
-    public static final String INTENT_TO_ACTIVITY_NAME = "watchListenerToActivity";
+    public static final String SERVICE_TO_ACTIVITY_NAME = "watchListenerToActivity";
+    public static final String ACTIVITY_TO_SERVICE_NAME = "activityToWatchListener";
     public static final String ACTION_EXTRA_TAG = "action";
     public static final String DATA_NOTIFICATION_ACTION = "onData";
     public static final String HANDSHAKE_NOTIFICATION_ACTION = "onHandshake";
@@ -42,6 +46,7 @@ public class WatchListenerService extends WearableListenerService {
     private LocalBroadcastManager mLocalBroadcastManager;
     private BTLEConnectionManager mBleConnectionManager;
     public static ReceivedHandshakes mReceivedHandshakes;
+    private BroadcastReceiver mArtificialHandshakeReceiver;
 
     @Override
     public void onCreate() {
@@ -51,6 +56,17 @@ public class WatchListenerService extends WearableListenerService {
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mBleConnectionManager = new BTLEConnectionManager(this);
         mReceivedHandshakes = new ReceivedHandshakes();
+
+        mArtificialHandshakeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onHandshake();
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver((mArtificialHandshakeReceiver),
+                new IntentFilter(WatchListenerService.ACTIVITY_TO_SERVICE_NAME)
+        );
+        System.out.println("Service registered");
     }
 
     /* When a message is received via the data API, perform theses actions */
@@ -85,7 +101,7 @@ public class WatchListenerService extends WearableListenerService {
 
     private void notifyActivityOnValuesReceived() {
 
-        Intent intent = new Intent(INTENT_TO_ACTIVITY_NAME);
+        Intent intent = new Intent(SERVICE_TO_ACTIVITY_NAME);
         intent.putExtra(ACTION_EXTRA_TAG, DATA_NOTIFICATION_ACTION);
         mLocalBroadcastManager.sendBroadcast(intent);
     }
@@ -96,7 +112,7 @@ public class WatchListenerService extends WearableListenerService {
         MRDFeatureExtractor.myLastShakeTime = Util.getCurrentUnixTimestamp();
 
         //DEBUG
-        processNewHandshake("1tu9Zko");
+        //processNewHandshake("1tu9Zko");
     }
 
     private float[] decodeMessage(byte[] messageData) {
