@@ -1,7 +1,6 @@
 package de.mobilemedia.thehandshakeapp.mobile_core;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,13 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.mobilemedia.thehandshakeapp.R;
-import de.mobilemedia.thehandshakeapp.bluetooth.BTLEConnectionManager;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.bluetooth.ReceivedHandshakes;
-import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedAction;
-import de.mobilemedia.thehandshakeapp.detection.HandshakeDetectedBluetoothAction;
 import de.mobilemedia.thehandshakeapp.detection.InternalAccelerationListenerService;
-import de.mobilemedia.thehandshakeapp.detection.MRDFeatureExtractor;
 import de.mobilemedia.thehandshakeapp.detection.WatchListenerService;
 
 import static de.mobilemedia.thehandshakeapp.bluetooth.Util.*;
@@ -44,7 +39,9 @@ import static de.mobilemedia.thehandshakeapp.bluetooth.Util.saveMapToFile;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final String LOG_TAG = MainActivity.class.getSimpleName();
     public static String ANDROID_ID;
+    public static File FILE_STORAGE_PATH;
 
     private Toolbar toolbar;
     private NavigationView navigationView;
@@ -71,6 +68,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ANDROID_ID = Settings.Secure.getString(getContentResolver(),
                      Settings.Secure.ANDROID_ID);
+        FILE_STORAGE_PATH = this.getFilesDir();
 
         /* Request permissions */
         verifyPermissions();
@@ -86,10 +84,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        receivedHandshakes
-                = ReceivedHandshakes.getInstance();
-
-        if (Config.LOAD_PREV_STATE) loadPrevData();
+        receivedHandshakes = new ReceivedHandshakes();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -133,26 +128,26 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
-    private void loadPrevData(){
-        File handshakesFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
+    public static void loadPrevData(){
+        File handshakesFile = new File(FILE_STORAGE_PATH, Config.HANDSHAKE_FILE_NAME);
         Map savedHandshakes = loadMapFromFile(handshakesFile);
         if (savedHandshakes != null) {
             receivedHandshakes.setReceivedHandshakesMap((HashMap<String, HandshakeData>) savedHandshakes);
-            Log.d("LOAD", "session handshakes loaded");
+            Log.d(LOG_TAG, "Handshakes loaded");
         }
+    }
+
+    public static void saveCurrentData(){
+        HashMap<String, HandshakeData> handshakesMap = receivedHandshakes.getReceivedHandshakesMap();
+        File handshakesFile = new File(FILE_STORAGE_PATH, Config.HANDSHAKE_FILE_NAME);
+        saveMapToFile(handshakesMap, handshakesFile);
+        Log.d(LOG_TAG, "Handshakes saved");
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (Config.SAVE_CURR_STATE) saveCurrentData();
+        saveCurrentData();
         super.onSaveInstanceState(outState);
-    }
-
-    private void saveCurrentData(){
-        HashMap<String, HandshakeData> handshakesMap = receivedHandshakes.getReceivedHandshakesMap();
-        File handshakesFile = new File(this.getFilesDir(), Config.HANDSHAKE_FILE_NAME);
-        saveMapToFile(handshakesMap, handshakesFile);
-        Log.d("SAVE", "session handshakes saved");
     }
 
     /* Requests the necessary permissions from the operating system */
@@ -178,7 +173,6 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         Intent stopIntent = new Intent(getApplicationContext(), InternalAccelerationListenerService.class );
         stopService(stopIntent);
-        //unregisterReceiver(bleConnectionManager);
     }
 
     @Override
@@ -202,6 +196,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_handshake) {
             fragmentTransaction.replace(R.id.fragment_container, mainFragment);
         } else if (id == R.id.nav_list) {
+            loadPrevData();
             HandshakeListFragment listFragment = new HandshakeListFragment();
             fragmentTransaction.replace(R.id.fragment_container, listFragment);
         } else if (id == R.id.nav_settings) {

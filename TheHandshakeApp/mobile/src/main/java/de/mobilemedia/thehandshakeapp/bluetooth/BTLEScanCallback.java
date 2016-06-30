@@ -59,7 +59,7 @@ public class BTLEScanCallback extends ScanCallback {
 
             if (decodedMessage != null) {
                 Log.d(LOG_TAG, "Received message: " + decodedMessage);
-                //WatchListenerService.receivedHandshakes.addHandshake(new HandshakeData(decodedMessage));
+                WatchListenerService.processNewHandshake(decodedMessage);
             } else {
                 Log.e(LOG_TAG, "Error decoding the received message");
             }

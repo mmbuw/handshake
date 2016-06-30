@@ -190,7 +190,7 @@ public class Util {
             out.writeObject(map);
             out.close();
             fileOut.close();
-            Log.d("SAVE", "saved map to file "+file.getAbsolutePath());
+            //Log.d("SAVE", "saved map to file "+file.getAbsolutePath());
         } catch(IOException i) {
             Log.d("SAVE", "couldn't save map to file "+file.getAbsolutePath());
         }
@@ -205,7 +205,7 @@ public class Util {
 
             in.close();
             fileIn.close();
-            Log.d("LOAD", "loaded map from file " + file.getAbsolutePath());
+            //Log.d("LOAD", "loaded map from file " + file.getAbsolutePath());
 
             return map;
         } catch(IOException i) {

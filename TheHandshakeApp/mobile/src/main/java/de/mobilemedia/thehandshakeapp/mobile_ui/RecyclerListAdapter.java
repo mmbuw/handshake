@@ -10,6 +10,7 @@ import java.util.List;
 import de.mobilemedia.thehandshakeapp.R;
 import de.mobilemedia.thehandshakeapp.bluetooth.HandshakeData;
 import de.mobilemedia.thehandshakeapp.mobile_core.HandshakeListFragment;
+import de.mobilemedia.thehandshakeapp.mobile_core.MainActivity;
 
 /**
  * Inspiration:
@@ -73,5 +74,6 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<ItemViewHolder>
     public void onItemDismiss(int position) {
         this.handshakeListFragment.removeHandshake(position);
         notifyItemRemoved(position);
+        MainActivity.saveCurrentData();
     }
 }

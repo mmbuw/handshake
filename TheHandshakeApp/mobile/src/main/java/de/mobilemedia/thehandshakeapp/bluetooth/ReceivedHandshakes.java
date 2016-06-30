@@ -10,24 +10,17 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ReceivedHandshakes {
-    private static ReceivedHandshakes receivedHandshakes;
+
     private HashMap<String, HandshakeData> receivedHandshakesMap;
     private static BlockingQueue<HandshakeData> processingQueue = new LinkedBlockingQueue<HandshakeData>();
 
-    private ReceivedHandshakes() {
+    public ReceivedHandshakes() {
         this.receivedHandshakesMap = new HashMap<>();
         addHandshake(new HandshakeData("1XUCsew"));
         addHandshake(new HandshakeData("1SRhxGT"));
         addHandshake(new HandshakeData("1qwGEEr"));
         this.startProcessing();
 
-    }
-
-    public static ReceivedHandshakes getInstance() {
-        if (receivedHandshakes == null){
-            receivedHandshakes = new ReceivedHandshakes();
-        }
-        return receivedHandshakes;
     }
 
     public HashMap<String, HandshakeData> getReceivedHandshakesMap() {

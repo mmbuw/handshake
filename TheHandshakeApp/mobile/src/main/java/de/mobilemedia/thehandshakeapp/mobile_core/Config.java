@@ -12,8 +12,6 @@ public class Config {
     public static int BLE_MIN_RSSI = -75;
 
     public static String HANDSHAKE_FILE_NAME = "handshakes.map";
-    public static boolean LOAD_PREV_STATE = true;
-    public static boolean SAVE_CURR_STATE = true;
 
     /* Handshake detection parameters */
 

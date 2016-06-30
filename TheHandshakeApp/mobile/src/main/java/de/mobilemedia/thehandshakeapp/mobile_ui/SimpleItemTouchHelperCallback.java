@@ -3,9 +3,6 @@ package de.mobilemedia.thehandshakeapp.mobile_ui;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-/**
- * Created by projectsw on 27.05.16.
- */
 public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     private final ItemTouchHelperAdapter mAdapter;
