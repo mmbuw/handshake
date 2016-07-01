@@ -63,6 +63,13 @@ public class HandshakeListFragment extends Fragment {
             }
         };
 
+        for (HandshakeData hd : mHandshakes) {
+            if (hd.getLongUrl() == null)
+            {
+                mReceivedHandshakes.addToProcessingQueue(hd);
+            }
+        }
+
         RecyclerListAdapter adapter = new RecyclerListAdapter(this, mHandshakes, itemTouchListener);
         recyclerView.setAdapter(adapter);
 

@@ -22,9 +22,9 @@ public class ReceivedHandshakes {
     public ReceivedHandshakes(boolean inBackground) {
         this.receivedHandshakesMap = new HashMap<>();
         mInBackground = inBackground;
-        addHandshake(new HandshakeData("1XUCsew"));
-        addHandshake(new HandshakeData("1SRhxGT"));
-        addHandshake(new HandshakeData("1qwGEEr"));
+        //addHandshake(new HandshakeData("1XUCsew"));
+        //addHandshake(new HandshakeData("1SRhxGT"));
+        //addHandshake(new HandshakeData("1qwGEEr"));
         this.startProcessing();
 
     }
@@ -53,7 +53,7 @@ public class ReceivedHandshakes {
         String hash = hd.getHash();
         if(!receivedHandshakesMap.containsKey(hash)){
             receivedHandshakesMap.put(hash, hd);
-            processingQueue.add(hd);
+            addToProcessingQueue(hd);
             //Log.d("MAP_ADD", "Added new Handshake with hash: "+hash);
         }
         else{
@@ -66,6 +66,10 @@ public class ReceivedHandshakes {
         String hash = hd.getHash();
         if (receivedHandshakesMap.containsKey(hash)) receivedHandshakesMap.remove(hash);
         //Log.d("MAP_REMOVE", hash);
+    }
+
+    public void addToProcessingQueue(HandshakeData hd) {
+        processingQueue.add(hd);
     }
 
     private void startProcessing(){
