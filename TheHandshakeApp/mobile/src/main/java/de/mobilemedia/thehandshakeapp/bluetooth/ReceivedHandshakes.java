@@ -35,6 +35,14 @@ public class ReceivedHandshakes {
 
     public void setReceivedHandshakesMap(HashMap<String, HandshakeData> receivedHandshakesMap) {
         this.receivedHandshakesMap = receivedHandshakesMap;
+
+        if (mInBackground) {
+            for (HandshakeData hd : receivedHandshakesMap.values()) {
+                if (hd.getLongUrl() == null) {
+                    addToProcessingQueue(hd);
+                }
+            }
+        }
     }
 
     public ArrayList<HandshakeData> getHandshakes(){
@@ -53,7 +61,10 @@ public class ReceivedHandshakes {
         String hash = hd.getHash();
         if(!receivedHandshakesMap.containsKey(hash)){
             receivedHandshakesMap.put(hash, hd);
-            addToProcessingQueue(hd);
+
+            if (mInBackground) {
+                addToProcessingQueue(hd);
+            }
             //Log.d("MAP_ADD", "Added new Handshake with hash: "+hash);
         }
         else{
