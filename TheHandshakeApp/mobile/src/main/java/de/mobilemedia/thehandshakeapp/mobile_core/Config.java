@@ -54,5 +54,4 @@ public class Config {
     //Maximum number of non-continuous positive windows a positive window streak is allowed to have
     public static int STREAK_MAX_DIFF = 3;
 
-
 }
