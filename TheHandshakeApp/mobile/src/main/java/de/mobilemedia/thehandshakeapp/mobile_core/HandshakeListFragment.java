@@ -9,7 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -27,6 +31,7 @@ public class HandshakeListFragment extends Fragment {
     MainActivity parentActivity;
     ReceivedHandshakes mReceivedHandshakes;
     List<HandshakeData> mHandshakes;
+    RecyclerListAdapter mAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,11 +68,11 @@ public class HandshakeListFragment extends Fragment {
             }
         };
 
-        RecyclerListAdapter adapter = new RecyclerListAdapter(this, mHandshakes, itemTouchListener);
-        recyclerView.setAdapter(adapter);
+        mAdapter = new RecyclerListAdapter(this, mHandshakes, itemTouchListener);
+        recyclerView.setAdapter(mAdapter);
 
         ItemTouchHelper.Callback callback =
-                new SimpleItemTouchHelperCallback(adapter);
+                new SimpleItemTouchHelperCallback(mAdapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recyclerView);
 

@@ -7,6 +7,9 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import de.mobilemedia.thehandshakeapp.R;
@@ -62,6 +65,27 @@ public class PrefsFragement extends PreferenceFragmentCompat implements SharedPr
             }
         });
 
+        setHasOptionsMenu(true);
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.add("Insert fake data");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == 0) {
+            MainActivity.loadPrevData();
+            MainActivity.receivedHandshakes.addFakeData();
+            MainActivity.saveCurrentData();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

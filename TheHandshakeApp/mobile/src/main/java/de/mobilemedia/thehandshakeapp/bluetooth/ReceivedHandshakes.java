@@ -22,11 +22,21 @@ public class ReceivedHandshakes {
     public ReceivedHandshakes(boolean inBackground) {
         this.receivedHandshakesMap = new HashMap<>();
         mInBackground = inBackground;
-        //addHandshake(new HandshakeData("1XUCsew"));
-        //addHandshake(new HandshakeData("1SRhxGT"));
-        //addHandshake(new HandshakeData("1qwGEEr"));
         this.startProcessing();
+    }
 
+    public void addFakeData() {
+        HandshakeData fake1 = new HandshakeData("1XUCsew");
+        HandshakeData fake2 = new HandshakeData("1SRhxGT");
+        HandshakeData fake3 = new HandshakeData("1qwGEEr");
+
+        addToProcessingQueue(fake1);
+        addToProcessingQueue(fake2);
+        addToProcessingQueue(fake3);
+
+        addHandshake(fake1);
+        addHandshake(fake2);
+        addHandshake(fake3);
     }
 
     public HashMap<String, HandshakeData> getReceivedHandshakesMap() {
