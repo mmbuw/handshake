@@ -61,8 +61,7 @@ public class HandshakeListFragment extends Fragment {
             public void onHandshakeTap(View view, int position) {
                 HandshakeData hd = mHandshakes.get(position);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String url = hd.getLongUrl();
-                if (url == null ) url = hd.getShortUrl();
+                String url = hd.getShortUrl();
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             }

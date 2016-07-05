@@ -66,7 +66,6 @@ public class WatchListenerService extends WearableListenerService {
         LocalBroadcastManager.getInstance(this).registerReceiver((mArtificialHandshakeReceiver),
                 new IntentFilter(WatchListenerService.ACTIVITY_TO_SERVICE_NAME)
         );
-        System.out.println("Service registered");
     }
 
     /* When a message is received via the data API, perform theses actions */
