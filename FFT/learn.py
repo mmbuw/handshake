@@ -1,4 +1,5 @@
 import fft_utils
+import file_utils
 from sklearn import tree
 from sklearn.datasets import load_iris
 from sklearn.externals.six import StringIO
@@ -33,8 +34,8 @@ def get_instance_from_pair(pair):
 
 	target = get_target(file1, file2)
 
-	val1 = [float(x) for x in fft_utils.load_values_from_file(file1, 2)]
-	val2 = [float(x) for x in fft_utils.load_values_from_file(file2, 1)]
+	val1 = [float(x) for x in file_utils.load_values_from_file(file1, window_size)]
+	val2 = [float(x) for x in file_utils.load_values_from_file(file2, window_size)]
 
 	values = np.array([])
 	fft_x = fft_utils.get_fft_difference(file1, file2, 0)
@@ -130,7 +131,7 @@ def get_data_and_target():
 		instance_values, instance_target = get_instance_from_pair(pair)
 
 		if instance_target == 1:
-			for x in range(20):
+			for x in range(80):
 				data.append(instance_values)
 				target.append(instance_target)
 
