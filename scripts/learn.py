@@ -285,7 +285,7 @@ def learn(new_window_size):
 
 	print
 
-	file_name = "output_noSame/%.2f_%02d" % (cv_mean, window_size) 
+	file_name = "output_start_detect_smoothed/%.2f_%02d" % (cv_mean, window_size) 
 
 	writeArffFile(data, target, file_name + ".arff")
 
