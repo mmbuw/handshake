@@ -114,7 +114,6 @@ def get_data_and_target():
 	data = []
 	target = []
 	for pair in txtfilepairs:
-
 		if is_same_device(pair[0], pair[1]):
 			continue
 		if is_same_person(pair[0], pair[1]):
@@ -122,7 +121,7 @@ def get_data_and_target():
 		instance_values, instance_target = get_instance_from_pair(pair)
 
 		if instance_target == 1:
-			for x in range(85):
+			for x in range(190):
 				data.append(instance_values)
 				target.append(instance_target)
 
@@ -146,13 +145,13 @@ def is_same_device(file1, file2):
 
 def is_same_person(file1, file2):
 	try:
-		name1=file1.split('-')[2].split('.')[0].strip().lower()
+		name1 = file1.split('-')[2].split('.')[0].strip().lower()
 	except IndexError:
-		name1=""
+		return False
 	try:
-		name2=file2.split('-')[2].split('.')[0].strip().lower()
+		name2 = file2.split('-')[2].split('.')[0].strip().lower()
 	except IndexError:
-		name2=""
+		return False
 	return name1==name2
 
 def setBoxColors(bp):
@@ -285,7 +284,7 @@ def learn(new_window_size):
 
 	print
 
-	file_name = "output_start_detect_smoothed/%.2f_%02d" % (cv_mean, window_size) 
+	file_name = "all_handshakes/%.2f_%02d" % (cv_mean, window_size) 
 
 	writeArffFile(data, target, file_name + ".arff")
 

@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import spatial
 from numpy import linalg as la
+from file_utils import detect_start
 
 def plot_all_files_in_dir(file_dir):
 	txtfiles = [join(file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
 	for file in txtfiles:
 		plot(file, show_plot= False)
-
 
 def plot(file, show_plot=True):
 	values = []
@@ -42,6 +42,8 @@ def plot(file, show_plot=True):
 
 	smooth_values = savitzky_golay(np.array(values), 11, 3)
 
+	detected_start = detect_start(smooth_values)
+
 	title = get_title_from_path(file)
 
 	fig_title = "%s start: %s stop: %s" % (title, start, stop)
@@ -52,6 +54,7 @@ def plot(file, show_plot=True):
 
 	plt.subplot(2,1,1)
 	plt.grid(True)
+	plt.axvline(detected_start, color="purple")
 	plt.axvline(start, color="red")
 	plt.axvline(stop, color="red")
 	plt.plot(values)
@@ -61,6 +64,7 @@ def plot(file, show_plot=True):
 
 	plt.subplot(2,1,2)
 	plt.grid(True)
+	plt.axvline(detected_start, color="purple")
 	plt.axvline(start, color="red")
 	plt.axvline(stop, color="red")
 	plt.plot(smooth_values)
