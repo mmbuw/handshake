@@ -17,8 +17,7 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from pylab import setp, hold, xlim, ylim
 
-feature_names = []
-window_size = 70
+window_size = 0
 
 def get_instance_from_pair(pair):
 	file1 = pair[0]
@@ -69,35 +68,6 @@ def get_instance_from_pair(pair):
 
 		zero_crossings = abs(len( np.where( np.diff( np.sign( values1[i] ) ) )[0] ) - len( np.where( np.diff( np.sign( values2[i] ) ) )[0] ))
 		feature_values = np.concatenate((feature_values, [zero_crossings]))
-
-	global feature_names
-	if len(feature_names) == 0:
-		for i in range(len(fft_x)):
-			feature_names.append("fft_x_"+str(i))
-		for i in range(len(fft_x)):
-			feature_names.append("fft_y_"+str(i))
-		for i in range(len(fft_x)):
-			feature_names.append("fft_z_"+str(i))
-		for i in range(len(fft_x)):
-			feature_names.append("fft_xy_"+str(i))
-		for i in range(len(fft_x)):
-			feature_names.append("fft_xz_"+str(i))			
-		for i in range(len(fft_x)):
-			feature_names.append("fft_yz_"+str(i))
-		for i in range(len(fft_x)):
-			feature_names.append("magnitude_"+str(i))		
-
-		feature_names.append("mean_x")
-		feature_names.append("range_x")
-		feature_names.append("zero_cross_x")
-
-		feature_names.append("mean_y")
-		feature_names.append("range_y")
-		feature_names.append("zero_cross_y")
-
-		feature_names.append("mean_z")
-		feature_names.append("range_z")
-		feature_names.append("zero_cross_z")
 
 	return (feature_values, target)
 
@@ -173,6 +143,40 @@ def setBoxColors(bp):
     setp(bp['fliers'][3], color='red')
     setp(bp['medians'][1], color='red')
 
+def get_feature_names():
+
+	length = int(window_size / 2)
+	feature_names = []
+
+	for i in range(length):
+		feature_names.append("fft_x_"+str(i))
+	for i in range(length):
+		feature_names.append("fft_y_"+str(i))
+	for i in range(length):
+		feature_names.append("fft_z_"+str(i))
+	for i in range(length):
+		feature_names.append("fft_xy_"+str(i))
+	for i in range(length):
+		feature_names.append("fft_xz_"+str(i))			
+	for i in range(length):
+		feature_names.append("fft_yz_"+str(i))
+	for i in range(length):
+		feature_names.append("magnitude_"+str(i))		
+
+	feature_names.append("mean_x")
+	feature_names.append("range_x")
+	feature_names.append("zero_cross_x")
+
+	feature_names.append("mean_y")
+	feature_names.append("range_y")
+	feature_names.append("zero_cross_y")
+
+	feature_names.append("mean_z")
+	feature_names.append("range_z")
+	feature_names.append("zero_cross_z")
+
+	return feature_names
+
 def createBoxplot(file_name, important_attributes, data, target):
 
 	ticks = []
@@ -222,6 +226,7 @@ def createBoxplot(file_name, important_attributes, data, target):
 	print "created boxplot"
 
 def writeArffFile(data, target, file_name):
+	feature_names = get_feature_names()
 	with open(file_name, 'w') as f:
 		f.write('@RELATION handshake_matching\n')
 
@@ -241,16 +246,14 @@ def printTree(clf, file_name):
 				clf,
 				out_file = f,
 				class_names = class_names,
-				feature_names= feature_names
+				feature_names= get_feature_names()
 			)
 
 	call(['dot', '-Tpdf', 'clf.dot', '-o', file_name])
 
-def learn(new_window_size):
+def learn():
 
-	print "learning with window size: %d" % new_window_size
-
-	window_size = new_window_size
+	print "learning with window size: %d" % window_size
 
 	(data, target) = get_data_and_target()
 
@@ -273,6 +276,9 @@ def learn(new_window_size):
 
 	model = ExtraTreesClassifier()
 	model.fit(data, target)
+
+	feature_names = get_feature_names()
+
 	# display the relative important_attributes of each attribute
 	print "important attributes:"
 	important_attributes = [ (val*100, feature_names[i], i) for i, val in enumerate(model.feature_importances_)]
@@ -295,5 +301,7 @@ def learn(new_window_size):
 	createBoxplot(file_name+"boxplot.png", choosen_attributes, data, target)
 
 if __name__ == '__main__':
-	for x in range(5, 105, 5):
-		learn(x)
+	for new_window_size in range(5, 105, 5):
+		global window_size
+		window_size = new_window_size
+		learn()

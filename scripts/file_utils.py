@@ -35,6 +35,8 @@ def load_values_from_file(file_path, window_size):
 	if detected_start != -1:
 		start = detected_start
 		stop = start + window_size
+	else:
+		print "couldn't detect start in: " + file_path
 
 	return values[start:stop]
 

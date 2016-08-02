@@ -33,7 +33,42 @@ def get_values(txtfile, window_size):
 	data["fft_z"] = fft_z.tolist()
 	data["fft_magnitude"] = fft_mag.tolist()
 
+	fft_xy = fft_utils.get_fft_vector(multiply_elementwise(x, y))
+	fft_xz = fft_utils.get_fft_vector(multiply_elementwise(x, z))
+	fft_yz = fft_utils.get_fft_vector(multiply_elementwise(y, z))
+
+	data["fft_xy"] = fft_xy.tolist()
+	data["fft_xz"] = fft_xz.tolist()
+	data["fft_yz"] = fft_yz.tolist()
+
+	mean_x = np.mean(x)
+	mean_y = np.mean(y)
+	mean_z = np.mean(z)
+
+	data["mean_x"] = [mean_x]
+	data["mean_y"] = [mean_y]
+	data["mean_z"] = [mean_z]
+
+	range_x = np.ptp(x)
+	range_y = np.ptp(y)
+	range_z = np.ptp(z)
+
+	data["range_x"] = [range_x]
+	data["range_y"] = [range_y]
+	data["range_z"] = [range_z]
+
+	crossings_x = len( np.where( np.diff( np.sign( x ) ) )[0] )
+	crossings_y = len( np.where( np.diff( np.sign( y ) ) )[0] )
+	crossings_z = len( np.where( np.diff( np.sign( z ) ) )[0] )
+
+	data["crossings_x"] = [crossings_x]
+	data["crossings_y"] = [crossings_y]
+	data["crossings_z"] = [crossings_z]
+
 	return data
+
+def multiply_elementwise(lista, listb):
+	return [a*b for a,b in zip(lista,listb)]
 
 def magnitude(vector):
 	magnitude = 0.0
@@ -55,5 +90,5 @@ if __name__ == '__main__':
 	for x in range(5, 105, 5):
 		data[x] = get_data(x)
 
-	with open('data.json', 'w') as outfile:
+	with open('shake_data.json', 'w') as outfile:
 		json.dump(data, outfile)
