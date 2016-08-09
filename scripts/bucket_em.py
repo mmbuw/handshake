@@ -37,8 +37,6 @@ class Pair(object):
 		self.shake2.bucket=bucket2
 		self.bucketdiff=abs(bucket1-bucket2)
 
-# !!Not Same Person!!
-
 def is_same_person(pair):
 	try:
 		name1 = pair[0].h_id.split('-')[2].split('.')[0].strip().lower()
@@ -105,6 +103,30 @@ def filterPairs(pairs, difftolerance=1):
 				x.status = x.status+1
 	return pairs
 
+def drawConfusionMatrix(pairs):
+	realNum = 0
+	fakeNum = 0
+	status = [0,0,0,0]
+
+	for x in pairs:
+		status[x.status]+=1
+		if x.status<=1:
+			realNum+=1
+		else:
+			fakeNum+=1
+
+	print "Order: truePositive, falseNegative, falsePositive, trueNegative"
+	print "Absolut Values: ", status
+
+	status[0]=round(status[0]/float(realNum),4)
+	status[1]=round(status[1]/float(realNum),4)
+	status[2]=round(status[2]/float(fakeNum),4)
+	status[3]=round(status[3]/float(fakeNum),4)
+
+	print "Realative Values: ", status
+
+
+
 def drawHisto(pairs, number_of_buckets=8):
 	truePos =[]
 	normedLenPos = 0
@@ -167,11 +189,13 @@ if __name__ == '__main__':
 
 	handshakes = buildPairs(data, window_size, category, categoryValue ,max_value, number_of_buckets)
 
-	drawHisto(pairs, number_of_buckets)
+	#drawHisto(pairs, number_of_buckets)
 
 	handshakes = filterPairs(pairs, difftolerance)
 
-	drawHisto(pairs, number_of_buckets)
+	#drawHisto(pairs, number_of_buckets)
+
+	drawConfusionMatrix(pairs)
 
 	max_value = 800
 	number_of_buckets = 8	
@@ -182,11 +206,13 @@ if __name__ == '__main__':
 
 	handshakes = updatePairs(pairs, window_size, category, categoryValue, max_value, number_of_buckets)
 
-	drawHisto(pairs, number_of_buckets)
+	#drawHisto(pairs, number_of_buckets)
 
 	handshakes = filterPairs(pairs, difftolerance)
 
-	drawHisto(pairs, number_of_buckets)
+	#drawHisto(pairs, number_of_buckets)
+
+	drawConfusionMatrix(pairs)
 
 
 ###### reminders
