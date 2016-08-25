@@ -166,10 +166,10 @@ if __name__ == '__main__':
 	#maybe depending on Input
 	max_value = 800
 	number_of_buckets = 8	
-	window_size = "65"		
-	category = "fft_y"
+	window_size = "70"		
+	category = "fft y"
 	categoryValue = 2
-	difftolerance = 1 	#a tolerance of x will include all diffs from 0 to x
+	difftolerance = 1	#a tolerance of x will include all diffs from 0 to x
 
 	#List of all valid pairs
 	pairs = []
@@ -199,10 +199,10 @@ if __name__ == '__main__':
 
 	max_value = 800
 	number_of_buckets = 8	
-	window_size = "65"		
-	category = "fft_y"
+	window_size = "70"		
+	category = "fft y"
 	categoryValue = 3
-	difftolerance = 1 
+	difftolerance = 1
 
 	handshakes = updatePairs(pairs, window_size, category, categoryValue, max_value, number_of_buckets)
 
@@ -213,6 +213,7 @@ if __name__ == '__main__':
 	#drawHisto(pairs, number_of_buckets)
 
 	drawConfusionMatrix(pairs)
+
 
 
 ###### reminders

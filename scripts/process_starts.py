@@ -118,6 +118,9 @@ def plot(file, show_plot=True):
     data = np.array(values)
     extracted_start = detect_start(data)
 
+    print start
+    print extracted_start
+
     # data plot
     fig_title = "%s start: %s stop: %s" % (title, start, stop)
     fig = plt.figure()

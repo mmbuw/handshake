@@ -17,6 +17,7 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from pylab import setp, hold, xlim, ylim
 import json
+import scipy.stats as stats
 
 window_size = 0
 feature_names = {}
@@ -57,10 +58,10 @@ def get_data_and_target():
 		instance_target = get_target(pair[0], pair[1])
 		instance_values = get_instance_from_pair(shakes[pair[0]], shakes[pair[1]])
 
-		if instance_target == 1:
-			for x in range(190):
-				data.append(instance_values)
-				target.append(instance_target)
+		#if instance_target == 1:
+			#for x in range(190):
+				#data.append(instance_values)
+				#target.append(instance_target)
 
 		data.append(instance_values)
 		target.append(instance_target)
@@ -157,13 +158,16 @@ def createBoxplot(file_name, important_attributes, data, target):
 
 	# set axes limits and labels and stepsize
 	xlim(0,stepsize*(attr_len+1))
-	ylim(0,500)
+	ylim(0,800)
 	ax.set_xticklabels(ticks)
 	ax.set_xticks(range(stepsize,(attr_len+1)*stepsize,stepsize))
 
 	## Remove top axes and right axes ticks
 	ax.get_xaxis().tick_bottom()
 	ax.get_yaxis().tick_left()
+
+	# Increase font size
+	plt.rcParams.update({'font.size': 22})
 
 	# Save the figure
 	fig.savefig(file_name, bbox_inches='tight')
@@ -201,37 +205,57 @@ def learn():
 
 	(data, target) = get_data_and_target()
 
-	clf = tree.DecisionTreeClassifier(
-		criterion="entropy"
-	)
+	sum_of_shakes = len([1 for x in target if x == 1])
+	sum_of_non_shakes = len(target) - sum_of_shakes
 
-	clf = clf.fit(data, target)
+	print "sum_of_shakes: " + str(sum_of_shakes)
+	print "sum_of_non_shakes: " + str(sum_of_non_shakes)
 
-	predicted = clf.predict(data)
+#	clf = tree.DecisionTreeClassifier(
+#		criterion="entropy"
+#	)
+#
+#	clf = clf.fit(data, target)
+#
+#	predicted = clf.predict(data)
+#
+#	cm = confusion_matrix(target, predicted)
+#	print cm
+#	print
+#
+#	scores = cross_validation.cross_val_score(clf, data, target, cv=4)
+#	cv_mean = np.mean(scores)*100
+#	print  "cross validation mean:\t"+str(np.mean(scores))
+#	print
+#
+#	model = ExtraTreesClassifier()
+#	model.fit(data, target)
+#	# display the relative important_attributes of each attribute
 
-	cm = confusion_matrix(target, predicted)
-	print cm
-	print
 
-	scores = cross_validation.cross_val_score(clf, data, target, cv=4)
-	cv_mean = np.mean(scores)*100
-	print  "cross validation mean:\t"+str(np.mean(scores))
-	print
-
-	model = ExtraTreesClassifier()
-	model.fit(data, target)
-	# display the relative important_attributes of each attribute
 	print "important attributes:"
-	important_attributes = [ (val*100, feature_names[i], i) for i, val in enumerate(model.feature_importances_)]
+	cv_mean = "NA"
+	number_of_features = len(data[0])
+	important_attributes = []
+	for i in range(number_of_features):
+		feature_vector = [instance[i] for instance in data]
+		importance = abs(stats.pearsonr(feature_vector, target)[0])
+		important_attributes.append((importance, feature_names[i], i))
+
+	#important_attributes = [ (val*100, feature_names[i], i) for i, val in enumerate(model.feature_importances_)]
+
 	important_attributes.sort(reverse=True)
-	choosen_attributes = []
-	for (val, feature_name, idx) in important_attributes[0:10]:
-		choosen_attributes.append(("%.2f" % val, feature_name, idx))
+	correlation = important_attributes[0][0] + important_attributes[1][0]
+	for (val, feature_name, idx) in important_attributes[0:100]:
 		print "%s : %.2f" % (feature_name, val)
 
+	choosen_attributes = []
+	for (val, feature_name, idx) in important_attributes[0:4]:
+		choosen_attributes.append(("%.2f" % val, feature_name, idx))
+
 	print
 
-	file_name = "json_handshakes/%.2f_%02d" % (cv_mean, window_size) 
+	file_name = "correlated_handshakes_mag/%.3f_%02d" % (correlation, window_size) 
 
 	#writeArffFile(data, target, file_name + ".arff")
 
