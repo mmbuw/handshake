@@ -1,13 +1,20 @@
 import fft_utils
 import file_utils
 import math
-import os
 import sys
-from os import listdir
-from os.path import isfile, join
 import itertools
 import numpy as np
 import json
+import os
+from os.path import isfile, join
+from os import listdir
+
+'''
+Generates the shakes.json file from the recorded shake trace txt files 
+
+Usage: python build_data.py <shaketrace filedir>
+
+'''
 
 def get_values(txtfile, window_size):
 	values = [a for a in file_utils.load_values_from_file(txtfile, window_size)]
@@ -74,10 +81,10 @@ def multiply_elementwise(lista, listb):
 	return [a*b for a,b in zip(lista,listb)]
 
 def magnitude(vector):
-	magnitude = 0.0
+	tmp = 0.0
 	for entry in vector:
-		magnitude += entry * entry
-	return math.sqrt(magnitude)
+		tmp += entry * entry
+	return math.sqrt(tmp)
 
 def get_data(window_size):
 	data = {}
@@ -93,5 +100,5 @@ if __name__ == '__main__':
 	for x in range(5, 105, 5):
 		data[x] = get_data(x)
 
-	with open('shake_data_mag.json', 'w') as outfile:
+	with open('../data/shakes.json', 'w') as outfile:
 		json.dump(data, outfile)

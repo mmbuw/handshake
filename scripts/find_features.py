@@ -1,23 +1,30 @@
 import fft_utils
 import file_utils
 import math
-from sklearn import tree
-from sklearn import datasets
-from sklearn.externals.six import StringIO
-from sklearn.ensemble import ExtraTreesClassifier
 import os
 import sys
-from os import listdir
-from os.path import isfile, join
 import itertools
-from sklearn import cross_validation
-from sklearn.metrics import confusion_matrix
 import numpy as np
-from subprocess import call
 import matplotlib.pyplot as plt
-from pylab import setp, hold, xlim, ylim
 import json
 import scipy.stats as stats
+from sklearn import tree
+from sklearn import cross_validation
+from sklearn import datasets
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.externals.six import StringIO
+from os import listdir
+from os.path import isfile, join
+from subprocess import call
+from pylab import setp, hold, xlim, ylim
+
+'''
+Finds the most important features by iterating through the data and calculating pearson's return
+
+Usage: python find_features.py ../data/shakes.json ../out_dir
+'''
+
 
 window_size = 0
 feature_names = {}
@@ -155,7 +162,6 @@ def createBoxplot(file_name, important_attributes, data, target):
 		bp = ax.boxplot(boxplot_data[i], positions = [(stepsize*(i+1))-0.8, (stepsize*(i+1))+0.8], widths = 0.8)
 		setBoxColors(bp)
 
-
 	# set axes limits and labels and stepsize
 	xlim(0,stepsize*(attr_len+1))
 	ylim(0,800)
@@ -170,7 +176,7 @@ def createBoxplot(file_name, important_attributes, data, target):
 	plt.rcParams.update({'font.size': 22})
 
 	# Save the figure
-	fig.savefig(file_name, bbox_inches='tight')
+	fig.savefig(out_dir+'/'+file_name, bbox_inches='tight')
 	plt.close(fig)
 	print "created boxplot"
 
@@ -255,7 +261,7 @@ def learn():
 
 	print
 
-	file_name = "correlated_handshakes_mag/%.3f_%02d" % (correlation, window_size) 
+	file_name = "%.4f_%02d" % (correlation, window_size) 
 
 	#writeArffFile(data, target, file_name + ".arff")
 
@@ -268,6 +274,8 @@ def learn():
 if __name__ == '__main__':
 
 	json_file = sys.argv[1]
+	out_dir = sys.argv[2]
+
 	with open(json_file) as data_file:
 		global input_data
 		input_data = json.load(data_file)

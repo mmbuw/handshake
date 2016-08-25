@@ -7,10 +7,10 @@ from os.path import isfile, join
 import matplotlib.pyplot as plt
 import math
 
-#
-#
-# Calculates the fft similarities between signals represented by text files in a folder
-# usage: python(2.7) fft.py <path-to-dir>
+'''
+Calculates the fft similarities between signals represented by text files in a folder
+Usage: python(2.7) fft_utils.py <path-to-dir>
+'''
 
 def simCos(v1, v2):
 	return 1 - spatial.distance.cosine(v1, v2)
@@ -69,9 +69,7 @@ def main():
 	results = []
 	for pair in txtfilepairs:
 		results.append((pair, evaluate(pair[0], pair[1], window_size)))
-	
 	results.sort()
-
 	plot_size = len(results)
 	fig = plt.figure()
 	title = ''
@@ -86,7 +84,6 @@ def main():
 	plt.tight_layout()
 	plt.savefig(file_dir+'/fft_padded-'+str(window_size)+'.png', dpi = 300)
 	#plt.show()
-
 
 if __name__ == '__main__':
 	main()

@@ -9,6 +9,8 @@ from scipy import spatial
 from numpy import linalg as la
 from file_utils import detect_start
 
+
+
 def plot_all_files_in_dir(file_dir):
 	txtfiles = [join(file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f)) and f.endswith('.txt')]
 	for file in txtfiles:
