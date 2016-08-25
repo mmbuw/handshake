@@ -100,5 +100,5 @@ if __name__ == '__main__':
 	for x in range(5, 105, 5):
 		data[x] = get_data(x)
 
-	with open('../data/shakes.json', 'w') as outfile:
+	with open('../data/shakes130.json', 'w') as outfile:
 		json.dump(data, outfile)
