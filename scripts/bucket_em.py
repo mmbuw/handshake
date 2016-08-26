@@ -183,8 +183,8 @@ if __name__ == '__main__':
 
     #maybe depending on Input
     max_value = 800
-    number_of_buckets = 8   
-    window_size = "70"      
+    number_of_buckets = 8 
+    window_size = "65"      
     category = "fft_y"
     categoryValue = 2
     difftolerance = 1   #a tolerance of x will include all diffs from 0 to x
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     falsePositive= []
 
     #getting the data from the json file
-    data_json = "shake_data_mag.json"
+    data_json = sys.argv[1]
     with open(data_json) as data_file:    
         data = json.load(data_file)
 
@@ -216,8 +216,8 @@ if __name__ == '__main__':
     drawConfusionMatrix(pairs)
 
     max_value = 800
-    number_of_buckets = 8   
-    window_size = "70"      
+    number_of_buckets = 8  
+    window_size = "65"      
     category = "fft_y"
     categoryValue = 3
     difftolerance = 1
@@ -233,9 +233,9 @@ if __name__ == '__main__':
     drawConfusionMatrix(pairs)
 
     max_value = 800
-    number_of_buckets = 8   
-    window_size = "70"      
-    category = "xyz"
+    number_of_buckets = 8  
+    window_size = "65"      
+    category = "fft_xyz"
     categoryValue = 0
     difftolerance = 1
 
@@ -248,6 +248,8 @@ if __name__ == '__main__':
     #drawHisto(pairs, number_of_buckets)
 
     drawConfusionMatrix(pairs)
+
+
 
 
 

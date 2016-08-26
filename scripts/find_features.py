@@ -53,7 +53,13 @@ def get_data_and_target():
 	shakes = input_data[str(window_size)]
 	shake_ids = input_data[str(window_size)].keys()
 
+	print "number of shake ids"
+	print len(shake_ids)
+
 	shake_id_pairs = list(itertools.combinations(shake_ids, 2))
+
+	print "number of shake pairs (instances)"
+	print len(shake_id_pairs)
 
 	data = []
 	target = []
@@ -84,17 +90,17 @@ def get_target(shake_id1, shake_id2):
 		return -1
 
 def is_same_device(shake_id1, shake_id2):
-	device_id1 = shake_id1.split('-')[1]
-	device_id2 = shake_id2.split('-')[1]
+	device_id1 = shake_id1.split('.')[0].split('-')[1]
+	device_id2 = shake_id2.split('.')[0].split('-')[1]
 	return device_id1 == device_id2
 
 def is_same_person(shake_id1, shake_id2):
 	try:
-		name1 = shake_id1.split('-')[2].split('.')[0].strip().lower()
+		name1 = shake_id1.split('.')[0].split('-')[2].split('.')[0].strip().lower()
 	except IndexError:
 		return False
 	try:
-		name2 = shake_id2.split('-')[2].split('.')[0].strip().lower()
+		name2 = shake_id2.split('.')[0].split('-')[2].split('.')[0].strip().lower()
 	except IndexError:
 		return False
 	return name1==name2
@@ -160,7 +166,7 @@ def createBoxplot(file_name, important_attributes, data, target):
 	attr_len=len(boxplot_data)
 	for i in range(0,attr_len):
 		bp = ax.boxplot(boxplot_data[i], positions = [(stepsize*(i+1))-0.8, (stepsize*(i+1))+0.8], widths = 0.8)
-		setBoxColors(bp)
+		#setBoxColors(bp)
 
 	# set axes limits and labels and stepsize
 	xlim(0,stepsize*(attr_len+1))
@@ -212,7 +218,7 @@ def learn():
 	(data, target) = get_data_and_target()
 
 	sum_of_shakes = len([1 for x in target if x == 1])
-	sum_of_non_shakes = len(target) - sum_of_shakes
+	sum_of_non_shakes = len([1 for x in target if x == -1])
 
 	print "sum_of_shakes: " + str(sum_of_shakes)
 	print "sum_of_non_shakes: " + str(sum_of_non_shakes)
@@ -251,9 +257,9 @@ def learn():
 	#important_attributes = [ (val*100, feature_names[i], i) for i, val in enumerate(model.feature_importances_)]
 
 	important_attributes.sort(reverse=True)
-	correlation = important_attributes[0][0] + important_attributes[1][0]
+	correlation = important_attributes[0][0] + important_attributes[1][0] + important_attributes[2][0]
 	for (val, feature_name, idx) in important_attributes[0:100]:
-		print "%s : %.2f" % (feature_name, val)
+		print "%s : %.4f" % (feature_name, val)
 
 	choosen_attributes = []
 	for (val, feature_name, idx) in important_attributes[0:4]:
@@ -261,7 +267,7 @@ def learn():
 
 	print
 
-	file_name = "%.4f_%02d" % (correlation, window_size) 
+	file_name = "%.6f_%02d" % (correlation, window_size) 
 
 	#writeArffFile(data, target, file_name + ".arff")
 
